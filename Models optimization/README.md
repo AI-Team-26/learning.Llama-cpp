@@ -90,6 +90,7 @@ start_server \
     $spec \
     $draft_model \
     $predict_token \
+    $ngram_values \
     $jinja \
     $batch \
     $ubatch

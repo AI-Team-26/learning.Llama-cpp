@@ -53,9 +53,10 @@ start_server() {
     local spec="$6"
     local draft_model="$7"
     local predict_token="$8"
-    local jinja="$9"
-    local batch="${10}"
-    local ubatch="${11}"
+    local ngram_values="$9"
+    local jinja="$10"
+    local batch="${11}"
+    local ubatch="${12}"
         
     # stop running server
     stop_server >&2
@@ -217,13 +218,34 @@ start_server() {
         print_value "Speculative type" "draft-simple (min: $pred_min, max: $pred_max)"
     fi
 
+    if [[ "$spec" == *draft-mtp* ]]; then
+        args+=(--spec-draft-n-min "$pred_min")
+        args+=(--spec-draft-n-max "$pred_max")
+        print_value "Speculative type" "draft-mtp (min: $pred_min, max: $pred_max)"
+    fi
+
     if [[ "$spec" == *ngram-simple* ]]; then
-        # N (lookup size) = pred_min
-        # M (draft size) = pred_max
-        args+=(--spec-ngram-simple-size-n "$pred_min")
-        args+=(--spec-ngram-simple-size-m "$pred_max")
-        args+=(--spec-ngram-simple-min-hits 1)
-        print_value "Speculative type" "ngram-simple (size_N: $pred_min, size_M: $pred_max)"
+        local spec_ngram_simple_size_n  # lookup size
+        local spec_ngram_simple_size_m  # draft size
+        local spec_ngram_simple_min_hits=2
+        if [[ -n "$ngram_values" ]]; then
+            # Split the string by '/'
+            IFS='/' read -r spec_ngram_simple_size_n spec_ngram_simple_size_m <<< "$ngram_values"
+            if [[ -z "$spec_ngram_simple_size_n" || -z "$spec_ngram_simple_size_m" ]]; then
+                echo "‼️ start_server was called with ngram_values that does not follow the format 'n/m'" >&2
+                return 1
+            fi
+        else
+            # take values from geenric predict_tokens argument
+            spec_ngram_simple_size_n="$pred_min"
+            spec_ngram_simple_size_m="$pred_max"
+            spec_ngram_simple_min_hits=1
+        fi
+
+        args+=(--spec-ngram-simple-size-n "$spec_ngram_simple_size_n")
+        args+=(--spec-ngram-simple-size-m "$spec_ngram_simple_size_m")
+        args+=(--spec-ngram-simple-min-hits "$spec_ngram_simple_min_hits")
+        print_value "Speculative type" "ngram-simple (size_N: $spec_ngram_simple_size_n, size_M: $spec_ngram_simple_size_m)"
     fi
 
     if [[ "$spec" == *draft-dflash* ]]; then
@@ -236,12 +258,6 @@ start_server() {
         args+=(--spec-draft-n-min "$pred_min")
         args+=(--spec-draft-n-max "$pred_max")
         print_value "Speculative type" "draft-dflash (min: $pred_min, max: $pred_max)"
-    fi
-
-    if [[ "$spec" == *draft-mtp* ]]; then
-        args+=(--spec-draft-n-min "$pred_min")
-        args+=(--spec-draft-n-max "$pred_max")
-        print_value "Speculative type" "draft-mtp (min: $pred_min, max: $pred_max)"
     fi
 
     if [[ "$spec" == *ngram-mod* ]]; then

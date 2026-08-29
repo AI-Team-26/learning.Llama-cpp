@@ -332,15 +332,15 @@ _test_model
 |  17 t/s |  64 k |   0 | 66/66 | 15.7 | 13.1/0.0  | q4_0  |   2048 | 122s | MTP     3/4             -- (75%) |  1024/256 |            |
 |  16 t/s |  64 k |   0 | 66/66 | 14.9 | 13.1/0.0  | q4_0  |   1468 |  89s | none                          -- |   512/256 |            |
 
-
+# Q4
 model=Qwen3.8-27B-UD-IQ4_XS_unsloth.gguf 
-ctx_k=72
+ctx_k=80
 gpu_layers=99
 cpu_moe=0
 quant=q4_0/q4_0
 spec=draft-mtp
 draft_model=none
-predict_token=3/3
+predict_token=4/4
 jinja=0
 batch=1024
 ubatch=256
@@ -368,23 +368,32 @@ _test_model
 
 # Q8
 model=Qwen3.8-27B-UD-IQ4_XS_unsloth.gguf 
-ctx_k=40
+ctx_k=32
 gpu_layers=99
 cpu_moe=0
-quant=q8_0/q4_0
+quant=q8_0/q8_0
 spec=draft-mtp
 draft_model=none
-predict_token=4/4
+predict_token=2/5
+#ngram_values=12/12
 jinja=0
 batch=1024
-ubatch=256
+ubatch=512
 _test_model
+
 
 | Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                  | Batch/Ub. | Note              |
 | ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | --------------------------------------- | --------- |------------------ |
+|  43 t/s |  40 k |   0 | 66/66 | 15.7 | 12.8/0.0  | q8_0 (q8_0) |    584 |  14s | MTP        min=2 max=5 p_min=0.20 (85%) |  1024/256 | R: medium         |
+|  43 t/s |  48 k |   0 | 66/66 | 15.7 | 12.8/0.0  | q8_0 (q4_0) |    548 |  13s | MTP        min=4 max=4 p_min=0.20 (91%) |   512/128 | R: medium         |
+|  42 t/s |  44 k |   0 | 66/66 | 15.6 | 12.8/0.0  | q8_0 (q4_0) |    611 |  14s | MTP        min=4 max=4 p_min=0.20 (89%) |  1024/256 | R: medium         |
+|  42 t/s |  40 k |   0 | 66/66 | 15.5 | 12.8/0.0  | q8_0 (q4_0) |    611 |  14s | MTP        min=4 max=4 p_min=0.20 (89%) |  1024/256 | R: medium         |
+|  42 t/s |  36 k |   0 | 66/66 | 15.3 | 12.8/0.0  | q8_0 (q4_0) |    611 |  15s | MTP        min=4 max=4 p_min=0.20 (89%) |  1024/256 | R: medium         |
 |  42 t/s |  32 k |   0 | 66/66 | 15.2 | 12.8/0.1  | q8_0 (q4_0) |    585 |  14s | MTP        min=4 max=4 p_min=0.20 (90%) |  1024/512 | R: medium         |
 |  25 t/s |  48 k |   0 | 66/66 | 15.7 | 12.7/0.1  | q8_0 (q4_0) |    602 |  24s | MTP        min=4 max=4 p_min=0.20 (91%) |  1024/512 | R: medium         |
 
+
+|  33 t/s |  48 k |   0 | 66/66 | 15.6 | 12.8/0.0  | q8_0 (q5_0) |    548 |  16s | MTP        min=4 max=4 p_min=0.20 (90%) |   512/128 | R: medium         |
 
 model=Qwen3.8-27B-IQ4_XS_unsloth.gguf 
 ctx_k=48

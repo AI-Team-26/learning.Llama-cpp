@@ -83,17 +83,14 @@ models:
     quant: q4_0/q4_0
     batch: 1024
     ubatch: 512
-    spec_type: draft-mtp,ngram-simple
-    spec_draft_n_min: 2
-    spec_draft_n_max: 3
-    spec_ngram_simple_size_n: 12
-    spec_ngram_simple_size_m: 12
-    spec_ngram_simple_min_hits: 1
+    spec_type: draft-mtp
+    spec_draft_n_min: 4
+    spec_draft_n_max: 4
     jinja: 0
     pi_agent_model: >
       { 
          "_test": "🥇🥇",
-         "_speed": "15-35 t/s",
+         "_speed": "20-35 t/s",
           "id": "Qwen3.8-27B_UD-Q3-K-XL_Unsloth_[80k]",
           "name": "Qwen 3.8 27B Q3-K-XL (Unsloth) [80k]",
           "contextWindow": 81920,
@@ -156,48 +153,42 @@ models:
     quant: q4_0
     batch: 1024
     ubatch: 256
-    spec_type: draft-mtp,ngram-simple
-    spec_draft_n_min: 2
-    spec_draft_n_max: 5
-    spec_ngram_simple_size_n: 12
-    spec_ngram_simple_size_m: 12
-    spec_ngram_simple_min_hits: 1
+    spec_type: draft-mtp
+    spec_draft_n_min: 4
+    spec_draft_n_max: 4
     jinja: 0
     pi_agent_model: >
       { 
          "_test": "🥇",
          "_speed": "20-40 t/s",
           "id": "Qwen3.8_27B_UD-IQ4_XS_(Unsloth)_[80k]",
-          "name": "🥇 Qwen 3.8 27B UD-IQ4_XS (Unsloth) [80k]",
+          "name": "🥇 Qwen 3.8 27B UD-IQ4_XS (Unsloth) [80k] Q4",
           "contextWindow": 81920,
           "maxTokens": 4096,
           "reasoning": true,
           "input": [ "text", "image" ]
       },
 
-  Qwen3.8_27B_UD-IQ4_XS_(Unsloth)_[32k]_Q8:
+  Qwen3.8_27B_UD-IQ4_XS_(Unsloth)_[48k]_Q8:
     file: Qwen3.8-27B-UD-IQ4_XS_unsloth.gguf
-    ctx_k: 32
+    ctx_k: 48
     gpu_layers: 99
     cpu_moe: 0
     quant: q8_0/q4_0
-    batch: 1024
-    ubatch: 256
-    spec_type: draft-mtp,ngram-simple
-    spec_draft_n_min: 2
-    spec_draft_n_max: 3
-    spec_ngram_simple_size_n: 12
-    spec_ngram_simple_size_m: 12
-    spec_ngram_simple_min_hits: 1
+    batch: 512
+    ubatch: 128
+    spec_type: draft-mtp
+    spec_draft_n_min: 4
+    spec_draft_n_max: 4
     jinja: 0
     pi_agent_model: >
       { 
          "_test": "",
          "_speed": " t/s",
-          "id": "Qwen3.8_27B_UD-IQ4_XS_(Unsloth)_[32k]_Q8",
-          "name": "Qwen 3.8 27B UD-IQ4_XS (Unsloth) [80k]",
-          "contextWindow": 81920,
-          "maxTokens": 4096,
+          "id": "Qwen3.8_27B_UD-IQ4_XS_(Unsloth)_[48k]_Q8",
+          "name": "Qwen 3.8 27B UD-IQ4_XS (Unsloth) [48k] Q8/Q4",
+          "contextWindow": 49152,
+          "maxTokens": 8192,
           "reasoning": true,
           "input": [ "text", "image" ]
       },
