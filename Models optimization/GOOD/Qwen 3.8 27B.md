@@ -4,6 +4,7 @@
 |------------------------------------------------------------|---------------------------------------------|
 | Qwen3.8-27B-Uncensored-Aggressive-IQ3_M_HauhauCS.gguf      | ✔️ 128k: 25-40 t/s. Good                    |
 | Qwen3.8-27B-UD-Q3_K_XL_unsloth.gguf                        | ✔️ 80k: 20-45 t/s Super smart.              |
+| Qwen3.8-27B-i1-IQ4_XS-GGUF-Smaller_jrell.gguf              | ✔️ 56k: 15-45 t/s Good                      |
 | Qwen3.8-27B-Abliterated-IQ4-MIX-MTP_finex666.gguf          | ✔️ 64k: 25-45 t/s                           |
 | Qwen3.8-27B-UD-IQ4_XS_unsloth.gguf                         | ✔️ 64k: 20-40 t/s  80k: 20-30 t/s           |
 | Qwen3.8-27B-Cold-Fusion-GAIN-V1.1-MTP-IQ3_M_davidau.gguf   | ✔️ 64k: 15-30 t/s Short reasoning           |
@@ -22,6 +23,8 @@
 To test:
 https://huggingface.co/JonathanColetti/Qwen3.8-27B-Uncensored-GGUF
 
+
+
 ## ? UD-IQ4_XS (huihui)
 Qwen3.8-27B-abliterated-UD-IQ4_XS_huihui.gguf                       13.4 GB
 https://huggingface.co/huihui-ai/Huihui-Qwen3.8-27B-abliterated-GGUF      
@@ -31,6 +34,14 @@ Not tested in Pi
 Qwen3.8-27B-UD-IQ4_XS_peculiar.gguf                 13.2 GB
 https://huggingface.co/peculiar-ragdoll/Dirk-Qwen3.8-27B-GGUF
 Not tested in Pi
+
+## 
+https://huggingface.co/tooltd/Qwen3.8-27B-IQ4-XS-16GB-VRAM-GGUF
+
+## ✔️ IQ4_XS (jrell)
+Qwen3.8-27B-i1-IQ4_XS-GGUF-Smaller_jrell.gguf                 12.6 GB
+https://huggingface.co/jrell/Qwen3.8-27B-i1-IQ4_XS-GGUF-Smaller
+Optimized for 16 GB
 
 ## Q3_K_S (Unsloth)
 Qwen3.8-27B-Q3_K_S_unsloth.gguf                          11.7 GB
@@ -92,6 +103,31 @@ Qwen3.8-27B-IQ4_XS_unsloth.gguf                         14.60 GB
 
 
 ```bash
+
+
+
+model=Qwen3.8-27B-i1-IQ4_XS-GGUF-Smaller_jrell.gguf
+ctx_k=56
+gpu_layers=99
+cpu_moe=0
+quant=q8_0/q8_0
+spec=draft-mtp
+draft_model=none
+predict_token=2/7
+jinja=0
+batch=1024
+ubatch=256
+_test_model
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                  | Batch/Ub. | Note              |
+| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | --------------------------------------- | --------- |------------------ |
+|  42 t/s |  56 k |   0 | 66/66 | 15.7 | 12.0/0.1  | q8_0 (q8_0) |    542 |  13s | MTP        min=2 max=7 p_min=0.20 (83%) |  1024/512 | R: medium         |
+|  44 t/s |  52 k |   0 | 66/66 | 15.7 | 12.0/0.0  | q8_0 (q8_0) |    542 |  13s | MTP        min=2 max=7 p_min=0.20 (82%) |  1024/256 | R: medium         |
+|  44 t/s |  48 k |   0 | 66/66 | 15.5 | 12.0/0.0  | q8_0 (q4_0) |    542 |  13s | MTP        min=2 max=7 p_min=0.20 (82%) |  1024/256 | R: medium         |
+|  41 t/s |  64 k |   0 | 66/66 | 14.9 | 12.0/0.1  | q4_0 (q4_0) |    568 |  14s | MTP        min=3 max=4 p_min=0.20 (88%) |  1024/512 | R: medium         |
+|  41 t/s |  64 k |   0 | 66/66 | 15.3 | 12.0/0.1  | q4_0 (q4_0) |    566 |  14s | MTP        min=2 max=7 p_min=0.20 (75%) |  1024/512 | R: medium         |
+|  19 t/s |  64 k |   0 | 66/66 | 15.7 | 12.0/0.1  | q8_0 (q4_0) |    542 |  28s | MTP        min=2 max=7 p_min=0.20 (82%) |  1024/512 | R: medium         |
+|  19 t/s |  64 k |   0 | 66/66 | 15.7 | 12.0/0.0  | q8_0 (q4_0) |    542 |  28s | MTP        min=2 max=7 p_min=0.20 (82%) |  1024/256 | R: medium         |
 
 model=Qwen3.8-27B-UD-IQ4_XS_peculiar.gguf
 ctx_k=64
@@ -343,7 +379,7 @@ draft_model=none
 predict_token=4/4
 jinja=0
 batch=1024
-ubatch=256
+ubatch=512
 _test_model
 
 | Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                  | Batch/Ub. | Note              |

@@ -23,26 +23,30 @@ args=(
     #--seed 1
     --parallel $PARALLEL \
     --prio 3 \
+    --n-cpu-ffn 0 \
     --flash-attn on \
     --kv-unified \
     --load-mode mmap \
     --fit off \
 
-    --cache-reuse 256 \
+    --cache-reuse 64 \
 
-    --draft-p-min $DRAFT_P_MIN \
+    # EXPERIMENTAL for 80k of Qwen3.8 27B
+    --ctx-checkpoints 4 --checkpoint-min-step 16384 \
+
+    --spec-draft-p-min $DRAFT_P_MIN \
 
     #--defrag-thold 0.1
 
     # TODO: minimal ?
     # default is 3, we need level 4 to print out the GPU layers
-    --log-verbosity 3 \
+    --log-verbosity 4 \
 
     # this should avoid the values sent by Agent code tool
     #--samplers "top_k;min_p;dry;rep_pen;temperature" \
     # Order is important!
     # (By putting temperature last, you ensure that min_p cuts out the garbage tokens first, preventing the model from picking wrong numbers.)
-    --samplers "penalties;dry;top_k;top_p;min_p;temperature"
+    --samplers "penalties;dry;top_k;top_p;min_p;temperature" \
 
     ## strict for large capable models
     --temperature $TEMPERATURE \
