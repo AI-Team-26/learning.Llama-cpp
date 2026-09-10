@@ -1,13 +1,14 @@
 # Gemma 4 26B A4B
 
-| File                                                         | Result                                        |
-| Gemma-4-26B_Q4_0-it_google.gguf                              | ✔️ Smart and fast - 160k 45 t/s | 256k 35 t/s |  
-| Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf                    | ✔️ Smart and fast - 160k 35 t/s               |
-| Gemma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf                    |
-| Gemma4-26B-A4B-QAT-Unc-Balanced-Q4_K_M_hauhaucs.gguf         | ⚠️ WITHOUT MTP: too slow  (MTP not tested)    |
-| Gemma-4-26B-REAP126-pruned-UD-IQ4_NL_techhermit.gguf         | ❌ Looping on Pi and lie                      |
-| Gemma-4-19B-REAP-Q4_K_M_vsark.gguf                           | ❌ Every here and then it breaks, 256k 40 t/s  | 
-| Gemma4-26b-uncensored-fast-v2-Q4_K_M_Jiunsong.gguf           | ❌ Gibebrish and unformatted output. Also slow. |
+| File                                                   | GB   | Result                                          |
+| ---                                                    | ---- | ---                                             |
+| Gemma-4-26B_Q4_0-it_google.gguf                        | ---- | ✔️ Smart and fast - 160k 45 t/s | 256k 35 t/s   |  
+| Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf              | 12.6 | ✔️ Smart and fast - 160k 35 t/s                 |
+| Gemma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf              | ---  |
+| Gemma4-26B-A4B-QAT-Unc-Balanced-Q4_K_M_hauhaucs.gguf   | ---  | ⚠️ WITHOUT MTP: too slow  (MTP not tested)    |
+| Gemma-4-26B-REAP126-pruned-UD-IQ4_NL_techhermit.gguf   | ---  | ❌ Looping on Pi and lie                      |
+| Gemma-4-19B-REAP-Q4_K_M_vsark.gguf                     | ---  | ❌ Every here and then it breaks, 256k 40 t/s  | 
+| Gemma4-26b-uncensored-fast-v2-Q4_K_M_Jiunsong.gguf     | ---  | ❌ Gibebrish and unformatted output. Also slow. |
 
 
 
@@ -18,8 +19,9 @@ https://huggingface.co/google/gemma-4-26B-A4B-it-qat-q4_0-gguf
 ❌ For the bug3 fix :it took half an hour and haven't done. It failed to call "edit" very often (sometime instead of edit a single line). It lied saying it did the job: No changes and no test !
 
 ## ✔️ UD IQ4_NL (by Unsloth)
-https://huggingface.co/unsloth/gemma-4-26B-A4B-it-GGUF
 Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf                           12.6 GB
+https://huggingface.co/unsloth/gemma-4-26B-A4B-it-GGUF
+
 
 ## ✔️ MXFP4 MOE (by Noctrex)
 Gemma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf                           14.3 GB
@@ -274,26 +276,50 @@ _test_model
 
 
 model=Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf
-ctx_k=256
-cpu_moe=1
-gpu_layers=-1
+ctx_k=180
+cpu_moe=0
+quant=q8_0
+gpu_layers=99
 spec=none
 draft_model=none
-predict_token=8/8
+predict_token=1/2
+ngram_values=8/4
 jinja=0
-batch=1024
-ubatch=256
+batch=2048
+ubatch=1024
 _test_model
 
-|  38 t/s | 256 k |   1 | 31/31  | 15.7 GB | 12.3/1.1  | --    |   1228 |  32s | none             | --                             | 1024/256     |                 |
-
-|  33 t/s | 256 k |   1 | 31/31  | 15.7 GB | 12.3/1.1  | --    |   1494 |  45s | DFlash (N-gram)  | s_M=4 s_N=4 min=1 (45%)        | 1024/256     |                 |
-|  38 t/s | 160 k |   1 | 31/31  | 15.2 GB | 12.3/1.1  | --    |   1228 |  32s | none             | --                             | 1024/256     |                 |
-|  35 t/s | 160 k |   1 | 31/31  | 15.2 GB | 12.3/1.1  | --    |   1268 |  37s | DFlash (N-gram)  | s_M=6 s_N=6 min=1 (43%)        | 1024/256     |                 |
-|  32 t/s | 160 k |   1 | 31/31  | 15.2 GB | 12.3/1.1  | --    |   1494 |  46s | DFlash (N-gram)  | s_M=4 s_N=4 min=1 (45%)        | 1024/256     |                 |
-|  30 t/s | 160 k |   1 | 31/31  | 15.2 GB | 12.3/1.1  | --    |   2048 |  68s | DFlash (N-gram)  | s_M=2 s_N=2 min=1 (48%)        | 1024/256     |                 |
 
 
+model=Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf
+ctx_k=104
+cpu_moe=0
+quant=q8_0
+gpu_layers=99
+spec=none
+draft_model=mtp-gemma-4-26B-A4B-it_unsloth.gguf
+predict_token=1/4
+ngram_values=none
+jinja=0
+batch=2048
+ubatch=512
+_test_model
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                  | Batch/Ub. | Note              |
+| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | --------------------------------------- | --------- |------------------ |
+|  47 t/s | 192 k |   0 | 31/31 | 15.7 | 12.7/0.1  | q8_0 (q8_0) |   1090 |  23s | none                                 -- |  1024/256 |                   |
+
+|  47 t/s | 180 k |   0 | 31/31 | 15.7 | 12.7/0.4  | q8_0 (q8_0) |   1452 |  30s | none                                 -- | 2048/1024 |                   |
+|  47 t/s | 160 k |   0 | 31/31 | 15.4 | 12.7/0.1  | q8_0 (q8_0) |   1090 |  23s | none                                 -- |  1024/256 |                   |
+|  40 t/s | 128 k |   1 | 31/31 | 14.7 | 12.3/0.1  | q8_0 (q8_0) |   1866 |  47s | none                                 -- |  1024/256 |                   |
+|  37 t/s | 128 k |   1 | 31/31 | 14.7 | 12.3/0.1  | q8_0 (q8_0) |   1919 |  52s | N-gram              N=8 M=8 min=1 (41%) |  1024/256 |                   |
+| MTP
+|  67 t/s | 128 k |   0 | 31/31 | 15.7 | 12.7/0.1  | q8_0 (q8_0) |   2036 |  30s | MTP        min=1 max=3 p_min=0.20 (78%) |  1024/512 |                   |
+|  50 t/s | 128 k |   0 | 31/31 | 15.7 | 12.7/0.1  | q8_0 (q8_0) |   1346 |  27s | MTP        min=1 max=4 p_min=0.20 (67%) |  1024/256 |                   |
+|  47 t/s | 128 k |   0 | 31/31 | 15.7 | 12.7/0.1  | q8_0 (q8_0) |   1111 |  24s | MTP        min=1 max=3 p_min=0.20 (71%) |  1024/256 |                   |
+|  44 t/s | 128 k |   0 | 31/31 | 15.7 | 12.7/0.1  | q8_0 (q8_0) |   1390 |  31s | MTP        min=1 max=2 p_min=0.20 (79%) |  1024/256 |                   |
+|  66 t/s | 104 k |   0 | 31/31 | 15.4 | 12.7/0.1  | q8_0 (q8_0) |   1346 |  20s | MTP        min=1 max=4 p_min=0.20 (67%) |  2048/256 |                   |
+|  67 t/s |  96 k |   0 | 31/31 | 15.3 | 12.7/0.1  | q8_0 (q8_0) |   1346 |  21s | MTP        min=2 max=4 p_min=0.20 (67%) |  2048/256 |                   |
 
 model=mythos-26b-a4b-prism-pro-dq_ex0bit.gguf
 ctx_k=64

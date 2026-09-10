@@ -29,12 +29,19 @@ args=(
     --load-mode mmap \
     --fit off \
 
+    --no-mmproj \
+    --agent \
+
     --cache-reuse 64 \
 
     # EXPERIMENTAL for 80k of Qwen3.8 27B
     --ctx-checkpoints 4 --checkpoint-min-step 16384 \
 
+    #--hip-fa-force-vec on \
+
     --spec-draft-p-min $DRAFT_P_MIN \
+    #--spec-mtp-cr-depth 1 \
+    #--spec-draft-adaptive \
 
     #--defrag-thold 0.1
 
@@ -50,8 +57,8 @@ args=(
 
     ## strict for large capable models
     --temperature $TEMPERATURE \
-    --top-k 20 \
-    --top-p 0.90 \
+    --top-k $TOP_K \
+    --top-p $TOP_P \
     --min-p 0.02 \
     --repeat-penalty 1.10 \
     --repeat-last-n 512 \
@@ -256,9 +263,6 @@ start_server() {
 
     [[ "$spec_type" != "none" ]] && args+=(--spec-type "$spec_type")
 
-    echo "dioporco"
-    echo "$args"
-
     # Disable RAM "cache" if no MoE or GPU offloading
     if [[ "$cpu_moe" != "0" || "$gpu_layers" != "99" ]]; then
         args+=(--cache-ram 4096) 
@@ -319,9 +323,24 @@ start_server() {
     echo "START SERVER: ${yellow}$model_file${reset} with ${yellow}$ctx_k K${reset} context" >&2
     echo "=========================================================" >&2
 
+    # The llama-server has to be launched as a detached process, to survive to shell closing
+    # `nohup` does not work
+    # `disown` does not work
+    # `start /c` does not work because the arguments have space, quotes...
+    # I GAVE UP, making something more complicated (create a PowerShell script on the fly to run it... is crazy, I prefer to create a separate proper program to manage llama-server)
     ("$LLAMA_BINS_FOLDER/llama-server.exe" "${args[@]}" \
         > $SERVER_LOG 2>&1 & ) >/dev/null
 
+    #nohup "$LLAMA_BINS_FOLDER/llama-server.exe" "${args[@]}" > $SERVER_LOG 2>&1 &
+    #CMDLINE="start \"\" /B \"$LLAMA_BINS_FOLDER/llama-server.exe\" ${args[@]} > \"$SERVER_LOG\" 2>&1"
+    #echo "$CMDLINE"
+    #cmd //c "start \"\" /B \"$LLAMA_BINS_FOLDER/llama-server.exe\" ${args[@]} > \"$SERVER_LOG\" 2>&1"
+    #cmd /c "start /B /MIN \"\" \"$LLAMA_BINS_FOLDER/llama-server.exe\" ${args[@]} > $SERVER_LOG 2>&1 "
+    #cmd /c "start /B /MIN \"$LLAMA_BINS_FOLDER/llama-server.exe\" "
+    # start /B "" : this start a process detached from calling process with a empty title
+    #(start /B "$LLAMA_BINS_FOLDER/llama-server.exe" "${args[@]}" > $SERVER_LOG 2>&1) &
+    #"$LLAMA_BINS_FOLDER/llama-server.exe" "${args[@]}" > $SERVER_LOG 2>&1 &
+    #disown
 
     # Wait for the server to come alive (up to 30 seconds)
     echo -n "Waiting for llama-server to load model..." >&2

@@ -11,6 +11,8 @@ source common.sh
 # sampling config
 PARALLEL=1
 TEMPERATURE=0.3
+TOP_K=20
+TOP_P=0.85
 DRAFT_P_MIN=0.2
 
 QWEN_REASONING_EFFORT_MEDIUM=1
@@ -29,6 +31,19 @@ is_server_started() {
 server_info() {
     local command=$(ps -ef | grep -a llama-server | sed 's/ -/\n-/g' | sed 's/^.*\llama-b/"llama-b/')
     echo "$command"
+}
+
+get_current_model() {
+    local command=$(server_info)
+    if [[ -z "$command" ]]; then
+        echo "model= alia="
+        return
+    fi
+    local model_path=$(echo "$command" | grep -- '--model' | awk '{print $2}')
+    local model_file=$(basename "$model_path")
+    local alias=$(echo "$command" | grep -- '--alias' | awk '{print}')
+
+    echo "model=$model_file alias=$alias"
 }
 
 
@@ -147,23 +162,30 @@ start_server() {
         --load-mode mmap \
         --fit off \
 
+        --no-mmproj \
+        --agent \
+
         --batch-size $batch \
         --ubatch-size $ubatch \
 
         # EXPERIMENTAL for 80k of Qwen3.8 27B
         --ctx-checkpoints 4 --checkpoint-min-step 16384
 
+        #--hip-fa-force-vec on \
+
         #--draft-p-min 0.7 \   ### old parameter
         --spec-draft-p-min $DRAFT_P_MIN \
+        #--spec-mtp-cr-depth 1 \
+        #--spec-draft-adaptive \
+
         # --cache-ram 16384
-        # --no-mmproj
 
         #--metrics \
-        #--perf \ 
+        #--perf \
 
         --temperature $TEMPERATURE \
-        --top-k 20 \
-        --top-p 0.90 \
+        --top-k $TOP_K \
+        --top-p $TOP_P \
         --min-p 0.02 \
         --repeat-penalty 1.10 \
         --repeat-last-n 512 \
@@ -227,7 +249,7 @@ start_server() {
     if [[ "$spec" == *ngram-simple* ]]; then
         local spec_ngram_simple_size_n  # lookup size
         local spec_ngram_simple_size_m  # draft size
-        local spec_ngram_simple_min_hits=2
+        local spec_ngram_simple_min_hits=1
         if [[ -n "$ngram_values" ]]; then
             # Split the string by '/'
             IFS='/' read -r spec_ngram_simple_size_n spec_ngram_simple_size_m <<< "$ngram_values"
@@ -284,6 +306,16 @@ start_server() {
 
     ("$LLAMA_BINS_FOLDER/llama-server.exe" "${args[@]}" \
         > $SERVER_LOG 2>&1 & ) >/dev/null
+
+
+    # from Git Bash, assuming LLAMA_BINS_FOLDER=/c/Path/To/Llama
+    #cmd.exe /c start "" /MIN "C:\Path\To\Llama\llama-server.exe" arg1 arg2
+    #cmd /c "start /B /MIN \"\" \"$LLAMA_BINS_FOLDER/llama-server.exe\" ${args[@]} > $SERVER_LOG 2>&1 "
+
+    #echo "Start the server........................"
+
+    # start /B "" : this start a process detached from calling process with a empty title
+    #start /B "" "$LLAMA_BINS_FOLDER/llama-server.exe" "${args[@]}" > $SERVER_LOG 2>&1
 
     #local SERVER_PID=$!
     #wait "$SERVER_PID" 2>/dev/null

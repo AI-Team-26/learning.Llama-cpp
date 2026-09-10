@@ -75,7 +75,55 @@ models:
 
 ### Qwen 3.8 27B ###
 
-  Qwen3.8-27B_UD-Q3-K-XL_Unsloth_[80k]:
+  Qwen3.8-27B-abliterated-UD-IQ4_XS_huihui_64k:
+    file: Qwen3.8-27B-abliterated-UD-IQ4_XS_huihui.gguf
+    ctx_k: 64
+    gpu_layers: 99
+    cpu_moe: 0
+    quant: q4_0
+    batch: 1024
+    ubatch: 512
+    spec_type: draft-mtp
+    spec_draft_n_min: 1
+    spec_draft_n_max: 4
+    jinja: 0
+    pi_agent_model: >
+      { 
+         "_test": "?",
+         "_speed": "15-40 t/s",
+          "id": "Qwen3.8-27B-abliterated-UD-IQ4_XS_huihui_64k",
+          "name": "Qwen 3.8 27B abliterated UD-IQ4_XS (huihui) [64k]",
+          "contextWindow": 65536,
+          "maxTokens": 8192,
+          "reasoning": true,
+          "input": [ "text" ]
+      },
+
+  Qwen3.8-27B-ZB4.00-MIN-v5-IQ4_XS_(tooltd)_[64k]:
+    file: Qwen3.8-27B-ZB4.00-MIN-v5-IQ4_XS_tooltd.gguf
+    ctx_k: 64
+    gpu_layers: 99
+    cpu_moe: 0
+    quant: q4_0
+    batch: 1024
+    ubatch: 512
+    spec_type: draft-mtp
+    spec_draft_n_min: 1
+    spec_draft_n_max: 5
+    jinja: 0
+    pi_agent_model: >
+      { 
+         "_test": "?",
+         "_speed": "?t/s",
+          "id": "Qwen3.8-27B-ZB4.00-MIN-v5-IQ4_XS_(tooltd)_[64k]",
+          "name": "Qwen 3.8 27B ZB4.00-MIN-v5 IQ4_XS (tooltd) [64k]",
+          "contextWindow": 65536,
+          "maxTokens": 8192,
+          "reasoning": true,
+          "input": [ "text", "image" ]
+      },
+
+  Qwen3.8-27B_UD-Q3-K-XL_(Unsloth)_[80k]:
     file: Qwen3.8-27B-UD-Q3_K_XL_unsloth.gguf
     ctx_k: 80
     gpu_layers: 99
@@ -84,22 +132,22 @@ models:
     batch: 1024
     ubatch: 512
     spec_type: draft-mtp
-    spec_draft_n_min: 4
+    spec_draft_n_min: 1
     spec_draft_n_max: 4
     jinja: 0
     pi_agent_model: >
       { 
          "_test": "🥇🥇",
          "_speed": "20-35 t/s",
-          "id": "Qwen3.8-27B_UD-Q3-K-XL_Unsloth_[80k]",
+          "id": "Qwen3.8-27B_UD-Q3-K-XL_(Unsloth)_[80k]",
           "name": "Qwen 3.8 27B Q3-K-XL (Unsloth) [80k]",
           "contextWindow": 81920,
           "maxTokens": 8192,
           "reasoning": true,
-          "input": [ "text", "image" ]
+          "input": [ "text" ]
       },
 
-  Qwen3.8-27B_UD-Q3-K-XL_Unsloth_[80k]_2_5:
+  Qwen3.8-27B_UD-Q3-K-XL_(Unsloth)_[80k]_2_5:
     file: Qwen3.8-27B-UD-Q3_K_XL_unsloth.gguf
     ctx_k: 80
     gpu_layers: 99
@@ -115,12 +163,12 @@ models:
       { 
          "_test": "🥇🥇",
          "_speed": "20-35 t/s",
-          "id": "Qwen3.8-27B_UD-Q3-K-XL_Unsloth_[80k]",
+          "id": "Qwen3.8-27B_UD-Q3-K-XL_(Unsloth)_[80k]_2_5",
           "name": "Qwen 3.8 27B Q3-K-XL (Unsloth) [80k]",
           "contextWindow": 81920,
           "maxTokens": 8192,
           "reasoning": true,
-          "input": [ "text", "image" ]
+          "input": [ "text" ]
       },
 
   Qwen3.8-27B-Uncensored-Aggressive-IQ3_M_(HauhauCS)_[128k]:
@@ -151,11 +199,12 @@ models:
     ctx_k: 64
     gpu_layers: 99
     cpu_moe: 0
+    quant: q4_0
     batch: 1024
     ubatch: 256
     spec_type: draft-mtp
-    spec_draft_n_min: 3
-    spec_draft_n_max: 5
+    spec_draft_n_min: 1
+    spec_draft_n_max: 6
     jinja: 0
     pi_agent_model: >
       { 
@@ -164,33 +213,57 @@ models:
           "id": "Qwen3.8-27B-Abliterated-IQ4-MIX-MTP_finex666_[64k]",
           "name": "Qwen3.8-27B Abliterated IQ4-MIX-MTP (finex666)[64k]",
           "contextWindow": 65536,
-          "maxTokens": 4096,
+          "maxTokens": 8192,
           "reasoning": true,
-          "input": [ "text", "image" ]
+          "input": [ "text"]
       },
 
-  Qwen3.8_27B_UD-IQ4_XS_(Unsloth)_[80k]:
+  Qwen3.8_27B_UD-IQ4_XS_(Unsloth)_[64k]:
     file: Qwen3.8-27B-UD-IQ4_XS_unsloth.gguf
-    ctx_k: 80
+    ctx_k: 64
     gpu_layers: 99
     cpu_moe: 0
     quant: q4_0
     batch: 1024
     ubatch: 256
     spec_type: draft-mtp
-    spec_draft_n_min: 4
+    spec_draft_n_min: 1
+    spec_draft_n_max: 6
+    jinja: 0
+    pi_agent_model: >
+      { 
+         "_test": "🥇",
+         "_speed": "20-40 t/s",
+          "id": "Qwen3.8_27B_UD-IQ4_XS_(Unsloth)_[64k]",
+          "name": "🥇 Qwen 3.8 27B UD-IQ4_XS (Unsloth) [64k]",
+          "contextWindow": 65536,
+          "maxTokens": 8192,
+          "reasoning": true,
+          "input": [ "text" ]
+      },
+
+  Qwen3.8_27B_UD-IQ4_XS_(Unsloth)_[40k]_Q8:
+    file: Qwen3.8-27B-UD-IQ4_XS_unsloth.gguf
+    ctx_k: 40
+    gpu_layers: 99
+    cpu_moe: 0
+    quant: q8_0/q4_0
+    batch: 1024
+    ubatch: 256
+    spec_type: draft-mtp
+    spec_draft_n_min: 1
     spec_draft_n_max: 4
     jinja: 0
     pi_agent_model: >
       { 
          "_test": "🥇",
          "_speed": "20-40 t/s",
-          "id": "Qwen3.8_27B_UD-IQ4_XS_(Unsloth)_[80k]",
-          "name": "🥇 Qwen 3.8 27B UD-IQ4_XS (Unsloth) [80k] Q4",
-          "contextWindow": 81920,
-          "maxTokens": 4096,
+          "id": "Qwen3.8_27B_UD-IQ4_XS_(Unsloth)_[40k]_Q8",
+          "name": "🥇 Qwen 3.8 27B UD-IQ4_XS (Unsloth) [40k]",
+          "contextWindow": 49152,
+          "maxTokens": 8192,
           "reasoning": true,
-          "input": [ "text", "image" ]
+          "input": [ "text" ]
       },
 
   Qwen3.8-27B-i1-IQ4_XS-GGUF-Smaller_(jrell)_Q8-Q8_[56k]:
@@ -223,10 +296,11 @@ models:
     ctx_k: 64
     gpu_layers: 99
     cpu_moe: 0
+    quant: q8_0
     batch: 512
     ubatch: 256
     spec_type: draft-mtp
-    spec_draft_n_min: 2
+    spec_draft_n_min: 1
     spec_draft_n_max: 3
     jinja: 0
     pi_agent_model: >
@@ -527,6 +601,49 @@ models:
 
 # KAT Coder
 
+  KAT-Coder-V2.5-Dev-REAP-205E-MTP-UD-IQ4_XS_(gbuxhf)_128k:
+    file: KAT-Coder-V2.5-Dev-REAP-205E-MTP-UD-IQ4_XS_gbuxhf.gguf
+    ctx_k: 128
+    gpu_layers: 99
+    cpu_moe: 0
+    quant: q8_0
+    batch: 1024
+    ubatch: 1024
+    spec_type: none 
+    pi_agent_model: >
+       { 
+            "_test": "?",
+            "_speed": "? t/s",
+            "id": "KAT-Coder-V2.5-Dev-REAP-205E-MTP-UD-IQ4_XS_(gbuxhf)_128k",
+            "name": "KAT-Coder-V2.5 REAP-205E MTP UD-IQ4_XS (gbuxhf) [128k]",
+            "contextWindow": 131072,
+            "maxTokens": 8192,
+            "reasoning": true
+       },
+
+  KAT-Coder-V2.5-Dev-REAP-205E-MTP-UD-IQ4_XS_(gbuxhf)_128k_2:
+    file: KAT-Coder-V2.5-Dev-REAP-205E-MTP-UD-IQ4_XS_gbuxhf.gguf
+    ctx_k: 128
+    gpu_layers: 99
+    cpu_moe: 0
+    quant: q8_0
+    batch: 2048
+    ubatch: 512
+    spec_type: ngram-simple
+    spec_ngram_simple_size_n: 6
+    spec_ngram_simple_size_m: 10 
+    spec_ngram_simple_min_hits: 1
+    pi_agent_model: >
+       { 
+            "_test": "?",
+            "_speed": "? t/s",
+            "id": "KAT-Coder-V2.5-Dev-REAP-205E-MTP-UD-IQ4_XS_(gbuxhf)_128k",
+            "name": "KAT-Coder-V2.5 REAP-205E MTP UD-IQ4_XS (gbuxhf) [128k]",
+            "contextWindow": 131072,
+            "maxTokens": 8192,
+            "reasoning": true
+       },
+
   KAT-Coder-V2.5-Dev-APEX-dynamic-v2_(myric)_192k:
     file: KAT-Coder-V2.5-Dev-APEX-dynamic-v2_myric.gguf
     ctx_k: 192
@@ -568,33 +685,12 @@ models:
             "reasoning": true
        },
 
-  KAT-Coder-V2.5-Dev_Q2_K-AllGPU_(offmonreal)_160k:
-    file: KAT-Coder-V2.5-Dev_Q2_K-AllGPU_offmonreal.gguf
-    ctx_k: 160
-    gpu_layers: 99
-    cpu_moe: 0
-    quant: q8_0
-    batch: 1024
-    ubatch: 512
-    spec_type: none 
-    pi_agent_model: >
-       { 
-            "_test": "✔️ Good and super fast",
-            "_speed": "60 t/s",
-            "id": "KAT-Coder-V2.5-Dev_Q2_K-AllGPU_(offmonreal)_160k",
-            "name": "KAT-Coder-V2.5-Dev_Q2_K-AllGPU (offmonreal) [160k]",
-            "contextWindow": 163840,
-            "maxTokens": 8192,
-            "reasoning": true
-       },
-
-
   KAT-Coder-V2.5-Dev_Q3_K_M_imatrix_MTP_(offmonreal)_64k:
     file: KAT-Coder-V2.5-Dev_Q3_K_M_imatrix_MTP_offmonreal.gguf
     ctx_k: 64
     gpu_layers: 99
-    cpu_moe: 2
-    quant: q4_0
+    cpu_moe: 4
+    quant: q8_0
     batch: 1024
     ubatch: 256
     spec_type: none 
@@ -609,12 +705,12 @@ models:
             "reasoning": true
        },
 
-  KAT-Coder-V2.5-Dev_Q3_K_M_imatrix_MTP_(offmonreal)_64k_Q8:
+  KAT-Coder-V2.5-Dev_Q3_K_M_imatrix_MTP_(offmonreal)_64k_Q4:
     file: KAT-Coder-V2.5-Dev_Q3_K_M_imatrix_MTP_offmonreal.gguf
-    ctx_k: 52
+    ctx_k: 64
     gpu_layers: 99
-    cpu_moe: 3
-    quant: q8_0
+    cpu_moe: 2
+    quant: q4_0
     batch: 1024
     ubatch: 256
     spec_type: none
@@ -735,22 +831,26 @@ models:
         "reasoning": true
       },
 
-  Gemma-4-26B-UD-IQ4_NL_(Unsloth)_64k:
-    speed: 45 t/s
+  Gemma-4-26B-UD-IQ4_NL_(Unsloth)_[104k]:
+    speed: 55 t/s
     file: Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf
-    ctx_k: 64
-    gpu_layers: -1
+    ctx_k: 104
+    gpu_layers: 99
     cpu_moe: 0
-    batch: 1024
+    quant: q8_0
+    batch: 2048
     ubatch: 256
-    spec_type: none 
+    spec_type: draft-mtp 
+    draft_model: mtp-gemma-4-26B-A4B-it_unsloth.gguf
+    spec_draft_n_min: 1
+    spec_draft_n_max: 5
     pi_agent_model: >
       { 
         "_test": "???",
-        "id": "Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf",
-        "name": "Gemma4 26B - UD-IQ4_NL (by Unsloth) 64K",
-        "contextWindow": 6500,
-        "maxTokens": 4096,
+        "id": "Gemma-4-26B-UD-IQ4_NL_(Unsloth)_[104k]",
+        "name": "Gemma4 26B - UD-IQ4_NL (Unsloth) 104K",
+        "contextWindow": 184320,
+        "maxTokens": 8192,
         "reasoning": true
       },
   Gemma-4-26B-UD-IQ4_NL_(Unsloth)_160k:

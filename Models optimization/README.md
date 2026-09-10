@@ -79,6 +79,9 @@ Script for test models:
 ```bash
 # function:
 
+# need to set a default
+ngram_values=none
+
 _test_model() {
 source server_common.sh && \
 start_server \

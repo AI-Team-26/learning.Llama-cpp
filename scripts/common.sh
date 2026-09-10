@@ -4,7 +4,7 @@ source debug.sh
 
 ### Folder with the .gguf files
 GGUF_FOLDER="L:\GGUF"
-LLAMA_BINS_FOLDER="$LLAMACPP"  
+LLAMA_BINS_FOLDER="$LLAMACPP"
 # Override with specific version
 #LLAMA_BINS_FOLDER="D:\Standalone Programs\llama-b9949-bin-win-cuda-12.4-x64"  # b9949 CUDA 12
 #LLAMA_BINS_FOLDER="D:\Standalone Programs\llama-b10098-bin-win-cuda-12.4-x64"  # b10098 CUDA 12

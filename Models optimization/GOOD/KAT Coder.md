@@ -1,28 +1,40 @@
 # KAT Coder
 
-| File                                                   | Result                                |
-| ---                                                    | ---                                   |
-| KAT-Coder-V2.5-Dev_Q3_K_M_imatrix_MTP_offmonreal.gguf  | ✔️ 40 t/s (64k) / 40 t/s (52k) Q8     |
-| KAT-Coder-V2.5-Dev-Cerebellum-14GB-v2_deucebucket.gguf | ✔️ 45 t/s (160k)                      |
-| KAT-Coder-V2.5-Dev_Q2_K-AllGPU_offmonreal.gguf         | ✔️ 50 t/s (160k)                      |
-| KAT-Coder-V2.5-Dev-APEX-dynamic-v2_myric.gguf          | ✔️ 40 t/s (192k)                      |
-| KAT-Coder-V2.5-Dev-MTP-MXFP4_MOE_noctrex.gguf          | ❌ Too slow                           |
+| File                                                   | GB   | Result                                |
+| ---                                                    | ---- |                                       |
+| KAT-Coder-V2.5-Dev_Q3_K_M_imatrix_MTP_offmonreal.gguf  | 16.8 | ✔️ 40 t/s (64k) / 40 t/s (52k) Q8     |
+| KAT-Coder-V2.5-Dev-Cerebellum-14GB-v2_deucebucket.gguf | 11.8 | ✔️ 45 t/s (160k)                      |
+| KAT-Coder-V2.5-Dev-APEX-dynamic-v2_myric.gguf          | 11.9 | ✔️ 40 t/s (192k)                      |
+| KAT-Coder-V2.5-Dev-REAP-205E-MTP-UD-IQ4_XS_gbuxhf.gguf | 14.0 | ✔️ 45 t/s (128k)                      | 
+| KAT-Coder-V2.5-Dev_Q2_K-AllGPU_offmonreal.gguf         | 13.0 | ❌ 50 t/s (160k)                      | 
+| KAT-Coder-V2.5-Dev-MTP-MXFP4_MOE_noctrex.gguf          |      | ❌ Too slow                           |
 
+
+
+## ✔️ UD-IQ4_XS (gbuxh)
+KAT-Coder-V2.5-Dev-REAP-205E-MTP-UD-IQ4_XS_gbuxhf.gguf             14.0 GB
+MTP gives worst result
 
 ## ✔️ Q3_K_M imatrix MTP (offmonreal)
 KAT-Coder-V2.5-Dev_Q3_K_M_imatrix_MTP_offmonreal.gguf               16.8 GB   
 https://huggingface.co/offmonreal/KAT-Coder-V2.5-Dev-MaxQuality-MTP-GGUF
+❌ Q4_0: Edit the skill despite not asked and explicitly forbidden by SYSTEM.md (Q8_0 was fine)
 
 ## ✔️ MTP APEX (Myric)
 KAT-Coder-V2.5-Dev-APEX-dynamic-v2_myric.gguf                       11.9 GB
 https://huggingface.co/Myric/KAT-Coder-V2.5-Dev-MTP-APEX-GGUF
 
-## ✔️ Q2_K (offmonreal)
-KAT-Coder-V2.5-Dev_Q2_K-AllGPU_offmonreal.gguf                      13.0 GB
-
 ## ✔️ Cerebellum-14GB-V2 (deucebucket)
 KAT-Coder-V2.5-Dev-Cerebellum-14GB-v2_deucebucket.gguf              11.8 GB
 https://huggingface.co/deucebucket/KAT-Coder-V2.5-Dev-Cerebellum-GGUF
+
+
+## ❌ Q2_K (offmonreal)
+KAT-Coder-V2.5-Dev_Q2_K-AllGPU_offmonreal.gguf                      13.0 GB
+
+❌ Call web-serach skill from cwd instead of from the skill folder
+❌ Edit the skill despite not asked and explicitly forbidden by SYSTEM.md
+
 
 ## ❌ MTP-MXFP4_MOE (noctrex)
 KAT-Coder-V2.5-Dev-MTP-MXFP4_MOE_noctrex.gguf                       19.0 GB
@@ -31,14 +43,43 @@ Too slow
 
 ```bash
 
-model=KAT-Coder-V2.5-Dev_Q3_K_M_imatrix_MTP_offmonreal.gguf
-ctx_k=56
+model=KAT-Coder-V2.5-Dev-REAP-205E-MTP-UD-IQ4_XS_gbuxhf.gguf
+ctx_k=128
 gpu_layers=99
-cpu_moe=3
+cpu_moe=0
 quant=q8_0
 spec=none
 draft_model=none
-predict_token=0/0
+predict_token=1/3
+jinja=1
+batch=1024
+ubatch=512
+_test_model
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                  | Batch/Ub. | Note              |
+| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | --------------------------------------- | --------- |------------------ |
+|  56 t/s | 152 k |   0 | 42/42 | 15.5 | 13.2/0.2  | q8_0 (none) |    692 |  12s | none                                 -- |  2048/512 |                   |
+|  55 t/s | 136 k |   0 | 42/42 | 15.3 | 13.2/0.1  | q8_0 (none) |    692 |  13s | none                                 -- |  2048/512 |                   |
+|  56 t/s | 128 k |   0 | 42/42 | 15.2 | 13.2/0.1  | q8_0 (none) |    692 |  12s | none                                 -- |  2048/512 |                   |
+|  56 t/s | 128 k |   0 | 42/42 | 15.2 | 13.2/0.1  | q8_0 (none) |    692 |  12s | none                                 -- |  1024/512 |                   |
+|  57 t/s |  96 k |   0 | 42/42 | 15.7 | 13.5/0.1  | q8_0 (q8_0) |    693 |  12s | MTP        min=1 max=4 p_min=0.20 (62%) |  1024/512 |                   |
+|  56 t/s |  96 k |   0 | 42/42 | 15.7 | 13.5/0.1  | q8_0 (q8_0) |    683 |  12s | MTP        min=1 max=3 p_min=0.20 (70%) |  1024/512 |                   |
+|  55 t/s |  64 k |   0 | 42/42 | 14.4 | 13.2/0.1  | q8_0 (none) |    692 |  12s | none                                 -- |  1024/512 |                   |
+|  39 t/s | 128 k |   3 | 42/42 | 15.5 | 12.7/0.1  | q8_0 (q8_0) |    664 |  18s | MTP        min=1 max=3 p_min=0.20 (70%) |  1024/512 |                   |
+|  34 t/s | 128 k |   2 | 42/42 | 15.7 | 13.0/0.1  | q8_0 (q8_0) |    690 |  21s | MTP        min=1 max=3 p_min=0.20 (68%) |  1024/512 |                   |
+|  34 t/s | 128 k |   2 | 42/42 | 15.7 | 13.0/0.1  | q8_0 (q4_0) |    712 |  21s | MTP        min=1 max=3 p_min=0.20 (67%) |  1024/512 |                   |
+|  28 t/s | 128 k |   0 | 42/42 | 15.7 | 13.5/0.1  | q8_0 (q8_0) |    683 |  24s | MTP        min=1 max=3 p_min=0.20 (70%) |  1024/512 |                   |
+| Q4
+|  56 t/s | 256 k |   0 | 42/42 | 15.7 | 13.2/0.3  | q4_0 (none) |    637 |  11s | none                                 -- |  2048/512 |                   |
+
+model=KAT-Coder-V2.5-Dev_Q3_K_M_imatrix_MTP_offmonreal.gguf
+ctx_k=64
+gpu_layers=99
+cpu_moe=4
+quant=q8_0
+spec=none
+draft_model=none
+predict_token=1/2
 jinja=0
 batch=1024
 ubatch=512
@@ -46,13 +87,15 @@ _test_model
 
 | Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                  | Batch/Ub. | Note              |
 | ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | --------------------------------------- | --------- |------------------ |
+| Q4
 |  51 t/s |  64 k |   2 | 42/42 | 15.7 | 14.9/0.0  | q4_0 (none) |    674 |  13s | none                                 -- |  1024/256 |                   |
 |  47 t/s |  64 k |   3 | 42/42 | 15.4 | 14.5/0.0  | q4_0 (none) |    572 |  13s | none                                 -- |  1024/256 |                   |
 |  47 t/s |  60 k |   3 | 42/42 | 15.3 | 14.5/0.0  | q4_0 (none) |    572 |  13s | none                                 -- |  1024/256 |                   |
 |  47 t/s |  56 k |   3 | 42/42 | 15.3 | 14.5/0.0  | q4_0 (none) |    572 |  12s | none                                 -- |  1024/256 |                   |
 |  48 t/s |  52 k |   3 | 42/42 | 15.3 | 14.5/0.0  | q4_0 (none) |    572 |  12s | none                                 -- |  1024/256 |                   |
 |  21 t/s |  52 k |   3 | 42/42 | 15.3 | 14.5/0.0  | q4_0 (none) |    729 |  35s | N-gram              N=4 M=6 min=1 (43%) |  1024/256 |                   |
-
+| Q8
+|  48 t/s |  56 k |   3 | 42/42 | 15.7 | 14.5/0.1  | q8_0 (none) |   1199 |  25s | none                                 -- |  1024/512 |                   |
 |  47 t/s |  52 k |   3 | 42/42 | 15.6 | 14.5/0.1  | q8_0 (none) |    673 |  15s | none                                 -- |  1024/512 |                   |
 |  49 t/s |  48 k |   2 | 42/42 | 15.7 | 14.9/0.1  | q8_0 (none) |    699 |  14s | none                                 -- |  1024/512 |                   |
 |  27 t/s |  52 k |   2 | 42/42 | 15.7 | 14.9/0.1  | q8_0 (none) |    699 |  25s | none                                 -- |  1024/512 |                   |
@@ -106,6 +149,7 @@ model=KAT-Coder-V2.5-Dev_Q2_K-AllGPU_offmonreal.gguf
 ctx_k=160
 gpu_layers=99
 cpu_moe=0
+quant=q8_0
 spec=none
 draft_model=none
 predict_token=4/6
