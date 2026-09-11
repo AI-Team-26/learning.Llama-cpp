@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="NUnit" />
+    <!-- NUnit 4 does not bundle the VSTest adapter -->
+    <PackageReference Include="NUnit3TestAdapter" />
+    <PackageReference Include="Unquote" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- F# does not use default compile globbing; files are listed in dependency order -->
+    <Compile Include="AppConfigTests.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/LlamaServerCore/LlamaServerCore.csproj" />
+  </ItemGroup>
+
+</Project>
