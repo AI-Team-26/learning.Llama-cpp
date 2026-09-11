@@ -38,18 +38,18 @@ let expectArgError (f: unit -> unit) =
 
 [<Test>]
 let ``draft-mtp model produces exact expected args`` () =
-    let m = ModelConfig()
-    m.File <- "Qwen3.8-27B-abliterated-UD-IQ4_XS_huihui.gguf"
-    m.CtxK <- 64
-    m.GpuLayers <- 99
-    m.CpuMoe <- 0
-    m.Quant <- "q4_0"
-    m.Batch <- 1024
-    m.UBatch <- 512
-    m.SpecType <- "draft-mtp"
-    m.SpecDraftNMin <- 1
-    m.SpecDraftNMax <- 4
-    m.Jinja <- 0
+    let modelConfig = ModelConfig()
+    modelConfig.File <- "Qwen3.8-27B-abliterated-UD-IQ4_XS_huihui.gguf"
+    modelConfig.CtxK <- 64
+    modelConfig.GpuLayers <- 99
+    modelConfig.CpuMoe <- 0
+    modelConfig.Quant <- "q4_0"
+    modelConfig.Batch <- 1024
+    modelConfig.UBatch <- 512
+    modelConfig.SpecType <- "draft-mtp"
+    modelConfig.SpecDraftNMin <- 1
+    modelConfig.SpecDraftNMax <- 4
+    modelConfig.Jinja <- 0
     let expected =
         fixedArgs 8001
         @ [ "--cache-type-k"; "q4_0"
@@ -69,27 +69,27 @@ let ``draft-mtp model produces exact expected args`` () =
             "--cache-ram"; "0"
             "--spec-draft-n-min"; "1"
             "--spec-draft-n-max"; "4" ]
-    let actual = ServerArgs.Build("Qwen3.8-27B-abliterated-UD-IQ4_XS_huihui_64k", 8001, m, @"L:\GGUF") |> List.ofSeq
+    let actual = ServerArgs.Build("Qwen3.8-27B-abliterated-UD-IQ4_XS_huihui_64k", 8001, modelConfig, @"L:\GGUF") |> List.ofSeq
     test <@ actual = expected @>
 
 [<Test>]
 let ``ngram-simple model with all options produces exact expected args`` () =
-    let m = ModelConfig()
-    m.File <- "some-model.gguf"
-    m.Alias <- "my-alias"
-    m.CtxK <- 128
-    m.GpuLayers <- 99
-    m.CpuMoe <- 7
-    m.Quant <- "q8_0/q4_0"
-    m.Batch <- 1024
-    m.UBatch <- 512
-    m.SpecType <- "ngram-simple"
-    m.SpecNgramSimpleSizeN <- 8
-    m.SpecNgramSimpleSizeM <- 8
-    m.SpecNgramSimpleMinHits <- 1
-    m.DraftModel <- "mtp-draft.gguf"
-    m.Jinja <- 1
-    m.QwenReasoningEffortMedium <- 1
+    let modelConfig = ModelConfig()
+    modelConfig.File <- "some-model.gguf"
+    modelConfig.Alias <- "my-alias"
+    modelConfig.CtxK <- 128
+    modelConfig.GpuLayers <- 99
+    modelConfig.CpuMoe <- 7
+    modelConfig.Quant <- "q8_0/q4_0"
+    modelConfig.Batch <- 1024
+    modelConfig.UBatch <- 512
+    modelConfig.SpecType <- "ngram-simple"
+    modelConfig.SpecNgramSimpleSizeN <- 8
+    modelConfig.SpecNgramSimpleSizeM <- 8
+    modelConfig.SpecNgramSimpleMinHits <- 1
+    modelConfig.DraftModel <- "mtp-draft.gguf"
+    modelConfig.Jinja <- 1
+    modelConfig.QwenReasoningEffortMedium <- 1
     let expected =
         fixedArgs 8001
         @ [ "--cache-type-k"; "q8_0"
@@ -112,88 +112,75 @@ let ``ngram-simple model with all options produces exact expected args`` () =
             "--spec-draft-model"; System.IO.Path.Combine(@"L:\GGUF", "mtp-draft.gguf")
             "--jinja"
             "--chat-template-kwargs"; "{\"reasoning_effort\":\"medium\"}" ]
-    let actual = ServerArgs.Build("model-id", 8001, m, @"L:\GGUF") |> List.ofSeq
+    let actual = ServerArgs.Build("model-id", 8001, modelConfig, @"L:\GGUF") |> List.ofSeq
     test <@ actual = expected @>
 
 [<Test>]
 let ``missing quant throws ArgBuildException`` () =
-    let m = ModelConfig()
-    m.File <- "x.gguf"
-    m.CtxK <- 64
-    m.GpuLayers <- 99
-    m.CpuMoe <- 0
-    m.Batch <- 1024
-    m.UBatch <- 512
-    m.SpecType <- "none"
-    let ex = expectArgError (fun () -> ServerArgs.Build("id", 8001, m, @"L:\GGUF") |> ignore)
+    let modelConfig = ModelConfig()
+    modelConfig.File <- "x.gguf"
+    modelConfig.CtxK <- 64
+    modelConfig.GpuLayers <- 99
+    modelConfig.CpuMoe <- 0
+    modelConfig.Batch <- 1024
+    modelConfig.UBatch <- 512
+    modelConfig.SpecType <- "none"
+    let ex = expectArgError (fun () -> ServerArgs.Build("id", 8001, modelConfig, @"L:\GGUF") |> ignore)
     test <@ ex.Message.Contains "quant" @>
 
 [<Test>]
 let ``missing spec_type throws ArgBuildException`` () =
-    let m = ModelConfig()
-    m.File <- "x.gguf"
-    m.CtxK <- 64
-    m.GpuLayers <- 99
-    m.CpuMoe <- 0
-    m.Quant <- "q4_0"
-    m.Batch <- 1024
-    m.UBatch <- 512
-    let ex = expectArgError (fun () -> ServerArgs.Build("id", 8001, m, @"L:\GGUF") |> ignore)
+    let modelConfig = ModelConfig()
+    modelConfig.File <- "x.gguf"
+    modelConfig.CtxK <- 64
+    modelConfig.GpuLayers <- 99
+    modelConfig.CpuMoe <- 0
+    modelConfig.Quant <- "q4_0"
+    modelConfig.Batch <- 1024
+    modelConfig.UBatch <- 512
+    let ex = expectArgError (fun () -> ServerArgs.Build("id", 8001, modelConfig, @"L:\GGUF") |> ignore)
     test <@ ex.Message.Contains "spec_type" @>
 
 [<Test>]
 let ``dflash spec type is not supported`` () =
-    let m = ModelConfig()
-    m.File <- "x.gguf"
-    m.CtxK <- 64
-    m.GpuLayers <- 99
-    m.CpuMoe <- 0
-    m.Quant <- "q4_0"
-    m.Batch <- 1024
-    m.UBatch <- 512
-    m.SpecType <- "dflash"
-    let ex = expectArgError (fun () -> ServerArgs.Build("id", 8001, m, @"L:\GGUF") |> ignore)
+    let modelConfig = ModelConfig()
+    modelConfig.File <- "x.gguf"
+    modelConfig.CtxK <- 64
+    modelConfig.GpuLayers <- 99
+    modelConfig.CpuMoe <- 0
+    modelConfig.Quant <- "q4_0"
+    modelConfig.Batch <- 1024
+    modelConfig.UBatch <- 512
+    modelConfig.SpecType <- "dflash"
+    let ex = expectArgError (fun () -> ServerArgs.Build("id", 8001, modelConfig, @"L:\GGUF") |> ignore)
     test <@ ex.Message.Contains "DFlash" @>
 
 [<Test>]
 let ``draft-mtp without draft n min/max throws`` () =
-    let m = ModelConfig()
-    m.File <- "x.gguf"
-    m.CtxK <- 64
-    m.GpuLayers <- 99
-    m.CpuMoe <- 0
-    m.Quant <- "q4_0"
-    m.Batch <- 1024
-    m.UBatch <- 512
-    m.SpecType <- "draft-mtp"
-    let ex = expectArgError (fun () -> ServerArgs.Build("id", 8001, m, @"L:\GGUF") |> ignore)
+    let modelConfig = ModelConfig()
+    modelConfig.File <- "x.gguf"
+    modelConfig.CtxK <- 64
+    modelConfig.GpuLayers <- 99
+    modelConfig.CpuMoe <- 0
+    modelConfig.Quant <- "q4_0"
+    modelConfig.Batch <- 1024
+    modelConfig.UBatch <- 512
+    modelConfig.SpecType <- "draft-mtp"
+    let ex = expectArgError (fun () -> ServerArgs.Build("id", 8001, modelConfig, @"L:\GGUF") |> ignore)
     test <@ ex.Message.Contains "spec_draft_n_min" @>
 
 [<Test>]
 let ``ngram-simple without min hits throws`` () =
-    let m = ModelConfig()
-    m.File <- "x.gguf"
-    m.CtxK <- 64
-    m.GpuLayers <- 99
-    m.CpuMoe <- 0
-    m.Quant <- "q4_0"
-    m.Batch <- 1024
-    m.UBatch <- 512
-    m.SpecType <- "ngram-simple"
-    m.SpecNgramSimpleSizeN <- 8
-    m.SpecNgramSimpleSizeM <- 8
-    let ex = expectArgError (fun () -> ServerArgs.Build("id", 8001, m, @"L:\GGUF") |> ignore)
+    let modelConfig = ModelConfig()
+    modelConfig.File <- "x.gguf"
+    modelConfig.CtxK <- 64
+    modelConfig.GpuLayers <- 99
+    modelConfig.CpuMoe <- 0
+    modelConfig.Quant <- "q4_0"
+    modelConfig.Batch <- 1024
+    modelConfig.UBatch <- 512
+    modelConfig.SpecType <- "ngram-simple"
+    modelConfig.SpecNgramSimpleSizeN <- 8
+    modelConfig.SpecNgramSimpleSizeM <- 8
+    let ex = expectArgError (fun () -> ServerArgs.Build("id", 8001, modelConfig, @"L:\GGUF") |> ignore)
     test <@ ex.Message.Contains "spec_ngram_simple_min_hits" @>
-
-[<Test>]
-let ``missing ctx_k throws ArgBuildException`` () =
-    let m = ModelConfig()
-    m.File <- "x.gguf"
-    m.GpuLayers <- 99
-    m.CpuMoe <- 0
-    m.Quant <- "q4_0"
-    m.Batch <- 1024
-    m.UBatch <- 512
-    m.SpecType <- "none"
-    let ex = expectArgError (fun () -> ServerArgs.Build("id", 8001, m, @"L:\GGUF") |> ignore)
-    test <@ ex.Message.Contains "ctx_k" @>

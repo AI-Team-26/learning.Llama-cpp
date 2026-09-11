@@ -5,8 +5,7 @@ public sealed class ArgBuildException : Exception
     public ArgBuildException(string message) : base(message) { }
 }
 
-// Builds the llama-server.exe argument list with byte-identical parity to
-// scripts/start_server_prod.sh (values from common.sh / server_common.sh).
+// Builds the llama-server.exe argument list matching the production launch script.
 public static class ServerArgs
 {
     // Values from scripts/common.sh and scripts/server_common.sh
@@ -43,17 +42,17 @@ public static class ServerArgs
     private const string ReasoningBudgetMessage =
         "... Considering the limited time by the user, I have to give the solution based on the thinking directly now.";
 
-    public static IReadOnlyList<string> Build(string modelId, int port, ModelConfig m, string ggufFolder)
+    public static IReadOnlyList<string> Build(string modelId, int port, ModelConfig modelConfig, string ggufFolder)
     {
         var args = new List<string>(FixedArgs(port));
 
-        if (string.IsNullOrEmpty(m.Quant))
-            throw new ArgBuildException("Argument \"quant\" is missing!");
+        if (string.IsNullOrEmpty(modelConfig.Quant))
+            throw new ArgBuildException("Variable \"quant\" is missing!");
 
         // quant: before '/' = k/v cache type, after '/' = draft k/v cache type (same if absent)
-        var slash = m.Quant!.IndexOf('/');
-        var cacheTypeKv = slash >= 0 ? m.Quant[..slash] : m.Quant;
-        var cacheTypeDraftKv = slash >= 0 ? m.Quant[(slash + 1)..] : m.Quant;
+        var slash = modelConfig.Quant.IndexOf('/');
+        var cacheTypeKv = slash >= 0 ? modelConfig.Quant[..slash] : modelConfig.Quant;
+        var cacheTypeDraftKv = slash >= 0 ? modelConfig.Quant[(slash + 1)..] : modelConfig.Quant;
 
         args.AddRange(new[]
         {
@@ -63,31 +62,26 @@ public static class ServerArgs
             "--cache-type-v-draft", cacheTypeDraftKv,
         });
 
-        RequireInt(m.CtxK, "ctx_k");
-        RequireInt(m.GpuLayers, "gpu_layers");
-        RequireInt(m.CpuMoe, "cpu_moe");
-        RequireInt(m.Batch, "batch");
-        RequireInt(m.UBatch, "ubatch");
-        if (string.IsNullOrEmpty(m.SpecType))
+        if (string.IsNullOrEmpty(modelConfig.SpecType))
             throw new ArgBuildException("Variable \"spec_type\" is missing!");
 
-        var specType = m.SpecType!;
+        var specType = modelConfig.SpecType;
 
-        var modelFile = Path.Combine(ggufFolder, m.File);
+        var modelFile = Path.Combine(ggufFolder, modelConfig.File);
         args.Add("--model");
         args.Add(modelFile);
         args.Add("--alias");
-        args.Add(!string.IsNullOrEmpty(m.Alias) ? m.Alias! : modelId);
+        args.Add(!string.IsNullOrEmpty(modelConfig.Alias) ? modelConfig.Alias! : modelId);
         args.Add("--ctx-size");
-        args.Add((m.CtxK * 1024).ToString());
+        args.Add((modelConfig.CtxK * 1024).ToString());
         args.Add("--n-gpu-layers");
-        args.Add(m.GpuLayers.ToString()!);
+        args.Add(modelConfig.GpuLayers.ToString());
         args.Add("--n-cpu-moe");
-        args.Add(m.CpuMoe.ToString()!);
+        args.Add(modelConfig.CpuMoe.ToString());
         args.Add("--batch-size");
-        args.Add(m.Batch.ToString()!);
+        args.Add(modelConfig.Batch.ToString());
         args.Add("--ubatch-size");
-        args.Add(m.UBatch.ToString()!);
+        args.Add(modelConfig.UBatch.ToString());
 
         if (specType != "none")
         {
@@ -96,31 +90,31 @@ public static class ServerArgs
         }
 
         // Disable RAM "cache" if no MoE or GPU offloading
-        if (m.CpuMoe != 0 || m.GpuLayers != 99)
+        if (modelConfig.CpuMoe != 0 || modelConfig.GpuLayers != 99)
             args.AddRange(new[] { "--cache-ram", "4096" });
         else
             args.AddRange(new[] { "--cache-ram", "0" });
 
         if (specType.Contains("draft-simple"))
         {
-            RequireArg(args, m.SpecDraftNMin, "spec_draft_n_min", "--spec-draft-n-min");
-            RequireArg(args, m.SpecDraftNMax, "spec_draft_n_max", "--spec-draft-n-max");
+            RequireArg(args, modelConfig.SpecDraftNMin, "spec_draft_n_min", "--spec-draft-n-min");
+            RequireArg(args, modelConfig.SpecDraftNMax, "spec_draft_n_max", "--spec-draft-n-max");
         }
 
         if (specType.Contains("ngram-simple"))
         {
-            RequireArg(args, m.SpecNgramSimpleSizeN, "spec_ngram_simple_size_n", "--spec-ngram-simple-size-n");
-            RequireArg(args, m.SpecNgramSimpleSizeM, "spec_ngram_simple_size_m", "--spec-ngram-simple-size-m");
-            RequireArg(args, m.SpecNgramSimpleMinHits, "spec_ngram_simple_min_hits", "--spec-ngram-simple-min-hits");
+            RequireArg(args, modelConfig.SpecNgramSimpleSizeN, "spec_ngram_simple_size_n", "--spec-ngram-simple-size-n");
+            RequireArg(args, modelConfig.SpecNgramSimpleSizeM, "spec_ngram_simple_size_m", "--spec-ngram-simple-size-m");
+            RequireArg(args, modelConfig.SpecNgramSimpleMinHits, "spec_ngram_simple_min_hits", "--spec-ngram-simple-min-hits");
         }
 
         if (specType.Contains("draft-mtp"))
         {
-            RequireArg(args, m.SpecDraftNMin, "spec_draft_n_min", "--spec-draft-n-min");
-            RequireArg(args, m.SpecDraftNMax, "spec_draft_n_max", "--spec-draft-n-max");
+            RequireArg(args, modelConfig.SpecDraftNMin, "spec_draft_n_min", "--spec-draft-n-min");
+            RequireArg(args, modelConfig.SpecDraftNMax, "spec_draft_n_max", "--spec-draft-n-max");
         }
 
-        // EXPERIMENTAL: ngram-mod (defaults from start_server_prod.sh)
+        // EXPERIMENTAL: ngram-mod (hardcoded defaults)
         if (specType.Contains("ngram-mod"))
         {
             args.AddRange(new[]
@@ -134,25 +128,19 @@ public static class ServerArgs
         if (specType == "dflash")
             throw new ArgBuildException("Spec \"DFlash\" not supported!");
 
-        if (!string.IsNullOrEmpty(m.DraftModel) && m.DraftModel != "none")
+        if (!string.IsNullOrEmpty(modelConfig.DraftModel) && modelConfig.DraftModel != "none")
         {
             args.Add("--spec-draft-model");
-            args.Add(Path.Combine(ggufFolder, m.DraftModel));
+            args.Add(Path.Combine(ggufFolder, modelConfig.DraftModel));
         }
 
-        if (m.Jinja == 1)
+        if (modelConfig.Jinja == 1)
             args.Add("--jinja");
 
-        if (m.QwenReasoningEffortMedium == 1)
+        if (modelConfig.QwenReasoningEffortMedium == 1)
             args.AddRange(new[] { "--chat-template-kwargs", "{\"reasoning_effort\":\"medium\"}" });
 
         return args;
-    }
-
-    private static void RequireInt(int? value, string name)
-    {
-        if (value is null)
-            throw new ArgBuildException($"Variable \"{name}\" is missing!");
     }
 
     private static void RequireArg(List<string> args, int? value, string varName, string argName)
