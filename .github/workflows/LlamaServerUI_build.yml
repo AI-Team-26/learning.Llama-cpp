@@ -1,0 +1,26 @@
+name: Build LlamaServerUI
+
+on:
+  #push:
+  #  branches: [ci/05_build, main]
+  pull_request: 
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore "LlamaServer UI/LlamaServerUI.slnx"
+
+      - name: Build
+        run: dotnet build "LlamaServer UI/LlamaServerUI.slnx" --configuration Release --no-restore
