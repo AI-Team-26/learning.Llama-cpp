@@ -41,7 +41,7 @@ public sealed class MainForm : Form
 
         _logBox.Dock = DockStyle.Fill;
 
-        var modelsSplitter = new Splitter { Dock = DockStyle.Fill };
+        var modelsSplitter = new Splitter { Dock = DockStyle.Bottom, Height = 5 };
         var logHost = new Panel { Dock = DockStyle.Bottom, Height = 200 };
         logHost.Controls.Add(_logBox);
 
