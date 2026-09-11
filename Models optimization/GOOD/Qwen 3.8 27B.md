@@ -8,10 +8,10 @@
 | Qwen3.8-27B-UD-IQ4_XS_unsloth.gguf                         | 13.2 | ✔️ 64k: 20-40 t/s  80k: 20-30 t/s           |
 | Qwen3.8-27B-Cold-Fusion-GAIN-V1.1-MTP-IQ3_M_davidau.gguf   | 13.5 | ✔️ 64k: 15-30 t/s Short reasoning           |
 | Qwen3.8-27B-ZB4.00-MIN-v5-IQ4_XS_tooltd.gguf               | 12.7 | ✔️ 64k: ? t/s                               |
-| Qwen3.8-27B-abliterated-UD-IQ4_XS_huihui.gguf              | 13.4 | ✔️ 64k: 15-40 t/s   Not good result in test |
+| Qwen3.8-27B-abliterated-UD-IQ4_XS_huihui.gguf              | 13.4 | ✔️ 64k: 15-40 t/s   Not good result in test. Slow. |
 | Qwen3.8-27B-Uncensored-IQ3_M_orcarouter.gguf               | 11.8 | ❌ Not for coding. Really uncensored        |
 | Qwen3.8-27B-UD-IQ4_XS_peculiar.gguf                        | 13.2 | Not tested in Pi                            |
-| Qwen3.8-27B-Abliterated-IQ4-MIX-MTP_finex666.gguf          | 13.2 | ❌ 64k: 25-45 t/s . Looping                 |
+| Qwen3.8-27B-Abliterated-IQ4-MIX-MTP_finex666.gguf          | 13.2 | ✔️ 64k: 25-45 t/s . Looping ?               |
 | RVN-Q3_K_M-mtp_observerx.gguf                              | 12.8 | ❌ Slow. It seems to manage only 64k ?!     |
 | RVN-IQ3_M-mtp_Observerx.gguf                               | 12.1 | ❌ Tool call failed on first attempt        |
 | RVN-Q3_K_L_observerx.gguf                                  | 13.3 | ❌ Slow. No MTP.                            |

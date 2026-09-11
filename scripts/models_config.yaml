@@ -179,7 +179,7 @@ models:
     batch: 1024
     ubatch: 256
     spec_type: draft-mtp
-    spec_draft_n_min: 3
+    spec_draft_n_min: 1
     spec_draft_n_max: 4
     jinja: 0
     pi_agent_model: >
@@ -201,10 +201,10 @@ models:
     cpu_moe: 0
     quant: q4_0
     batch: 1024
-    ubatch: 256
+    ubatch: 512
     spec_type: draft-mtp
     spec_draft_n_min: 1
-    spec_draft_n_max: 6
+    spec_draft_n_max: 4
     jinja: 0
     pi_agent_model: >
       { 

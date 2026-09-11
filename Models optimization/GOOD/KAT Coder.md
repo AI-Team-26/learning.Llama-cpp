@@ -4,34 +4,36 @@
 | ---                                                    | ---- |                                       |
 | KAT-Coder-V2.5-Dev_Q3_K_M_imatrix_MTP_offmonreal.gguf  | 16.8 | ✔️ 40 t/s (64k) / 40 t/s (52k) Q8     |
 | KAT-Coder-V2.5-Dev-Cerebellum-14GB-v2_deucebucket.gguf | 11.8 | ✔️ 45 t/s (160k)                      |
-| KAT-Coder-V2.5-Dev-APEX-dynamic-v2_myric.gguf          | 11.9 | ✔️ 40 t/s (192k)                      |
-| KAT-Coder-V2.5-Dev-REAP-205E-MTP-UD-IQ4_XS_gbuxhf.gguf | 14.0 | ✔️ 45 t/s (128k)                      | 
-| KAT-Coder-V2.5-Dev_Q2_K-AllGPU_offmonreal.gguf         | 13.0 | ❌ 50 t/s (160k)                      | 
+| KAT-Coder-V2.5-Dev-APEX-dynamic-v2_myric.gguf          | 11.9 | ✔️ 50 t/s (192k)  ❌ Indisciplinate   |
+| KAT-Coder-V2.5-Dev-REAP-205E-MTP-UD-IQ4_XS_gbuxhf.gguf | 14.0 | ✔️ 45 t/s (128k)  ❌ Indisciplinate   | 
+| KAT-Coder-V2.5-Dev_Q2_K-AllGPU_offmonreal.gguf         | 13.0 | ✔️ 50 t/s (160k)  ❌ Indisciplinate   | 
 | KAT-Coder-V2.5-Dev-MTP-MXFP4_MOE_noctrex.gguf          |      | ❌ Too slow                           |
 
-
-
-## ✔️ UD-IQ4_XS (gbuxh)
-KAT-Coder-V2.5-Dev-REAP-205E-MTP-UD-IQ4_XS_gbuxhf.gguf             14.0 GB
-MTP gives worst result
-
-## ✔️ Q3_K_M imatrix MTP (offmonreal)
-KAT-Coder-V2.5-Dev_Q3_K_M_imatrix_MTP_offmonreal.gguf               16.8 GB   
-https://huggingface.co/offmonreal/KAT-Coder-V2.5-Dev-MaxQuality-MTP-GGUF
-❌ Q4_0: Edit the skill despite not asked and explicitly forbidden by SYSTEM.md (Q8_0 was fine)
-
-## ✔️ MTP APEX (Myric)
-KAT-Coder-V2.5-Dev-APEX-dynamic-v2_myric.gguf                       11.9 GB
-https://huggingface.co/Myric/KAT-Coder-V2.5-Dev-MTP-APEX-GGUF
 
 ## ✔️ Cerebellum-14GB-V2 (deucebucket)
 KAT-Coder-V2.5-Dev-Cerebellum-14GB-v2_deucebucket.gguf              11.8 GB
 https://huggingface.co/deucebucket/KAT-Coder-V2.5-Dev-Cerebellum-GGUF
 
+## ✔️❌ MTP APEX (Myric)
+KAT-Coder-V2.5-Dev-APEX-dynamic-v2_myric.gguf                       11.9 GB
+https://huggingface.co/Myric/KAT-Coder-V2.5-Dev-MTP-APEX-GGUF
+❌ With a bug in hte TODO, it started to solve it editing directly on main branch
 
-## ❌ Q2_K (offmonreal)
+
+## ✔️❌ UD-IQ4_XS (gbuxh)
+KAT-Coder-V2.5-Dev-REAP-205E-MTP-UD-IQ4_XS_gbuxhf.gguf             14.0 GB
+MTP gives worst result
+❌ Deleted all the .gitignore file when asked why it set a wrong path on one record
+❌ Deleted the entire TODO file when asked why a single step was not marked "done"
+❌ A lot of Back and forth chat for just correcting a line in the .gitignore
+
+## ✔️❌ Q3_K_M imatrix MTP (offmonreal)
+KAT-Coder-V2.5-Dev_Q3_K_M_imatrix_MTP_offmonreal.gguf               16.8 GB   
+https://huggingface.co/offmonreal/KAT-Coder-V2.5-Dev-MaxQuality-MTP-GGUF
+❌ Q4_0: Edit the skill despite not asked and explicitly forbidden by SYSTEM.md (Q8_0 was fine)
+
+## ✔️❌ Q2_K (offmonreal)
 KAT-Coder-V2.5-Dev_Q2_K-AllGPU_offmonreal.gguf                      13.0 GB
-
 ❌ Call web-serach skill from cwd instead of from the skill folder
 ❌ Edit the skill despite not asked and explicitly forbidden by SYSTEM.md
 
