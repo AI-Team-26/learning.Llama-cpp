@@ -11,6 +11,16 @@ public sealed class AppConfig
     public string LastModelId { get; set; } = "";
     public string ModelsConfigPath { get; set; } = "scripts/models_config.yaml";
 
+    // Relative values are resolved against the application base directory.
+    public string ResolvedModelsConfigPath =>
+        IsAbsolutePath(ModelsConfigPath)
+            ? ModelsConfigPath
+            : Path.Combine(AppContext.BaseDirectory, ModelsConfigPath);
+
+    private static bool IsAbsolutePath(string path) =>
+        Path.IsPathRooted(path) ||
+        (path.Length >= 3 && char.IsLetter(path[0]) && path[1] == ':' && (path[2] == '\\' || path[2] == '/'));
+
     private static readonly JsonSerializerOptions JsonOpts = new()
     {
         WriteIndented = true,
@@ -19,8 +29,6 @@ public sealed class AppConfig
     public static string DefaultConfigPath =>
         Path.Combine(AppContext.BaseDirectory, "config.json");
 
-    /// <summary>Loads config from <paramref name="path"/>. Missing file returns defaults.</summary>
-    /// <exception cref="InvalidOperationException">The file exists but is not valid JSON.</exception>
     public static AppConfig Load(string path)
     {
         if (!File.Exists(path))

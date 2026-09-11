@@ -57,3 +57,16 @@ type AppConfigTests() =
         test <@ ex <> null @>
         let ioex : System.Exception = ex
         test <@ ioex.Message.Contains(tempFile) @>
+
+    [<Test>]
+    member _.resolve_models_config_path_relative_against_app_base() =
+        let cfg = AppConfig()
+        cfg.ModelsConfigPath <- "models/custom.yaml"
+        let expected = System.IO.Path.Combine(System.AppContext.BaseDirectory, "models/custom.yaml")
+        test <@ cfg.ResolvedModelsConfigPath = expected @>
+
+    [<Test>]
+    member _.resolve_models_config_path_keeps_absolute_paths() =
+        let cfg = AppConfig()
+        cfg.ModelsConfigPath <- "C:\\cfg\\models.yaml"
+        test <@ cfg.ResolvedModelsConfigPath = "C:\\cfg\\models.yaml" @>
