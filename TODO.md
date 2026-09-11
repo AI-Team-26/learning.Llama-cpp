@@ -1,13 +1,5 @@
 # TODO
 
-## In Progress
-- [ ] **[feat/03_arg_builder]** Implement llama-server argument builder in LlamaServerCore
-    - [x] Branch + draft PR opened
-    - [ ] ArgBuilder: build exact arg list per start_server_prod.sh spec (fixed args + per-model rules, quant split, spec_type branching, cache-ram derivation)
-    - [ ] Typed errors for missing required fields / dflash / missing spec params
-    - [ ] F# NUnit+Unquote tests: full expected arg lists (draft-mtp + ngram-simple models) and all error branches
-    - [ ] Build + test green, push
-
 ## Backlog
 - Unify the llama-server call of test adn prod calls
 - Removed/commented out error check of JSON response in run_llamacpp function

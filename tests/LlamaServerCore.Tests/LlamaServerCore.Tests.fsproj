@@ -16,6 +16,7 @@
   <ItemGroup>
     <!-- F# does not use default compile globbing; files are listed in dependency order -->
     <Compile Include="AppConfigTests.fs" />
+    <Compile Include="ArgBuilderTests.fs" />
   </ItemGroup>
 
   <ItemGroup>
