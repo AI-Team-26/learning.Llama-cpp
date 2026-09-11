@@ -1,1 +1,4 @@
 /scripts/logs/
+bin/
+obj/
+agent_build/
