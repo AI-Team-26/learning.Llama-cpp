@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+  </Folder>
+  <Project Path="src/Core/Core.csproj" />
+  <Project Path="tests/Core.Tests/Core.Tests.fsproj" />
+  <Project Path="src/UI/UI.csproj" />
+</Solution>
