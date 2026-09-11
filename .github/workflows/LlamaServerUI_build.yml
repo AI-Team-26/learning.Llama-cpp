@@ -3,7 +3,8 @@ name: Build LlamaServerUI
 on:
   #push:
   #  branches: [ci/05_build, main]
-  pull_request: [main]
+  pull_request: 
+    branches: [main]
 
 jobs:
   build:
