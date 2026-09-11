@@ -1,8 +1,7 @@
 # TODO
 
 ## Backlog
-
-- Unify the llama-server call of test adn prod calls
+- Unify the llama-server call of test and prod calls
 - Removed/commented out error check of JSON response in run_llamacpp function
 - Manage server start failing due to error loading the model
 - **[feat/02_llama_server_ui]** **Create a UI program to start Llama-server**
@@ -63,4 +62,3 @@
       - [ ] All error cases show friendly messages, app never crashes
       - [ ] Taskbar icon visible while running
     - **PHASE 2 (later, separate task):** edit/add model entries in the UI and save back to `models_config.yaml`.
-
