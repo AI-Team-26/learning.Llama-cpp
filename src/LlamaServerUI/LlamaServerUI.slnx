@@ -2,5 +2,7 @@
   <Folder Name="/Solution Items/">
     <File Path=".gitignore" />
   </Folder>
+  <Project Path="../LlamaServerCore/LlamaServerCore.csproj" />
+  <Project Path="../../tests/LlamaServerCore.Tests/LlamaServerCore.Tests.fsproj" />
   <Project Path="LlamaServerUI.csproj" />
 </Solution>
