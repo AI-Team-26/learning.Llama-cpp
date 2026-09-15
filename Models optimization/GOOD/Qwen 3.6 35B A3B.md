@@ -202,13 +202,13 @@ _test_model
 
 # Q4 SPEC
 model=Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf
-ctx_k=128
+ctx_k=96
 gpu_layers=99
 cpu_moe=4
 quant=q4_0
 spec=ngram-simple
 draft_model=none
-predict_token=16/24
+ngram_values=16/16
 jinja=0
 batch=1024
 ubatch=512
@@ -216,6 +216,11 @@ _test_model
 
 | Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                  | Batch/Ub. | Note              |
 | ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | --------------------------------------- | --------- |------------------ |
+| new llama.cpp version
+|  38 t/s | 128 k |   4 | 41/41 | 15.7 | 14.2/0.1  | q4_0 (none) |    885 |  24s | N-gram            N=16 M=16 min=1 (28%) |  1024/512 |                   |
+|  39 t/s |  96 k |   4 | 41/41 | 15.5 | 14.2/0.1  | q4_0 (none) |    885 |  23s | N-gram            N=16 M=16 min=1 (28%) |  1024/512 |                   |
+
+|  45 t/s | 128 k |   4 | 41/41 | 15.7 | 14.2/0.1  | q4_0 (none) |   1669 |  37s | N-gram                   N=12 M=8 min=1 |  1024/512 |                   |
 |  46 t/s | 128 k |   4 | 41/41 | 15.7 | 14.2/0.1  | q4_0 (none) |   1280 |  28s | N-gram            N=16 M=16 min=1 (78%) |  1024/512 |                   |
 |  45 t/s |  96 k |   4 | 41/41 | 15.5 | 14.2/0.1  | q4_0 (none) |   1280 |  28s | N-gram            N=16 M=16 min=1 (78%) |  1024/512 |                   |
 |  41 t/s |  96 k |   4 | 41/41 | 15.5 | 14.2/0.1  | q4_0 (none) |   1280 |  31s | N-gram            N=12 M=16 min=1 (67%) |  1024/512 |                   |
@@ -228,10 +233,11 @@ ctx_k=96
 gpu_layers=99
 cpu_moe=4
 quant=q8_0
-#spec=ngram-simple
-spec=none
+spec=ngram-simple
+ngram_values=12/10
+#spec=none
 draft_model=none
-predict_token=3/5
+predict_token=0/0
 jinja=0
 batch=1024
 ubatch=512
@@ -239,6 +245,14 @@ _test_model
 
 | Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                  | Batch/Ub. | Note              |
 | ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | --------------------------------------- | --------- |------------------ |
+
+|  46 t/s |  96 k |   4 | 41/41 | 15.7 | 14.2/0.1  | q8_0 (none) |   1152 |  25s | N-gram                  N=16 M=12 min=1 |  1024/512 |                   |
+|  45 t/s |  96 k |   4 | 41/41 | 15.7 | 14.2/0.1  | q8_0 (none) |   1152 |  26s | N-gram                   N=12 M=8 min=1 |  1024/512 |                   |
+|  45 t/s |  96 k |   4 | 41/41 | 15.7 | 14.2/0.1  | q8_0 (none) |   1152 |  25s | N-gram                   N=12 M=8 min=1 |  1024/512 |                   |
+|  41 t/s |  96 k |   4 | 41/41 | 15.7 | 14.2/0.1  | q8_0 (none) |   1152 |  27s | none                                 -- |  1024/512 |                   |
+|  40 t/s |  96 k |   4 | 41/41 | 15.7 | 14.2/0.1  | q8_0 (none) |   1152 |  29s | N-gram            N=12 M=12 min=1 (74%) |  1024/512 |                   |
+
+
 |  45 t/s |  96 k |   4 | 41/41 | 15.7 | 14.2/0.1  | q8_0 (none) |   1224 |  27s | N-gram                  N=16 M=24 min=1 |  1024/512 |                   |
 |  45 t/s |  96 k |   4 | 41/41 | 15.7 | 14.2/0.1  | q8_0 (none) |   1224 |  27s | N-gram                  N=16 M=16 min=1 |  1024/512 |                   |
 |  39 t/s |  96 k |   4 | 41/41 | 15.7 | 14.2/0.1  | q8_0 (none) |   1169 |  30s | N-gram            N=12 M=12 min=1 (73%) |  1024/512 |                   |

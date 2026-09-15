@@ -22,6 +22,11 @@
 | Qwen3.8-27B-UD-Q2_K_XL_unsloth.gguf                        |  9.2 | ❌ It changed the CHANGELOG for the test PR |
 | Qwen3.8-27B-Q3_K_S_unsloth.gguf                            | 11.7 | ❌ It changed the CHANGELOG for the test PR |
 | Qwen3.8-27B-UD-IQ3_S_unsloth.gguf                          | 11.2 |                          |
+| Qwen3.8-27B-IQ3_XS_ukisai.gguf                             | 12.1 |                          |
+
+## Qwen3.8-27B-IQ3_XS_ukisai.gguf                            
+https://huggingface.co/ukisai/Swift-Qwen3.8-27B-GGUF 
+
 
 ## ✔️ Uncensored-IQ3_M (orcarouter)
 Qwen3.8-27B-Uncensored-IQ3_M_orcarouter.gguf
@@ -113,6 +118,29 @@ It changed the CHANGELOG for the test PR
 
 ```bash
 
+model=Qwen3.8-27B-IQ3_XS_ukisai.gguf
+ctx_k=68
+gpu_layers=99
+cpu_moe=0
+quant=q8_0
+spec=draft-mtp
+draft_model=none
+predict_token=1/4
+ngram_values=12/8
+jinja=0
+batch=1024
+ubatch=1024
+_test_model
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                  | Batch/Ub. | Note              |
+| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | --------------------------------------- | --------- |------------------ |
+|  32 t/s |  80 k |   0 | 66/66 | 15.7 | 11.4/0.1  | q8_0 (q4_0) |    568 |  18s | MTP        min=1 max=3 p_min=0.20 (93%) |  1024/512 | R: medium         |
+|  43 t/s |  64 k |   0 | 66/66 | 15.6 | 11.4/0.1  | q8_0 (q8_0) |    568 |  13s | MTP        min=1 max=5 p_min=0.20 (87%) |  1024/512 | R: medium         |
+|  43 t/s |  64 k |   0 | 66/66 | 15.4 | 11.4/0.1  | q8_0 (q8_0) |    568 |  13s | MTP        min=1 max=4 p_min=0.20 (89%) |  1024/512 | R: medium         |
+|  43 t/s |  64 k |   0 | 66/66 | 15.4 | 11.4/0.1  | q8_0 (q4_0) |    568 |  13s | MTP        min=1 max=4 p_min=0.20 (89%) |  1024/512 | R: medium         |
+|  39 t/s |  64 k |   0 | 66/66 | 15.2 | 11.4/0.1  | q8_0 (q4_0) |    568 |  15s | MTP        min=1 max=3 p_min=0.20 (93%) |  1024/512 | R: medium         |
+|  39 t/s |  64 k |   0 | 66/66 | 15.3 | 11.4/0.1  | q8_0 (q8_0) |    568 |  15s | MTP        min=1 max=3 p_min=0.20 (92%) |  1024/512 | R: medium         | + ngram
+|  39 t/s |  64 k |   0 | 66/66 | 15.2 | 11.4/0.1  | q8_0 (q4_0) |    568 |  14s | MTP        min=1 max=3 p_min=0.20 (93%) |  1024/512 | R: medium         |
 
 model=Qwen3.8-27B-Uncensored-IQ3_M_orcarouter.gguf
 ctx_k=64
@@ -301,17 +329,17 @@ ubatch=256
 _test_model
 
 model=Qwen3.8-27B-Abliterated-IQ4-MIX-MTP_finex666.gguf
-ctx_k=64
+ctx_k=60
 gpu_layers=99
 cpu_moe=0
 quant=q4_0
 spec=draft-mtp
 draft_model=none
-predict_token=1/6
+predict_token=1/3
 ngram_values=none
 jinja=0
 batch=1024
-ubatch=256
+ubatch=512
 _test_model
 
 | Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                  | Batch/Ub. | Note              |

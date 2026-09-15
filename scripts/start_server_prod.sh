@@ -35,7 +35,7 @@ args=(
     --cache-reuse 64 \
 
     # EXPERIMENTAL for 80k of Qwen3.8 27B
-    --ctx-checkpoints 4 --checkpoint-min-step 16384 \
+    #--ctx-checkpoints 4 --checkpoint-min-step 16384 \
 
     #--hip-fa-force-vec on \
 

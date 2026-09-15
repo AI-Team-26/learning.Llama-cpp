@@ -75,6 +75,31 @@ models:
 
 ### Qwen 3.8 27B ###
 
+  Qwen3.8-27B-IQ3_XS_ulisai_64k:
+    file: Qwen3.8-27B-IQ3_XS_ukisai.gguf
+    ctx_k: 64
+    gpu_layers: 99
+    cpu_moe: 0
+    quant: q8_0
+    batch: 2048
+    ubatch: 1024
+    spec_type: draft-mtp
+    spec_draft_n_min: 1
+    spec_draft_n_max: 4
+    jinja: 0
+    pi_agent_model: >
+      { 
+         "_test": "?",
+         "_speed": "? t/s",
+          "id": "Qwen3.8-27B-IQ3_XS_ulisai_64k",
+          "name": "Qwen 3.8 27B IQ3_XS (UkisAI) [64k]",
+          "_contextWindow": 69632,
+          "contextWindow": 65536,
+          "maxTokens": 8192,
+          "reasoning": true,
+          "input": [ "text" ]
+      },
+
   Qwen3.8-27B-abliterated-UD-IQ4_XS_huihui_64k:
     file: Qwen3.8-27B-abliterated-UD-IQ4_XS_huihui.gguf
     ctx_k: 64
@@ -196,15 +221,15 @@ models:
 
   Qwen3.8-27B-Abliterated-IQ4-MIX-MTP_finex666_[64k]:
     file: Qwen3.8-27B-Abliterated-IQ4-MIX-MTP_finex666.gguf
-    ctx_k: 64
+    ctx_k: 56
     gpu_layers: 99
     cpu_moe: 0
     quant: q4_0
     batch: 1024
-    ubatch: 512
+    ubatch: 1024
     spec_type: draft-mtp
     spec_draft_n_min: 1
-    spec_draft_n_max: 4
+    spec_draft_n_max: 3
     jinja: 0
     pi_agent_model: >
       { 
@@ -212,7 +237,7 @@ models:
          "_speed": "",
           "id": "Qwen3.8-27B-Abliterated-IQ4-MIX-MTP_finex666_[64k]",
           "name": "Qwen3.8-27B Abliterated IQ4-MIX-MTP (finex666)[64k]",
-          "contextWindow": 65536,
+          "contextWindow": 60000,
           "maxTokens": 8192,
           "reasoning": true,
           "input": [ "text"]
@@ -496,7 +521,6 @@ models:
          "_test": "?",
          "_speed": "? t/s",
           "id": "Qwen3.6-27B-IQ4_XS_unsloth.gguf",
-          "alias": "Unsloth/Qwen3.6 27B IQ4_XS [64k]",
           "name": "Qwen3.6 27B IQ4_XS (Unsloth) 64k",
           "contextWindow": 65536,
           "maxTokens": 4096,
@@ -535,7 +559,8 @@ models:
     quant: q8_0
     batch: 1024
     ubatch: 512
-    spec_type: none
+    spec_type: ngram-simple
+    ngram_values: 12/8
     jinja: 0
     pi_agent_model: >
       { 
@@ -546,7 +571,7 @@ models:
           "contextWindow": 98304,
           "maxTokens": 8192,
           "reasoning": true,
-          "input": [ "text", "image" ]
+          "input": [ "text" ]
       },
   Qwen_3.6_28b_reap_20_(barozp)_96k_Q8_NGRAM_16_16:
     file: Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf
