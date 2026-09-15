@@ -1,3 +1,7 @@
+// TODO(feat/sharpyaml-swap): replace YamlDotNet with SharpYaml.
+// Use YamlSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower },
+// drop all [YamlMember] aliases from ModelConfig except UBatch
+// ([JsonPropertyName("ubatch")], since STJ snake_case yields "u_batch").
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 
