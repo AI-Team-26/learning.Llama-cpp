@@ -20,8 +20,9 @@ public sealed class MainForm : Form
     private readonly Button _configureButton = new()
     {
         Text = "\u2699 Configure",
-        AutoSize = true,
+        Width = 100,
         Visible = false,
+        FlatStyle = FlatStyle.Standard,
     };
     private readonly TextBox _logBox = new()
     {
