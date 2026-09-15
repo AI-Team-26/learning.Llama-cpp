@@ -39,10 +39,17 @@ public sealed class MainForm : Form
         MinimumSize = new Size(700, 450);
         Icon = LoadAppIcon();
 
+        // Parent panel for all top content (deterministic stacking)
+        var headerPanel = new Panel
+        {
+            Dock = DockStyle.Top,
+            AutoSize = true,
+            Padding = new Padding(0),
+        };
+
         // Top bar: buttons + status
         var topBar = new FlowLayoutPanel
         {
-            Dock = DockStyle.Top,
             Height = 32,
             FlowDirection = System.Windows.Forms.FlowDirection.LeftToRight,
             Padding = new Padding(8),
@@ -58,12 +65,14 @@ public sealed class MainForm : Form
         // Warning row (below top bar)
         var warningRow = new FlowLayoutPanel
         {
-            Dock = DockStyle.Top,
             Height = 24,
             FlowDirection = System.Windows.Forms.FlowDirection.LeftToRight,
             Padding = new Padding(8, 0, 0, 0),
         };
         warningRow.Controls.Add(_warningLabel);
+
+        headerPanel.Controls.Add(topBar);
+        headerPanel.Controls.Add(warningRow);
 
         // Main layout
         _modelsList.Dock = DockStyle.Fill;
@@ -77,8 +86,8 @@ public sealed class MainForm : Form
 
         Controls.Add(modelsSplitter);
         Controls.Add(logHost);
-        Controls.Add(warningRow);
-        Controls.Add(topBar);
+        Controls.Add(headerPanel);
+        Controls.Add(_modelsList);
 
         _configureButton.Click += OnConfigureClick;
 
