@@ -163,6 +163,15 @@ public sealed class MainForm : Form
 
     private void RunFirstRunWizard()
     {
+        MessageBox.Show(
+            this,
+            "This app needs to know where your llama.cpp binaries are installed.\n"
+            + "Please select the folder that contains 'llama-server.exe'.\n\n"
+            + "You can find it in the zip you downloaded from https://github.com/ggml-org/llama.cpp",
+            "Llama Server — First Setup",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Information);
+
         var dlg = new FolderBrowserDialog();
         dlg.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
 
