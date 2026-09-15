@@ -557,10 +557,12 @@ models:
     gpu_layers: 99
     cpu_moe: 4
     quant: q8_0
-    batch: 1024
-    ubatch: 512
+    batch: 2048
+    ubatch: 1024
     spec_type: ngram-simple
-    ngram_values: 12/8
+    spec_ngram_simple_size_n: 12
+    spec_ngram_simple_size_m: 10
+    spec_ngram_simple_min_hits: 1
     jinja: 0
     pi_agent_model: >
       { 
@@ -579,8 +581,8 @@ models:
     gpu_layers: 99
     cpu_moe: 4
     quant: q8_0
-    batch: 1024
-    ubatch: 512
+    batch: 2048
+    ubatch: 1024
     spec_type: ngram-simple
     spec_ngram_simple_size_n: 16
     spec_ngram_simple_size_m: 16
@@ -590,12 +592,12 @@ models:
       { 
          "_test": "Really good",
          "_speed": "35 t/s",
-          "id": "Qwen_3.6_28b_reap_20_(barozp)_96k_Q8",
+          "id": "Qwen_3.6_28b_reap_20_(barozp)_96k_Q8_NGRAM_16_16",
           "name": "Qwen 3.6 28B REAP20 (barozp) [96k] Q8",
           "contextWindow": 98304,
           "maxTokens": 8192,
           "reasoning": true,
-          "input": [ "text", "image" ]
+          "input": [ "text" ]
       },
 
   Qwen_3.6_35B_A3B_Genesis_v3_APEX_(luffythefox)_128k:

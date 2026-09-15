@@ -234,24 +234,27 @@ gpu_layers=99
 cpu_moe=4
 quant=q8_0
 spec=ngram-simple
-ngram_values=12/10
+ngram_values=10/8
 #spec=none
 draft_model=none
 predict_token=0/0
 jinja=0
 batch=1024
-ubatch=512
+ubatch=1024
 _test_model
 
 | Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                  | Batch/Ub. | Note              |
 | ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | --------------------------------------- | --------- |------------------ |
+
+|  46 t/s |  96 k |   4 | 41/41 | 15.7 | 14.2/0.2  | q8_0 (none) |    812 |  18s | N-gram                  N=12 M=10 min=1 | 1024/1024 |                   |
+|  45 t/s |  96 k |   4 | 41/41 | 15.7 | 14.2/0.2  | q8_0 (none) |    812 |  18s | N-gram                   N=12 M=8 min=1 | 1024/1024 |                   |
+|  44 t/s |  96 k |   4 | 41/41 | 15.7 | 14.2/0.2  | q8_0 (none) |    812 |  19s | N-gram                   N=10 M=8 min=1 | 1024/1024 |                   |
 
 |  46 t/s |  96 k |   4 | 41/41 | 15.7 | 14.2/0.1  | q8_0 (none) |   1152 |  25s | N-gram                  N=16 M=12 min=1 |  1024/512 |                   |
 |  45 t/s |  96 k |   4 | 41/41 | 15.7 | 14.2/0.1  | q8_0 (none) |   1152 |  26s | N-gram                   N=12 M=8 min=1 |  1024/512 |                   |
 |  45 t/s |  96 k |   4 | 41/41 | 15.7 | 14.2/0.1  | q8_0 (none) |   1152 |  25s | N-gram                   N=12 M=8 min=1 |  1024/512 |                   |
 |  41 t/s |  96 k |   4 | 41/41 | 15.7 | 14.2/0.1  | q8_0 (none) |   1152 |  27s | none                                 -- |  1024/512 |                   |
 |  40 t/s |  96 k |   4 | 41/41 | 15.7 | 14.2/0.1  | q8_0 (none) |   1152 |  29s | N-gram            N=12 M=12 min=1 (74%) |  1024/512 |                   |
-
 
 |  45 t/s |  96 k |   4 | 41/41 | 15.7 | 14.2/0.1  | q8_0 (none) |   1224 |  27s | N-gram                  N=16 M=24 min=1 |  1024/512 |                   |
 |  45 t/s |  96 k |   4 | 41/41 | 15.7 | 14.2/0.1  | q8_0 (none) |   1224 |  27s | N-gram                  N=16 M=16 min=1 |  1024/512 |                   |
