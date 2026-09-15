@@ -10,26 +10,21 @@ public sealed class MainForm : Form
     private readonly Button _startButton = new() { Text = "Start", AutoSize = true };
     private readonly Button _stopButton = new() { Text = "Stop", AutoSize = true, Enabled = false };
     private readonly Label _statusLabel = new() { AutoSize = true, Text = "Idle" };
-    private readonly Label _warningLabel = new()
-    {
-        AutoSize = true,
-        ForeColor = Color.DarkOrange,
-        Font = new Font(FontFamily.GenericSansSerif, 9f, FontStyle.Bold),
-        Visible = false,
-    };
-    private readonly Button _configureButton = new()
-    {
-        Text = "\u2699 Configure",
-        Width = 100,
-        Visible = false,
-        FlatStyle = FlatStyle.Standard,
-    };
     private readonly TextBox _logBox = new()
     {
         Multiline = true,
         ReadOnly = true,
         ScrollBars = ScrollBars.Vertical,
         Font = new Font(FontFamily.GenericMonospace, 9f),
+    };
+
+    // Warning label — always visible when config incomplete
+    private readonly Label _warningLabel = new()
+    {
+        AutoSize = true,
+        ForeColor = Color.DarkRed,
+        Font = new Font(FontFamily.GenericSansSerif, 9f, FontStyle.Bold),
+        Visible = false,
     };
 
     private readonly List<string> _modelIds = [];
@@ -43,37 +38,40 @@ public sealed class MainForm : Form
         MinimumSize = new Size(700, 450);
         Icon = LoadAppIcon();
 
-        // Row 1: buttons + status
-        var row1 = new FlowLayoutPanel
+        // Menu bar
+        var menu = new MenuStrip();
+        var fileMenu = new ToolStripMenuItem("File");
+        var configureItem = new ToolStripMenuItem("\u2699 &Configure...") { ShortcutKeys = Keys.Control | Keys.C };
+        var exitItem = new ToolStripMenuItem("E&xit") { ShortcutKeys = Keys.Alt | Keys.F4 };
+        configureItem.Click += OnConfigureClick;
+        exitItem.Click += (_, _) => Close();
+        fileMenu.DropDownItems.AddRange([configureItem, new ToolStripSeparator(), exitItem]);
+        menu.Items.Add(fileMenu);
+        Controls.Add(menu);
+
+        // Top bar: buttons + status
+        var topBar = new FlowLayoutPanel
         {
             Dock = DockStyle.Top,
             Height = 32,
             FlowDirection = System.Windows.Forms.FlowDirection.LeftToRight,
             Padding = new Padding(8),
         };
-        row1.Controls.Add(_startButton);
-        row1.Controls.Add(new Panel { Width = 4 });
-        row1.Controls.Add(_stopButton);
-        row1.Controls.Add(new Panel { Width = 16 });
-        row1.Controls.Add(_statusLabel);
+        topBar.Controls.Add(_startButton);
+        topBar.Controls.Add(new Panel { Width = 4 });
+        topBar.Controls.Add(_stopButton);
+        topBar.Controls.Add(new Panel { Width = 16 });
+        topBar.Controls.Add(_statusLabel);
 
-        // Row 2: warning + configure (auto-spaced, no overlap)
-        var row2 = new FlowLayoutPanel
+        // Warning row (below top bar)
+        var warningRow = new FlowLayoutPanel
         {
             Dock = DockStyle.Top,
             Height = 24,
             FlowDirection = System.Windows.Forms.FlowDirection.LeftToRight,
             Padding = new Padding(8, 0, 0, 0),
         };
-        row2.Controls.Add(_warningLabel);
-        row2.Controls.Add(new Panel { Width = 8 });
-        row2.Controls.Add(_configureButton);
-
-        var topPanel = new Panel { Dock = DockStyle.Top, Height = 56, Padding = new Padding(0) };
-        topPanel.Controls.Add(row1);
-        topPanel.Controls.Add(row2);
-        row1.Location = new Point(0, 0);
-        row2.Location = new Point(0, 32);
+        warningRow.Controls.Add(_warningLabel);
 
         // Main layout
         _modelsList.Dock = DockStyle.Fill;
@@ -87,10 +85,8 @@ public sealed class MainForm : Form
 
         Controls.Add(modelsSplitter);
         Controls.Add(logHost);
-        Controls.Add(topPanel);
-        Controls.Add(_modelsList);
-
-        _configureButton.Click += OnConfigureClick;
+        Controls.Add(warningRow);
+        Controls.Add(topBar);
 
         _config = AppConfig.Load(AppConfig.DefaultConfigPath);
 
@@ -118,16 +114,11 @@ public sealed class MainForm : Form
 
     private void ShowWarning(string message)
     {
-        _warningLabel.Text = $"\u26A0 {message}";
+        _warningLabel.Text = "\u26A0 " + message;
         _warningLabel.Visible = true;
-        _configureButton.Visible = true;
     }
 
-    private void ClearWarning()
-    {
-        _warningLabel.Visible = false;
-        _configureButton.Visible = false;
-    }
+    private void ClearWarning() => _warningLabel.Visible = false;
 
     private void SetStatus(string text) => _statusLabel.Text = text;
 
@@ -187,11 +178,12 @@ public sealed class MainForm : Form
 
     private void OnConfigureClick(object? sender, EventArgs e)
     {
-        using var dlg = new ConfigurationForm(_config);
-        if (dlg.ShowDialog(this) == DialogResult.OK)
+        Visible = false;
+        Application.Run(new ConfigurationForm(_config, () =>
         {
-            LoadModels(); // reload with updated config
-        }
+            Visible = true;
+            LoadModels();
+        }));
     }
 
     private void DiscoverLlamaBins()
@@ -236,7 +228,7 @@ public sealed class MainForm : Form
         }
 
         ShowWarning("The configuration of the app is not complete");
-        SetStatus("llama-server.exe not discovered — click Configure to set it up");
+        SetStatus("llama-server.exe not discovered — use File > Configure to set it up");
         _startButton.Enabled = false;
     }
 

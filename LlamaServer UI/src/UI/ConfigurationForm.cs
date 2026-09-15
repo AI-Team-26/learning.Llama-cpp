@@ -2,23 +2,25 @@ using LlamaServerCore;
 
 namespace LlamaServerUI;
 
-/// <summary>Standalone configuration dialog.</summary>
+/// <summary>Standalone configuration form that replaces the main window.</summary>
 public sealed class ConfigurationForm : Form
 {
     private readonly AppConfig _config;
+    private readonly Action _onRestored;
     private readonly TextBox _txtBins = new();
-    private readonly Button _btnBrowseBins = new() { Text = "\uF07A Browse", Width = 70 };
+    private readonly Button _btnBrowseBins = new() { Text = "Browse", Width = 70 };
     private readonly TextBox _txtGguf = new();
-    private readonly Button _btnBrowseGguf = new() { Text = "\uF07A Browse", Width = 70 };
+    private readonly Button _btnBrowseGguf = new() { Text = "Browse", Width = 70 };
     private readonly NumericUpDown _numPort = new() { Minimum = 1, Maximum = 65535, Value = 8001 };
     private readonly TextBox _txtYaml = new();
-    private readonly Button _btnBrowseYaml = new() { Text = "\uF07A Browse", Width = 70 };
+    private readonly Button _btnBrowseYaml = new() { Text = "Browse", Width = 70 };
     private readonly Button _btnSave = new() { Text = "Save", Width = 80 };
     private readonly Button _btnCancel = new() { Text = "Cancel", Width = 80 };
 
-    public ConfigurationForm(AppConfig config)
+    public ConfigurationForm(AppConfig config, Action onRestored)
     {
         _config = config;
+        _onRestored = onRestored;
         Text = "Configuration";
         StartPosition = FormStartPosition.CenterScreen;
         FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -53,7 +55,7 @@ public sealed class ConfigurationForm : Form
 
             var lblC = new Label { Text = label, AutoSize = true };
             var spacer = new Panel();
-            var browseBtn = new Button { Text = "\uF07A Browse", Width = 70 };
+            var browseBtn = new Button { Text = "Browse", Width = 70 };
             browseBtn.Click += (_, _) =>
             {
                 if (isFile)
@@ -120,7 +122,7 @@ public sealed class ConfigurationForm : Form
         _txtYaml.Text = _config.ModelsConfigPath;
 
         _btnSave.Click += OnSaveClick;
-        _btnCancel.Click += (_, _) => DialogResult = DialogResult.Cancel;
+        _btnCancel.Click += (_, _) => Close();
     }
 
     private void OnSaveClick(object? sender, EventArgs e)
@@ -130,7 +132,7 @@ public sealed class ConfigurationForm : Form
         _config.Port = (int)_numPort.Value;
         _config.ModelsConfigPath = _txtYaml.Text.Trim();
         _config.Save(AppConfig.DefaultConfigPath);
-        DialogResult = DialogResult.OK;
+        _onRestored();
         Close();
     }
 }
