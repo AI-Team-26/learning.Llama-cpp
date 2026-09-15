@@ -1,5 +1,8 @@
 using YamlDotNet.Serialization;
 
+// TODO(feat/sharpyaml-swap): when moving to SharpYaml (see ModelsConfigLoader),
+// remove these [YamlMember] aliases and rely on SnakeCaseLower naming policy;
+// keep only [JsonPropertyName("ubatch")] on UBatch.
 namespace LlamaServerCore;
 
 // One entry of the .models map in models_config.yaml.
