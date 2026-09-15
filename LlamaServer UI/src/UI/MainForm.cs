@@ -64,10 +64,10 @@ public sealed class MainForm : Form
 
         _config = AppConfig.Load(AppConfig.DefaultConfigPath);
 
-        // First-run wizard: ask user to pick the llama.cpp bin folder.
-        if (!File.Exists(AppConfig.DefaultConfigPath))
+        // Auto-discover llama-server.exe on first run.
+        if (_config.LlamaBinsFolder.Length == 0)
         {
-            RunFirstRunWizard();
+            DiscoverLlamaBins();
         }
 
         LoadModels();
@@ -161,44 +161,53 @@ public sealed class MainForm : Form
 
     private void ClearWarning() => _warningLabel.Visible = false;
 
-    private void RunFirstRunWizard()
+    private void DiscoverLlamaBins()
     {
-        MessageBox.Show(
-            this,
-            "This app needs to know where your llama.cpp binaries are installed.\n"
-            + "Please select the folder that contains 'llama-server.exe'.\n\n"
-            + "You can find it in the zip you downloaded from https://github.com/ggml-org/llama.cpp",
-            "Llama Server — First Setup",
-            MessageBoxButtons.OK,
-            MessageBoxIcon.Information);
-
-        var dlg = new FolderBrowserDialog();
-        dlg.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
-
-        while (true)
+        var candidates = new[]
         {
-            if (dlg.ShowDialog(this) != DialogResult.OK)
+            // Common download locations for llama.cpp zips
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "llama-b*-bin-win-cuda*"),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "llama-b*-bin-win-cuda*"),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "llama-b*-bin-win-cuda*"),
+        };
+
+        foreach (var pattern in candidates)
+        {
+            try
             {
-                _startButton.Enabled = false;
-                SetStatus("Configuration skipped");
+                var dir = Directory.GetParent(pattern);
+                if (dir is null) continue;
+                foreach (var match in dir.GetDirectories(Path.GetFileName(pattern)))
+                {
+                    var exe = Path.Combine(match.FullName, "llama-server.exe");
+                    if (File.Exists(exe))
+                    {
+                        _config.LlamaBinsFolder = match.FullName;
+                        _config.Save(AppConfig.DefaultConfigPath);
+                        return;
+                    }
+                }
+            }
+            catch { /* skip unreadable dirs */ }
+        }
+
+        // Also check PATH
+        var pathDirs = Environment.GetEnvironmentVariable("PATH")?.Split(Path.PathSeparator) ?? Array.Empty<string>();
+        foreach (var p in pathDirs)
+        {
+            var exe = Path.Combine(p, "llama-server.exe");
+            if (File.Exists(exe))
+            {
+                _config.LlamaBinsFolder = p;
+                _config.Save(AppConfig.DefaultConfigPath);
                 return;
             }
-
-            var serverExe = Path.Combine(dlg.SelectedPath, "llama-server.exe");
-            if (File.Exists(serverExe))
-            {
-                _config.LlamaBinsFolder = dlg.SelectedPath;
-                _config.Save(AppConfig.DefaultConfigPath);
-                break;
-            }
-
-            MessageBox.Show(
-                this,
-                $"The selected folder does not contain llama-server.exe.\n\nPlease select the correct folder.",
-                "Invalid Folder",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
         }
+
+        // Nothing found — show warning label instead of popup
+        ShowWarning("llama-server.exe not found — set LlamaBinsFolder in config.json manually");
+        SetStatus("llama-server.exe not discovered");
+        _startButton.Enabled = false;
     }
 
     private void OnStopClick(object? sender, EventArgs e)
