@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Text.Json;
 using LlamaServerCore;
 
 namespace LlamaServerUI;
@@ -9,6 +10,13 @@ public sealed class MainForm : Form
     private readonly Button _startButton = new() { Text = "Start", AutoSize = true };
     private readonly Button _stopButton = new() { Text = "Stop", AutoSize = true, Enabled = false };
     private readonly Label _statusLabel = new() { AutoSize = true, Text = "Idle" };
+    private readonly Label _warningLabel = new()
+    {
+        AutoSize = true,
+        ForeColor = Color.DarkOrange,
+        Font = new Font(FontFamily.GenericSansSerif, 9f, FontStyle.Bold),
+        Visible = false,
+    };
     private readonly TextBox _logBox = new()
     {
         Multiline = true,
@@ -28,13 +36,15 @@ public sealed class MainForm : Form
         MinimumSize = new Size(700, 450);
         Icon = LoadAppIcon();
 
-        var topPanel = new Panel { Dock = DockStyle.Top, Height = 36, Padding = new Padding(8) };
+        var topPanel = new Panel { Dock = DockStyle.Top, Height = 56, Padding = new Padding(8) };
         topPanel.Controls.Add(_startButton);
         topPanel.Controls.Add(_stopButton);
         topPanel.Controls.Add(_statusLabel);
+        topPanel.Controls.Add(_warningLabel);
         _startButton.Location = new Point(8, 8);
         _stopButton.Location = new Point(_startButton.Right + 8, 8);
         _statusLabel.Location = new Point(_stopButton.Right + 16, 11);
+        _warningLabel.Location = new Point(8, 34);
 
         _modelsList.Dock = DockStyle.Fill;
         _modelsList.SelectionMode = SelectionMode.One;
@@ -53,6 +63,13 @@ public sealed class MainForm : Form
         _stopButton.Click += OnStopClick;
 
         _config = AppConfig.Load(AppConfig.DefaultConfigPath);
+
+        // First-run wizard: ask user to pick the llama.cpp bin folder.
+        if (!File.Exists(AppConfig.DefaultConfigPath))
+        {
+            RunFirstRunWizard();
+        }
+
         LoadModels();
     }
 
@@ -92,12 +109,27 @@ public sealed class MainForm : Form
                 _modelsList.SelectedIndex = 0;
             }
 
+            ClearWarning();
             SetStatus($"Loaded {_modelIds.Count} model(s) from config");
+        }
+       catch (FileNotFoundException)
+        {
+            ShowWarning("Models config not found — check ModelsConfigPath in config.json");
+            SetStatus("Configuration incomplete");
+        }
+       catch (JsonException ex)
+        {
+            ShowWarning($"Invalid config.json — {ex.Message}");
+            SetStatus("Configuration error");
+        }
+       catch (InvalidOperationException ex)
+        {
+            ShowWarning(ex.Message);
+            SetStatus("Configuration error");
         }
        catch (Exception ex)
         {
-            SetStatus($"Error: {ex.Message}");
-            MessageBox.Show(this, ex.Message, "Llama Server", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            SetStatus($"Unexpected error: {ex.Message}");
         }
     }
 
@@ -119,6 +151,45 @@ public sealed class MainForm : Form
         }
         SetStatus($"Starting {id}...");
         AppendLog($"[ui] start requested for '{id}' (logic pending)");
+    }
+
+    private void ShowWarning(string message)
+    {
+        _warningLabel.Text = $"\u26A0 {message}";
+        _warningLabel.Visible = true;
+    }
+
+    private void ClearWarning() => _warningLabel.Visible = false;
+
+    private void RunFirstRunWizard()
+    {
+        var dlg = new FolderBrowserDialog();
+        dlg.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+
+        while (true)
+        {
+            if (dlg.ShowDialog(this) != DialogResult.OK)
+            {
+                _startButton.Enabled = false;
+                SetStatus("Configuration skipped");
+                return;
+            }
+
+            var serverExe = Path.Combine(dlg.SelectedPath, "llama-server.exe");
+            if (File.Exists(serverExe))
+            {
+                _config.LlamaBinsFolder = dlg.SelectedPath;
+                _config.Save(AppConfig.DefaultConfigPath);
+                break;
+            }
+
+            MessageBox.Show(
+                this,
+                $"The selected folder does not contain llama-server.exe.\n\nPlease select the correct folder.",
+                "Invalid Folder",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+        }
     }
 
     private void OnStopClick(object? sender, EventArgs e)
