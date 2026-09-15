@@ -31,29 +31,6 @@ public sealed class MainForm : Form
         Font = new Font(FontFamily.GenericMonospace, 9f),
     };
 
-    // Config panel controls
-    private readonly Panel _configPanel = new()
-    {
-        Dock = DockStyle.Top,
-        Height = 0,
-        Padding = new Padding(8),
-        BackColor = Color.LightYellow,
-    };
-    private readonly Label _lblBins = new() { Text = "llama.cpp bin:", AutoSize = true };
-    private readonly TextBox _txtBins = new();
-    private readonly Button _btnBrowseBins = new() { Text = "\uF07A Browse", Width = 70 };
-    private readonly Label _lblGguf = new() { Text = "GGUF folder:", AutoSize = true };
-    private readonly TextBox _txtGguf = new();
-    private readonly Button _btnBrowseGguf = new() { Text = "\uF07A Browse", Width = 70 };
-    private readonly Label _lblPort = new() { Text = "Port:", AutoSize = true };
-    private readonly NumericUpDown _numPort = new() { Minimum = 1, Maximum = 65535, Value = 8001 };
-    private readonly Label _lblYaml = new() { Text = "Models config:", AutoSize = true };
-    private readonly TextBox _txtYaml = new();
-    private readonly Button _btnBrowseYaml = new() { Text = "\uF07A Browse", Width = 70 };
-    private readonly FlowLayoutPanel _btnRow = new() { FlowDirection = System.Windows.Forms.FlowDirection.TopDown, AutoSize = true, Padding = new Padding(0) };
-    private readonly Button _btnSaveConfig = new() { Text = "Save", Width = 80 };
-    private readonly Button _btnCancelConfig = new() { Text = "Cancel", Width = 80 };
-
     private readonly List<string> _modelIds = [];
     private readonly AppConfig _config;
 
@@ -65,68 +42,37 @@ public sealed class MainForm : Form
         MinimumSize = new Size(700, 450);
         Icon = LoadAppIcon();
 
-        var topPanel = new Panel { Dock = DockStyle.Top, Height = 56, Padding = new Padding(8) };
-        topPanel.Controls.Add(_startButton);
-        topPanel.Controls.Add(_stopButton);
-        topPanel.Controls.Add(_statusLabel);
-        topPanel.Controls.Add(_warningLabel);
-        topPanel.Controls.Add(_configureButton);
-        _startButton.Location = new Point(8, 8);
-        _stopButton.Location = new Point(_startButton.Right + 8, 8);
-        _statusLabel.Location = new Point(_stopButton.Right + 16, 11);
-        _warningLabel.Location = new Point(8, 34);
-        _configureButton.Location = new Point(_warningLabel.Right + 8, 34);
+        // Row 1: buttons + status
+        var row1 = new FlowLayoutPanel
+        {
+            Dock = DockStyle.Top,
+            Height = 32,
+            FlowDirection = System.Windows.Forms.FlowDirection.LeftToRight,
+            Padding = new Padding(8),
+        };
+        row1.Controls.Add(_startButton);
+        row1.Controls.Add(new Panel { Width = 4 });
+        row1.Controls.Add(_stopButton);
+        row1.Controls.Add(new Panel { Width = 16 });
+        row1.Controls.Add(_statusLabel);
 
-        // Config panel layout
-        var row1 = new TableLayoutPanel { ColumnCount = 4, RowCount = 1, AutoSize = true, Margin = new Padding(0, 0, 0, 6) };
-        row1.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 120));
-        row1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f));
-        row1.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 10));
-        row1.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 70));
-        row1.Controls.Add(_lblBins, 0, 0);
-        row1.Controls.Add(_txtBins, 1, 0);
-        row1.Controls.Add(new Control(), 2, 0);
-        row1.Controls.Add(_btnBrowseBins, 3, 0);
+        // Row 2: warning + configure (auto-spaced, no overlap)
+        var row2 = new FlowLayoutPanel
+        {
+            Dock = DockStyle.Top,
+            Height = 24,
+            FlowDirection = System.Windows.Forms.FlowDirection.LeftToRight,
+            Padding = new Padding(8, 0, 0, 0),
+        };
+        row2.Controls.Add(_warningLabel);
+        row2.Controls.Add(new Panel { Width = 8 });
+        row2.Controls.Add(_configureButton);
 
-        var row2 = new TableLayoutPanel { ColumnCount = 4, RowCount = 1, AutoSize = true, Margin = new Padding(0, 0, 0, 6) };
-        row2.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 120));
-        row2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f));
-        row2.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 10));
-        row2.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 70));
-        row2.Controls.Add(_lblGguf, 0, 0);
-        row2.Controls.Add(_txtGguf, 1, 0);
-        row2.Controls.Add(new Control(), 2, 0);
-        row2.Controls.Add(_btnBrowseGguf, 3, 0);
-
-        var row3 = new TableLayoutPanel { ColumnCount = 4, RowCount = 1, AutoSize = true, Margin = new Padding(0, 0, 0, 6) };
-        row3.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 120));
-        row3.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f));
-        row3.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 10));
-        row3.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 70));
-        row3.Controls.Add(_lblPort, 0, 0);
-        row3.Controls.Add(_numPort, 1, 0);
-        row3.Controls.Add(new Control(), 2, 0);
-        row3.Controls.Add(new Control(), 3, 0);
-
-        var row4 = new TableLayoutPanel { ColumnCount = 4, RowCount = 1, AutoSize = true, Margin = new Padding(0, 0, 0, 6) };
-        row4.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 120));
-        row4.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f));
-        row4.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 10));
-        row4.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 70));
-        row4.Controls.Add(_lblYaml, 0, 0);
-        row4.Controls.Add(_txtYaml, 1, 0);
-        row4.Controls.Add(new Control(), 2, 0);
-        row4.Controls.Add(_btnBrowseYaml, 3, 0);
-
-        _btnRow.Controls.Add(_btnSaveConfig);
-        _btnRow.Controls.Add(new Panel { Width = 8 });
-        _btnRow.Controls.Add(_btnCancelConfig);
-
-        _configPanel.Controls.Add(row1);
-        _configPanel.Controls.Add(row2);
-        _configPanel.Controls.Add(row3);
-        _configPanel.Controls.Add(row4);
-        _configPanel.Controls.Add(_btnRow);
+        var topPanel = new Panel { Dock = DockStyle.Top, Height = 56, Padding = new Padding(0) };
+        topPanel.Controls.Add(row1);
+        topPanel.Controls.Add(row2);
+        row1.Location = new Point(0, 0);
+        row2.Location = new Point(0, 32);
 
         // Main layout
         _modelsList.Dock = DockStyle.Fill;
@@ -141,15 +87,9 @@ public sealed class MainForm : Form
         Controls.Add(modelsSplitter);
         Controls.Add(logHost);
         Controls.Add(topPanel);
-        Controls.Add(_configPanel);
         Controls.Add(_modelsList);
 
         _configureButton.Click += OnConfigureClick;
-        _btnBrowseBins.Click += (_, _) => BrowseFolder(_txtBins);
-        _btnBrowseGguf.Click += (_, _) => BrowseFolder(_txtGguf);
-        _btnBrowseYaml.Click += (_, _) => BrowseFile(_txtYaml, "YAML files|*.yaml;*.yml");
-        _btnSaveConfig.Click += OnSaveConfigClick;
-        _btnCancelConfig.Click += (_, _) => HideConfigPanel();
 
         _config = AppConfig.Load(AppConfig.DefaultConfigPath);
 
@@ -242,45 +182,15 @@ public sealed class MainForm : Form
 
     private void AppendLog(string line) => _logBox.AppendText(line + Environment.NewLine);
 
-    // --- Config panel ---
+    // --- Configuration dialog ---
 
-    private void ShowConfigPanel()
+    private void OnConfigureClick(object? sender, EventArgs e)
     {
-        _txtBins.Text = _config.LlamaBinsFolder;
-        _txtGguf.Text = _config.GgufFolder;
-        _numPort.Value = _config.Port;
-        _txtYaml.Text = _config.ModelsConfigPath;
-        _configPanel.Height = 260;
-    }
-
-    private void HideConfigPanel() => _configPanel.Height = 0;
-
-    private void OnConfigureClick(object? sender, EventArgs e) => ShowConfigPanel();
-
-    private void OnSaveConfigClick(object? sender, EventArgs e)
-    {
-        _config.LlamaBinsFolder = _txtBins.Text.Trim();
-        _config.GgufFolder = _txtGguf.Text.Trim();
-        _config.Port = (int)_numPort.Value;
-        _config.ModelsConfigPath = _txtYaml.Text.Trim();
-        _config.Save(AppConfig.DefaultConfigPath);
-        HideConfigPanel();
-        LoadModels(); // reload models with new config
-    }
-
-    private void BrowseFolder(TextBox target)
-    {
-        using var dlg = new FolderBrowserDialog();
-        dlg.InitialDirectory = target.Text.Length > 0 ? target.Text : Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+        using var dlg = new ConfigurationForm(_config);
         if (dlg.ShowDialog(this) == DialogResult.OK)
-            target.Text = dlg.SelectedPath;
-    }
-
-    private void BrowseFile(TextBox target, string filter)
-    {
-        using var dlg = new OpenFileDialog { Filter = filter };
-        if (dlg.ShowDialog(this) == DialogResult.OK)
-            target.Text = dlg.FileName;
+        {
+            LoadModels(); // reload with updated config
+        }
     }
 
     private void DiscoverLlamaBins()
