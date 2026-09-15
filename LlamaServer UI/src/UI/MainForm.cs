@@ -17,6 +17,12 @@ public sealed class MainForm : Form
         Font = new Font(FontFamily.GenericSansSerif, 9f, FontStyle.Bold),
         Visible = false,
     };
+    private readonly Button _configureButton = new()
+    {
+        Text = "\u2699 Configure",
+        AutoSize = true,
+        Visible = false,
+    };
     private readonly TextBox _logBox = new()
     {
         Multiline = true,
@@ -24,6 +30,29 @@ public sealed class MainForm : Form
         ScrollBars = ScrollBars.Vertical,
         Font = new Font(FontFamily.GenericMonospace, 9f),
     };
+
+    // Config panel controls
+    private readonly Panel _configPanel = new()
+    {
+        Dock = DockStyle.Top,
+        Height = 0,
+        Padding = new Padding(8),
+        BackColor = Color.LightYellow,
+    };
+    private readonly Label _lblBins = new() { Text = "llama.cpp bin:", AutoSize = true };
+    private readonly TextBox _txtBins = new();
+    private readonly Button _btnBrowseBins = new() { Text = "\uF07A Browse", Width = 70 };
+    private readonly Label _lblGguf = new() { Text = "GGUF folder:", AutoSize = true };
+    private readonly TextBox _txtGguf = new();
+    private readonly Button _btnBrowseGguf = new() { Text = "\uF07A Browse", Width = 70 };
+    private readonly Label _lblPort = new() { Text = "Port:", AutoSize = true };
+    private readonly NumericUpDown _numPort = new() { Minimum = 1, Maximum = 65535, Value = 8001 };
+    private readonly Label _lblYaml = new() { Text = "Models config:", AutoSize = true };
+    private readonly TextBox _txtYaml = new();
+    private readonly Button _btnBrowseYaml = new() { Text = "\uF07A Browse", Width = 70 };
+    private readonly FlowLayoutPanel _btnRow = new() { FlowDirection = System.Windows.Forms.FlowDirection.TopDown, AutoSize = true, Padding = new Padding(0) };
+    private readonly Button _btnSaveConfig = new() { Text = "Save", Width = 80 };
+    private readonly Button _btnCancelConfig = new() { Text = "Cancel", Width = 80 };
 
     private readonly List<string> _modelIds = [];
     private readonly AppConfig _config;
@@ -41,11 +70,65 @@ public sealed class MainForm : Form
         topPanel.Controls.Add(_stopButton);
         topPanel.Controls.Add(_statusLabel);
         topPanel.Controls.Add(_warningLabel);
+        topPanel.Controls.Add(_configureButton);
         _startButton.Location = new Point(8, 8);
         _stopButton.Location = new Point(_startButton.Right + 8, 8);
         _statusLabel.Location = new Point(_stopButton.Right + 16, 11);
         _warningLabel.Location = new Point(8, 34);
+        _configureButton.Location = new Point(_warningLabel.Right + 8, 34);
 
+        // Config panel layout
+        var row1 = new TableLayoutPanel { ColumnCount = 4, RowCount = 1, AutoSize = true, Margin = new Padding(0, 0, 0, 6) };
+        row1.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 120));
+        row1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f));
+        row1.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 10));
+        row1.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 70));
+        row1.Controls.Add(_lblBins, 0, 0);
+        row1.Controls.Add(_txtBins, 1, 0);
+        row1.Controls.Add(new Control(), 2, 0);
+        row1.Controls.Add(_btnBrowseBins, 3, 0);
+
+        var row2 = new TableLayoutPanel { ColumnCount = 4, RowCount = 1, AutoSize = true, Margin = new Padding(0, 0, 0, 6) };
+        row2.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 120));
+        row2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f));
+        row2.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 10));
+        row2.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 70));
+        row2.Controls.Add(_lblGguf, 0, 0);
+        row2.Controls.Add(_txtGguf, 1, 0);
+        row2.Controls.Add(new Control(), 2, 0);
+        row2.Controls.Add(_btnBrowseGguf, 3, 0);
+
+        var row3 = new TableLayoutPanel { ColumnCount = 4, RowCount = 1, AutoSize = true, Margin = new Padding(0, 0, 0, 6) };
+        row3.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 120));
+        row3.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f));
+        row3.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 10));
+        row3.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 70));
+        row3.Controls.Add(_lblPort, 0, 0);
+        row3.Controls.Add(_numPort, 1, 0);
+        row3.Controls.Add(new Control(), 2, 0);
+        row3.Controls.Add(new Control(), 3, 0);
+
+        var row4 = new TableLayoutPanel { ColumnCount = 4, RowCount = 1, AutoSize = true, Margin = new Padding(0, 0, 0, 6) };
+        row4.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 120));
+        row4.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f));
+        row4.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 10));
+        row4.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 70));
+        row4.Controls.Add(_lblYaml, 0, 0);
+        row4.Controls.Add(_txtYaml, 1, 0);
+        row4.Controls.Add(new Control(), 2, 0);
+        row4.Controls.Add(_btnBrowseYaml, 3, 0);
+
+        _btnRow.Controls.Add(_btnSaveConfig);
+        _btnRow.Controls.Add(new Panel { Width = 8 });
+        _btnRow.Controls.Add(_btnCancelConfig);
+
+        _configPanel.Controls.Add(row1);
+        _configPanel.Controls.Add(row2);
+        _configPanel.Controls.Add(row3);
+        _configPanel.Controls.Add(row4);
+        _configPanel.Controls.Add(_btnRow);
+
+        // Main layout
         _modelsList.Dock = DockStyle.Fill;
         _modelsList.SelectionMode = SelectionMode.One;
 
@@ -58,9 +141,15 @@ public sealed class MainForm : Form
         Controls.Add(modelsSplitter);
         Controls.Add(logHost);
         Controls.Add(topPanel);
+        Controls.Add(_configPanel);
+        Controls.Add(_modelsList);
 
-        _startButton.Click += OnStartClick;
-        _stopButton.Click += OnStopClick;
+        _configureButton.Click += OnConfigureClick;
+        _btnBrowseBins.Click += (_, _) => BrowseFolder(_txtBins);
+        _btnBrowseGguf.Click += (_, _) => BrowseFolder(_txtGguf);
+        _btnBrowseYaml.Click += (_, _) => BrowseFile(_txtYaml, "YAML files|*.yaml;*.yml");
+        _btnSaveConfig.Click += OnSaveConfigClick;
+        _btnCancelConfig.Click += (_, _) => HideConfigPanel();
 
         _config = AppConfig.Load(AppConfig.DefaultConfigPath);
 
@@ -86,6 +175,21 @@ public sealed class MainForm : Form
         }
     }
 
+    private void ShowWarning(string message)
+    {
+        _warningLabel.Text = $"\u26A0 {message}";
+        _warningLabel.Visible = true;
+        _configureButton.Visible = true;
+    }
+
+    private void ClearWarning()
+    {
+        _warningLabel.Visible = false;
+        _configureButton.Visible = false;
+    }
+
+    private void SetStatus(string text) => _statusLabel.Text = text;
+
     private void LoadModels()
     {
         try
@@ -95,7 +199,7 @@ public sealed class MainForm : Form
             {
                 _modelIds.Add(id);
                 var exists = File.Exists(Path.Combine(_config.GgufFolder, model.File));
-                _modelsList.Items.Add($"{id} {(exists ? "🟢" : "🔴")}");
+                _modelsList.Items.Add($"{id} {(exists ? "\uD83D\uDFE2" : "\uD83C\uDFA4")}");
             }
 
             if (_config.LastModelId.Length > 0)
@@ -114,12 +218,12 @@ public sealed class MainForm : Form
         }
        catch (FileNotFoundException)
         {
-            ShowWarning("Models config not found — check ModelsConfigPath in config.json");
+            ShowWarning("The configuration of the app is not complete");
             SetStatus("Configuration incomplete");
         }
        catch (JsonException ex)
         {
-            ShowWarning($"Invalid config.json — {ex.Message}");
+            ShowWarning("Invalid config.json — " + ex.Message);
             SetStatus("Configuration error");
         }
        catch (InvalidOperationException ex)
@@ -138,34 +242,51 @@ public sealed class MainForm : Form
 
     private void AppendLog(string line) => _logBox.AppendText(line + Environment.NewLine);
 
-    private void SetStatus(string text) => _statusLabel.Text = text;
+    // --- Config panel ---
 
-    // Stubs: server lifecycle arrives in a follow-up change.
-    private void OnStartClick(object? sender, EventArgs e)
+    private void ShowConfigPanel()
     {
-        var id = SelectedModelId;
-        if (id is null)
-        {
-            SetStatus("No model selected");
-            return;
-        }
-        SetStatus($"Starting {id}...");
-        AppendLog($"[ui] start requested for '{id}' (logic pending)");
+        _txtBins.Text = _config.LlamaBinsFolder;
+        _txtGguf.Text = _config.GgufFolder;
+        _numPort.Value = _config.Port;
+        _txtYaml.Text = _config.ModelsConfigPath;
+        _configPanel.Height = 260;
     }
 
-    private void ShowWarning(string message)
+    private void HideConfigPanel() => _configPanel.Height = 0;
+
+    private void OnConfigureClick(object? sender, EventArgs e) => ShowConfigPanel();
+
+    private void OnSaveConfigClick(object? sender, EventArgs e)
     {
-        _warningLabel.Text = $"\u26A0 {message}";
-        _warningLabel.Visible = true;
+        _config.LlamaBinsFolder = _txtBins.Text.Trim();
+        _config.GgufFolder = _txtGguf.Text.Trim();
+        _config.Port = (int)_numPort.Value;
+        _config.ModelsConfigPath = _txtYaml.Text.Trim();
+        _config.Save(AppConfig.DefaultConfigPath);
+        HideConfigPanel();
+        LoadModels(); // reload models with new config
     }
 
-    private void ClearWarning() => _warningLabel.Visible = false;
+    private void BrowseFolder(TextBox target)
+    {
+        using var dlg = new FolderBrowserDialog();
+        dlg.InitialDirectory = target.Text.Length > 0 ? target.Text : Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+        if (dlg.ShowDialog(this) == DialogResult.OK)
+            target.Text = dlg.SelectedPath;
+    }
+
+    private void BrowseFile(TextBox target, string filter)
+    {
+        using var dlg = new OpenFileDialog { Filter = filter };
+        if (dlg.ShowDialog(this) == DialogResult.OK)
+            target.Text = dlg.FileName;
+    }
 
     private void DiscoverLlamaBins()
     {
         var candidates = new[]
         {
-            // Common download locations for llama.cpp zips
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "llama-b*-bin-win-cuda*"),
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "llama-b*-bin-win-cuda*"),
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "llama-b*-bin-win-cuda*"),
@@ -191,7 +312,6 @@ public sealed class MainForm : Form
             catch { /* skip unreadable dirs */ }
         }
 
-        // Also check PATH
         var pathDirs = Environment.GetEnvironmentVariable("PATH")?.Split(Path.PathSeparator) ?? Array.Empty<string>();
         foreach (var p in pathDirs)
         {
@@ -204,10 +324,23 @@ public sealed class MainForm : Form
             }
         }
 
-        // Nothing found — show warning label instead of popup
-        ShowWarning("llama-server.exe not found — set LlamaBinsFolder in config.json manually");
-        SetStatus("llama-server.exe not discovered");
+        ShowWarning("The configuration of the app is not complete");
+        SetStatus("llama-server.exe not discovered — click Configure to set it up");
         _startButton.Enabled = false;
+    }
+
+    // --- Server stubs ---
+
+    private void OnStartClick(object? sender, EventArgs e)
+    {
+        var id = SelectedModelId;
+        if (id is null)
+        {
+            SetStatus("No model selected");
+            return;
+        }
+        SetStatus($"Starting {id}...");
+        AppendLog($"[ui] start requested for '{id}' (logic pending)");
     }
 
     private void OnStopClick(object? sender, EventArgs e)
