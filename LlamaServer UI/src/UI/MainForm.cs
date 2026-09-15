@@ -10,7 +10,6 @@ public sealed class MainForm : Form
     private readonly Button _startButton = new() { Text = "Start", AutoSize = true };
     private readonly Button _stopButton = new() { Text = "Stop", AutoSize = true, Enabled = false };
     private readonly Button _configureButton = new() { Text = "\u2699 Configure", Width = 100, FlatStyle = FlatStyle.Standard };
-    private readonly Label _statusLabel = new() { AutoSize = true, Text = "Idle" };
     private readonly TextBox _logBox = new()
     {
         Multiline = true,
@@ -47,32 +46,31 @@ public sealed class MainForm : Form
             Padding = new Padding(0),
         };
 
-        // Top bar: buttons + status
-        var topBar = new FlowLayoutPanel
+        // Status bar (top of header)
+        var statusBarRow = new FlowLayoutPanel
+        {
+            Height = 24,
+            FlowDirection = System.Windows.Forms.FlowDirection.LeftToRight,
+            Padding = new Padding(8, 0, 0, 0),
+            BackColor = Color.LightGray,
+        };
+        statusBarRow.Controls.Add(_warningLabel);
+
+        // Button row (below status)
+        var buttonRow = new FlowLayoutPanel
         {
             Height = 32,
             FlowDirection = System.Windows.Forms.FlowDirection.LeftToRight,
             Padding = new Padding(8),
         };
-        topBar.Controls.Add(_configureButton);
-        topBar.Controls.Add(new Panel { Width = 4 });
-        topBar.Controls.Add(_startButton);
-        topBar.Controls.Add(new Panel { Width = 4 });
-        topBar.Controls.Add(_stopButton);
-        topBar.Controls.Add(new Panel { Width = 16 });
-        topBar.Controls.Add(_statusLabel);
+        buttonRow.Controls.Add(_configureButton);
+        buttonRow.Controls.Add(new Panel { Width = 4 });
+        buttonRow.Controls.Add(_startButton);
+        buttonRow.Controls.Add(new Panel { Width = 4 });
+        buttonRow.Controls.Add(_stopButton);
 
-        // Warning row (below top bar)
-        var warningRow = new FlowLayoutPanel
-        {
-            Height = 24,
-            FlowDirection = System.Windows.Forms.FlowDirection.LeftToRight,
-            Padding = new Padding(8, 0, 0, 0),
-        };
-        warningRow.Controls.Add(_warningLabel);
-
-        headerPanel.Controls.Add(topBar);
-        headerPanel.Controls.Add(warningRow);
+        headerPanel.Controls.Add(statusBarRow);
+        headerPanel.Controls.Add(buttonRow);
 
         // Main layout
         _modelsList.Dock = DockStyle.Fill;
@@ -115,15 +113,23 @@ public sealed class MainForm : Form
         }
     }
 
-    private void ShowWarning(string message)
+    private void ShowError(string message)
     {
         _warningLabel.Text = "\u26A0 " + message;
+        _warningLabel.ForeColor = Color.DarkRed;
         _warningLabel.Visible = true;
     }
 
-    private void ClearWarning() => _warningLabel.Visible = false;
+    private void SetStatus(string text)
+    {
+        _warningLabel.Text = text;
+        _warningLabel.ForeColor = Color.Black;
+        _warningLabel.Visible = true;
+    }
 
-    private void SetStatus(string text) => _statusLabel.Text = text;
+    private void ClearStatus() => _warningLabel.Visible = false;
+
+
 
     private void LoadModels()
     {
@@ -148,20 +154,20 @@ public sealed class MainForm : Form
                 _modelsList.SelectedIndex = 0;
             }
 
-            ClearWarning();
-            SetStatus($"Loaded {_modelIds.Count} model(s) from config");
+            ClearStatus();
+            SetStatus($"{_modelIds.Count} model(s) loaded");
         }
        catch (FileNotFoundException)
         {
-            ShowWarning("The configuration of the app is not complete");
+            ShowError("The configuration of the app is not complete");
         }
        catch (JsonException ex)
         {
-            ShowWarning("Invalid config.json — " + ex.Message);
+            ShowError("Invalid config.json — " + ex.Message);
         }
        catch (InvalidOperationException ex)
         {
-            ShowWarning(ex.Message);
+            ShowError(ex.Message);
         }
        catch (Exception ex)
         {
@@ -227,8 +233,7 @@ public sealed class MainForm : Form
             }
         }
 
-        ShowWarning("The configuration of the app is not complete");
-        SetStatus("llama-server.exe not discovered — click Configure to set it up");
+        ShowError("The configuration of the app is not complete");
         _startButton.Enabled = false;
     }
 
