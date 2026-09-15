@@ -9,6 +9,7 @@ public sealed class MainForm : Form
     private readonly ListBox _modelsList = new();
     private readonly Button _startButton = new() { Text = "Start", AutoSize = true };
     private readonly Button _stopButton = new() { Text = "Stop", AutoSize = true, Enabled = false };
+    private readonly Button _configureButton = new() { Text = "\u2699 Configure", Width = 100, FlatStyle = FlatStyle.Standard };
     private readonly Label _statusLabel = new() { AutoSize = true, Text = "Idle" };
     private readonly TextBox _logBox = new()
     {
@@ -18,7 +19,7 @@ public sealed class MainForm : Form
         Font = new Font(FontFamily.GenericMonospace, 9f),
     };
 
-    // Warning label — always visible when config incomplete
+    // Warning label — shown when config is incomplete
     private readonly Label _warningLabel = new()
     {
         AutoSize = true,
@@ -38,17 +39,6 @@ public sealed class MainForm : Form
         MinimumSize = new Size(700, 450);
         Icon = LoadAppIcon();
 
-        // Menu bar
-        var menu = new MenuStrip();
-        var fileMenu = new ToolStripMenuItem("File");
-        var configureItem = new ToolStripMenuItem("\u2699 &Configure...") { ShortcutKeys = Keys.Control | Keys.C };
-        var exitItem = new ToolStripMenuItem("E&xit") { ShortcutKeys = Keys.Alt | Keys.F4 };
-        configureItem.Click += OnConfigureClick;
-        exitItem.Click += (_, _) => Close();
-        fileMenu.DropDownItems.AddRange([configureItem, new ToolStripSeparator(), exitItem]);
-        menu.Items.Add(fileMenu);
-        Controls.Add(menu);
-
         // Top bar: buttons + status
         var topBar = new FlowLayoutPanel
         {
@@ -57,6 +47,8 @@ public sealed class MainForm : Form
             FlowDirection = System.Windows.Forms.FlowDirection.LeftToRight,
             Padding = new Padding(8),
         };
+        topBar.Controls.Add(_configureButton);
+        topBar.Controls.Add(new Panel { Width = 4 });
         topBar.Controls.Add(_startButton);
         topBar.Controls.Add(new Panel { Width = 4 });
         topBar.Controls.Add(_stopButton);
@@ -87,6 +79,8 @@ public sealed class MainForm : Form
         Controls.Add(logHost);
         Controls.Add(warningRow);
         Controls.Add(topBar);
+
+        _configureButton.Click += OnConfigureClick;
 
         _config = AppConfig.Load(AppConfig.DefaultConfigPath);
 
@@ -151,17 +145,14 @@ public sealed class MainForm : Form
        catch (FileNotFoundException)
         {
             ShowWarning("The configuration of the app is not complete");
-            SetStatus("Configuration incomplete");
         }
        catch (JsonException ex)
         {
             ShowWarning("Invalid config.json — " + ex.Message);
-            SetStatus("Configuration error");
         }
        catch (InvalidOperationException ex)
         {
             ShowWarning(ex.Message);
-            SetStatus("Configuration error");
         }
        catch (Exception ex)
         {
@@ -228,7 +219,7 @@ public sealed class MainForm : Form
         }
 
         ShowWarning("The configuration of the app is not complete");
-        SetStatus("llama-server.exe not discovered — use File > Configure to set it up");
+        SetStatus("llama-server.exe not discovered — click Configure to set it up");
         _startButton.Enabled = false;
     }
 
