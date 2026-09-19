@@ -1,13 +1,14 @@
 # Qwen 3.6 27B
 
-| File                                                       | Result                                      |
-|------------------------------------------------------------|---------------------------------------------|
-| Qwen3.6-27B-Cerebellum-v5-Q2_K_deucebucket.gguf            | ✔️ Slow but fixed the TEST 01 very quickly  |
-| Qwen3.6-27B-IQ4_XS_unsloth.gguf                            | ❌ 16 t/s                                   |
-| Qwen3.6-27B-Q4_K_M_unsloth.gguf                            | ❌ too slow                                 |
-| Qwen3.6-27B-Esper3.1.Q4_K_M_mr_radermacher.gguf            | ❌ too slow                                 |
-| Qwen3.6-27B-Claude-Mythos-Distilled.Q4_K_M_chatqaq.gguf    | ❌ too slow                                 |
-| Qwen3.6-27B-Bedrock-13.26GB_enginetown.gguf                | ❌ 1500 tokens (90s) for the test           | 
+| File                                                    | GB   | Result                                      |
+|---------------------------------------------------------|------|---------------------------------------------|
+| Qwen3.6-27B-Cerebellum-v5-Q2_K_deucebucket.gguf         |      |✔️ Slow but fixed the TEST 01 very quickly  |
+| Qwen3.6-27B-IQ4_XS_unsloth.gguf                         |      |❌ 16 t/s                                   |
+| Qwen3.6-27B-Q4_K_M_unsloth.gguf                         |      |❌ too slow                                 |
+| Qwen3.6-27B-Esper3.1.Q4_K_M_mr_radermacher.gguf         |      |❌ too slow                                 |
+| Qwen3.6-27B-Claude-Mythos-Distilled.Q4_K_M_chatqaq.gguf |      |❌ too slow                                 |
+| Qwen3.6-27B-Bedrock-13.26GB_enginetown.gguf             |      |❌ 1500 tokens (90s) for the test           | 
+| Qwen3.6-27B-Esper3.1.Q4_K_M_mradermacher.gguf           | 15.4 |❌ too slow                                 |             
 
 
 ## 🥇 Cerebellum v5 Q2_K Mixed (deucebucket)
@@ -18,7 +19,6 @@ MTP: NO
 
 With Ngram-simple, Temperature of 0.1 gives 22 t/s while temperature of 0.3 gives 17 t/s.  
 Low temperature increasa the t/s at 40-43 near the end of the stream, I suppose when code is generated, but it creates longher responses.
-
 
 ## ❌ Bedrock (by enginetown)
 Qwen3.6-27B-Bedrock-13.26GB_enginetown.gguf                                                   13.2 GB
@@ -70,6 +70,25 @@ Qwen3.6-27B-DFlash-Q8_0_anbeeld.dflash.gguf
 
 
 ```bash
+
+model=Qwen3.6-27B-Esper3.1.Q4_K_M_mradermacher.gguf
+ctx_k=16
+gpu_layers=99
+cpu_moe=6
+quant=q4_0
+spec=none
+draft_model=none
+predict_token=4/6
+jinja=0
+batch=1024
+ubatch=256
+_test_model
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                  | Batch/Ub. | Note              |
+| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | --------------------------------------- | --------- |------------------ |
+|  12 t/s |  32 k |   6 | 65/65 | 15.7 | 14.7/0.0  | q4_0 (none) |    723 |  59s | none                                 -- |  1024/256 |                   |
+|  15 t/s |  16 k |   6 | 65/65 | 15.4 | 14.7/0.0  | q4_0 (none) |    723 |  49s | none                                 -- |  1024/256 |                   |
+
 
 model=Qwen3.6-27B-Bedrock-13.26GB_enginetown.gguf 
 ctx_k=64

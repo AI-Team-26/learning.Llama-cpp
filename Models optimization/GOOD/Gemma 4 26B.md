@@ -5,10 +5,11 @@
 | Gemma-4-26B_Q4_0-it_google.gguf                        | ---- | ✔️ Smart and fast - 160k 45 t/s | 256k 35 t/s   |  
 | Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf              | 12.6 | ✔️ Smart and fast - 160k 35 t/s                 |
 | Gemma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf              | ---  |
-| Gemma4-26B-A4B-QAT-Unc-Balanced-Q4_K_M_hauhaucs.gguf   | ---  | ⚠️ WITHOUT MTP: too slow  (MTP not tested)    |
-| Gemma-4-26B-REAP126-pruned-UD-IQ4_NL_techhermit.gguf   | ---  | ❌ Looping on Pi and lie                      |
-| Gemma-4-19B-REAP-Q4_K_M_vsark.gguf                     | ---  | ❌ Every here and then it breaks, 256k 40 t/s  | 
-| Gemma4-26b-uncensored-fast-v2-Q4_K_M_Jiunsong.gguf     | ---  | ❌ Gibebrish and unformatted output. Also slow. |
+| Gemma4-26B-A4B-QAT-Unc-Balanced-Q4_K_M_hauhaucs.gguf   | ---  | ⚠️ WITHOUT MTP: too slow  (MTP not tested)      |
+| Gemma-4-26B-REAP126-pruned-UD-IQ4_NL_techhermit.gguf   | ---  | ❌ Looping on Pi and lie                                  |
+| Gemma-4-19B-REAP-Q4_K_M_vsark.gguf                     | ---  | ❌ Every here and then it breaks, 256k 40 t/s             |  
+| Gemma4-26b-uncensored-fast-v2-Q4_K_M_Jiunsong.gguf     | ---  | ❌ Gibberish and unformatted output. Also slow.           |
+| Gemma-4-26B-A4B-it-qat-UD-Q4_K_XL_unsloth.gguf         | 13.2 | ❌ Small Context. It doen't test its code. It requires a lot of rework.  |
 
 
 
@@ -17,6 +18,10 @@ Gemma-4-26B_Q4_0-it_google.gguf                                     13.4 GB
 https://huggingface.co/google/gemma-4-26B-A4B-it-qat-q4_0-gguf
 
 ❌ For the bug3 fix :it took half an hour and haven't done. It failed to call "edit" very often (sometime instead of edit a single line). It lied saying it did the job: No changes and no test !
+
+
+## QAT UD Q4-K-XL (by Unsloth)
+Gemma-4-26B-A4B-it-qat-UD-Q4_K_XL_unsloth.gguf                      13.2 GB
 
 ## ✔️ UD IQ4_NL (by Unsloth)
 Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf                           12.6 GB
@@ -156,6 +161,33 @@ Draft_file_1:
 
 ```bash
 
+
+model=Gemma-4-26B-A4B-it-qat-UD-Q4_K_XL_unsloth.gguf
+ctx_k=80
+cpu_moe=0
+gpu_layers=99
+quant=q8_0
+spec=draft-mtp
+draft_model=mtp-gemma-4-26B-A4B-it-Q8_0.gguf
+draft_model=mtp-gemma-4-26B-A4B-it-Q8_0_unsloth.gguf
+predict_token=1/3
+jinja=0
+batch=512
+ubatch=256
+_test_model
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                  | Batch/Ub. | Note              |
+| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | --------------------------------------- | --------- |------------------ |
+|  71 t/s |  80 k |   0 | 31/31 | 15.6 | 13.3/0.0  | q8_0 (q8_0) |    784 |  11s | MTP        min=1 max=2 p_min=0.20 (79%) |   512/256 |                   |
+|  70 t/s |  80 k |   0 | 31/31 | 15.5 | 13.3/0.0  | q8_0 (q8_0) |    916 |  13s | MTP        min=1 max=3 p_min=0.20 (70%) |   512/128 |                   |
+|  68 t/s |  80 k |   0 | 31/31 | 15.6 | 13.3/0.0  | q8_0 (q8_0) |   1869 |  28s | MTP        min=1 max=3 p_min=0.20 (64%) |   512/256 |                   |
+|  67 t/s |  80 k |   0 | 31/31 | 15.6 | 13.3/0.0  | q8_0 (q8_0) |   1869 |  28s | MTP        min=1 max=3 p_min=0.20 (64%) |   512/256 |                   |
+
+|  73 t/s |  64 k |   0 | 31/31 | 15.4 | 13.3/0.1  | q8_0 (q8_0) |    750 |  11s | MTP        min=1 max=3 p_min=0.20 (75%) |  1024/512 |                   |
+|  72 t/s |  64 k |   0 | 31/31 | 15.4 | 13.3/0.1  | q8_0 (q8_0) |    750 |  10s | MTP        min=1 max=3 p_min=0.20 (75%) |  1024/512 |                   |
+|  68 t/s |  64 k |   0 | 31/31 | 15.4 | 13.3/0.1  | q8_0 (q8_0) |    870 |  13s | MTP        min=1 max=4 p_min=0.20 (63%) |  1024/512 |                   |
+|  60 t/s |  64 k |   1 | 31/31 | 15.1 | 12.9/0.1  | q8_0 (q8_0) |    775 |  13s | MTP        min=1 max=2 p_min=0.20 (81%) |  1024/512 |                   |
+
 ## There is currently a bug for Gemma4 MTP
 model=Gemma4-26B-A4B-QAT-Unc-Balanced-Q4_K_M_hauhaucs.gguf 
 ctx_k=64
@@ -276,32 +308,50 @@ _test_model
 
 
 model=Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf
-ctx_k=180
+ctx_k=80
 cpu_moe=0
-quant=q8_0
+quant=q8_0/q4_0
 gpu_layers=99
-spec=none
-draft_model=none
-predict_token=1/2
-ngram_values=8/4
+spec=draft-mtp,ngram-simple
+draft_model=mtp-gemma-4-26B-A4B-it_unsloth.gguf
+predict_token=1/3
+ngram_values=3/3
 jinja=0
-batch=2048
+batch=1024
 ubatch=1024
 _test_model
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                  | Batch/Ub. | Note              |
+| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | --------------------------------------- | --------- |------------------ |
+|  48 t/s | 180 k |   0 | 31/31 | 15.7 | 12.7/0.4  | q8_0 (q8_0) |   1784 |  38s | none                                 -- | 2048/1024 |                   |
+|  47 t/s | 160 k |   0 | 31/31 | 15.7 | 12.7/0.3  | q8_0 (q8_0) |   1784 |  38s | none                                 -- | 2048/1024 |                   |
+
+|  47 t/s | 128 k |   0 | 31/31 | 15.3 | 12.7/0.3  | q8_0 (q8_0) |   1784 |  38s | none                                 -- | 2048/1024 |                   |
+|  47 t/s | 128 k |   0 | 31/31 | 15.3 | 12.7/0.3  | q8_0 (q8_0) |   1784 |  38s | N-gram                    N=8 M=4 min=1 | 2048/1024 |                   |
+|  47 t/s | 128 k |   0 | 31/31 | 15.3 | 12.7/0.3  | q8_0 (q8_0) |   1784 |  38s | N-gram                  N=12 M=10 min=1 | 2048/1024 |                   |
+|  41 t/s | 128 k |   0 | 31/31 | 15.3 | 12.7/0.3  | q8_0 (q8_0) |    981 |  24s | N-gram              N=3 M=5 min=1 (43%) | 2048/1024 |                   |
+|  34 t/s | 160 k |   1 | 31/31 | 15.5 | 12.3/0.3  | q8_0 (q8_0) |   1149 |  34s | none                                 -- | 2048/1024 |                   |
+|  30 t/s | 160 k |   3 | 31/31 | 14.9 | 11.7/0.3  | q8_0 (q8_0) |   1245 |  41s | none                                 -- | 2048/1024 |                   |
+
+|  65 t/s |  92 k |   0 | 31/31 | 15.7 | 12.7/0.2  | q8_0 (q8_0) |   1700 |  26s | MTP        min=1 max=3 p_min=0.20 (60%) | 1024/1024 |                   |
+
+|  59 t/s |  96 k |   0 | 31/31 | 15.7 | 12.7/0.2  | q8_0 (q8_0) |   2048 |  35s | MTP        min=1 max=3 p_min=0.20 (73%) | 1024/1024 |                   |
+|  58 t/s |  96 k |   0 | 31/31 | 15.7 | 12.7/0.2  | q8_0 (q8_0) |   2048 |  35s | MTP        min=1 max=3 p_min=0.20 (73%) | 1024/1024 |                   |
+
 
 
 
 model=Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf
-ctx_k=104
+ctx_k=128
 cpu_moe=0
 quant=q8_0
 gpu_layers=99
-spec=none
+spec=draft-mtp
 draft_model=mtp-gemma-4-26B-A4B-it_unsloth.gguf
 predict_token=1/4
 ngram_values=none
 jinja=0
-batch=2048
+batch=1024
 ubatch=512
 _test_model
 
@@ -320,6 +370,10 @@ _test_model
 |  44 t/s | 128 k |   0 | 31/31 | 15.7 | 12.7/0.1  | q8_0 (q8_0) |   1390 |  31s | MTP        min=1 max=2 p_min=0.20 (79%) |  1024/256 |                   |
 |  66 t/s | 104 k |   0 | 31/31 | 15.4 | 12.7/0.1  | q8_0 (q8_0) |   1346 |  20s | MTP        min=1 max=4 p_min=0.20 (67%) |  2048/256 |                   |
 |  67 t/s |  96 k |   0 | 31/31 | 15.3 | 12.7/0.1  | q8_0 (q8_0) |   1346 |  21s | MTP        min=2 max=4 p_min=0.20 (67%) |  2048/256 |                   |
+|  66 t/s |  96 k |   0 | 31/31 | 15.5 | 12.7/0.1  | q8_0 (q8_0) |   1283 |  19s | MTP        min=1 max=4 p_min=0.20 (69%) |  1024/512 |                   |
+|  55 t/s | 128 k |   0 | 31/31 | 15.7 | 12.7/0.1  | q8_0 (q8_0) |   1283 |  23s | MTP        min=1 max=4 p_min=0.20 (69%) |  1024/512 |                   |
+
+
 
 model=mythos-26b-a4b-prism-pro-dq_ex0bit.gguf
 ctx_k=64

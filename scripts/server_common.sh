@@ -273,7 +273,7 @@ start_server() {
     if [[ "$spec" == *draft-dflash* ]]; then
 
         if [[ -z "$draft_model" ||  "$draft_model" == "none" ]]; then
-            echo "‼️ draft_model has to be set with Speculative type DFlash" >&2
+            echo -e "‼️ draft_model has to be set with Speculative type DFlash" >&2
             return 1
         fi
         
@@ -293,6 +293,12 @@ start_server() {
     # External draft model
     if [[ -n "$draft_model" && "$draft_model" != "none" ]]; then
         local draft_model_path="$GGUF_FOLDER/$draft_model"
+
+        if [[ ! -f "$draft_model_path" ]]; then
+            echo -e "‼️ Draft model '$draft_model' file not found" >&2
+            return 1
+        fi 
+
         args+=(--spec-draft-model "$draft_model_path")
         print_value "Draft Model" "$draft_model"
     fi

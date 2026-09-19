@@ -557,7 +557,7 @@ models:
     gpu_layers: 99
     cpu_moe: 4
     quant: q8_0
-    batch: 2048
+    batch: 1024
     ubatch: 1024
     spec_type: ngram-simple
     spec_ngram_simple_size_n: 12
@@ -567,7 +567,7 @@ models:
     pi_agent_model: >
       { 
          "_test": "Really good",
-         "_speed": "35 t/s",
+         "_speed": "45 t/s",
           "id": "Qwen_3.6_28b_reap_20_(barozp)_96k_Q8",
           "name": "Qwen 3.6 28B REAP20 (barozp) [96k] Q8",
           "contextWindow": 98304,
@@ -895,29 +895,28 @@ models:
         "id": "Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf",
         "name": "Gemma4 26B - UD-IQ4_NL (by Unsloth) 160K",
         "contextWindow": 163840,
-        "maxTokens": 4096,
+        "maxTokens": 8192,
         "reasoning": true
       },
-  Gemma-4-26B-UD-IQ4_NL_(Unsloth)_SPEC_160k:
+  Gemma-4-26B-UD-IQ4_NL_(Unsloth)_160k_NGRAM:
     speed: n.a.
     file: Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf
     ctx_k: 160
     gpu_layers: -1
     cpu_moe: 1
     batch: 1024
-    ubatch: 256
-    _spec_type: none 
-    spec_type: ngram-simple
-    spec_ngram_simple_size_m: 4
-    spec_ngram_simple_size_n: 4
+    ubatch: 512
+    spec_type: draft-mtp,ngram-simple
+    spec_ngram_simple_size_m: 8
+    spec_ngram_simple_size_n: 8
     spec_ngram_simple_min_hits: 1
     pi_agent_model: >
       { 
         "_test": "???",
-        "id": "Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf",
+        "id": "Gemma-4-26B-UD-IQ4_NL_(Unsloth)_160k_NGRAM",
         "name": "Gemma4 26B - UD-IQ4_NL (by Unsloth) 160K",
         "contextWindow": 163840,
-        "maxTokens": 4096,
+        "maxTokens": 8192,
         "reasoning": true
       },
   

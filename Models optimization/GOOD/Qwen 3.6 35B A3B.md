@@ -1,20 +1,24 @@
 # Qwen 3.6 35B A3B
 
-| Model                                    | File                                                    | Result                                  |
-| ---------------------------------------- | ------------------------------------------------------- | --------------------------------------- |
-| REAP20 Q4_K_M (by barozp)                | Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf               | ✔️ Really Good but only 64k             |
-| Genesis V3 APEX Compact (LuffyTheFox)    | Qwen3.6-35B-A3B-Un-Genesis-V3-APEX_luffythefox.gguf     | ⚠️ 30-35 t/s with 96 and 128k           | 
-| Coder CD CD-Q4_K_M (ManniX)              | Qwen3.6-27B-A3B-Coder-CD-Q4_K_M_mannix.gguf             | ⚠️ 30-35 t/s with 96 and 128k TEST      |
-| MOE384-pruned-Q4_K_M (by tipe)           | Qwen3.6-35B-A3B-MOE384-pruned-Q4_K_M_tipe.gguf          | ⚠️ Loop in Pi. Good analyze/write code  |
-| MTP MXFP4 MOE (by Unsloth)               | Qwen3.6-35B-A3B-MXFP4_MOE_unsloth.gguf                  | ❌ Too big. Slow.                       |
-| REAP pruned ratio 0.3 Q4_K_M (amazeble)  | Qwen3.6-35B-REAP-pruned-ratio-0.3-Q4_K_M_amazeble.gguf  | ❌ no tools                             |
-| REAP pruned ratio 0.5 Q4_K_M (lemmyhans) | Qwen3.6-35B-REAP-pruned-ratio-0.5-Q4_K_M_lemmyhans.gguf | ❌ no tools                             |
-| UD Q3_K_XL (Unsloth)                     | Qwen3.6-35B-A3B-UD-Q3_K_XL_unsloth.gguf                 | ❌ Too slow at 96K                      |
-| UD Q4_K_M (Unsloth)                      | Qwen3.6-35B-A3B-UD-Q4_K_M_unsloth.gguf                  | ❌ 22GB                                 |
+| File                                                    | GB   | Result                                  |
+| ------------------------------------------------------- | ---- | --------------------------------------- |
+| Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf               |      | ✔️ Really Good but only 64k             |
+| Qwen3.6-35B-A3B-Un-Genesis-V3-APEX_luffythefox.gguf     |      | ⚠️ 30-35 t/s with 96 and 128k           | 
+| Qwen3.6-27B-A3B-Coder-CD-Q4_K_M_mannix.gguf             |      | ⚠️ 30-35 t/s with 96 and 128k TEST      |
+| Qwen3.6-35B-A3B-MOE384-pruned-Q4_K_M_tipe.gguf          |      | ⚠️ Loop in Pi. Good analyze/write code  |
+| Qwen3.6-35B-A3B-MXFP4_MOE_unsloth.gguf                  |      | ❌ Too big. Slow.                       |
+| Qwen3.6-35B-REAP-pruned-ratio-0.3-Q4_K_M_amazeble.gguf  |      | ❌ no tools                             |
+| Qwen3.6-35B-REAP-pruned-ratio-0.5-Q4_K_M_lemmyhans.gguf |      | ❌ no tools                             |
+| Qwen3.6-35B-A3B-UD-Q3_K_XL_unsloth.gguf                 |      | ❌ Too slow at 96K                      |
+| Qwen3.6-35B-A3B-UD-Q4_K_M_unsloth.gguf                  |      | ❌ 22GB                                 |
+| Tiel-Coder-35B-A3B-UD-IQ4_XS_peculiar.gguf              | 16.5 | ❌ Too slow. 30 t/s at 64k              |
 
 
 ## https://huggingface.co/avlp12/Qwen3.5-35B-A3B-Alis-Ultra-GGUF
 
+
+##
+Tiel-Coder-35B-A3B-UD-IQ4_XS_peculiar.gguf     16.5 GB
 
 ## ⚠️ Uncensored Genesis V3 APEX (by luffythefox)
 Qwen3.6-35B-A3B-Un-Genesis-V3-APEX_luffythefox.gguf            16.1 GB  
@@ -175,13 +179,34 @@ https://huggingface.co/unsloth/Qwen3.6-35B-A3B-GGUF
 
 ```bash
 
+model=Tiel-Coder-35B-A3B-UD-IQ4_XS_peculiar.gguf
+ctx_k=64
+gpu_layers=99
+cpu_moe=11
+quant=q4_0
+spec=none
+draft_model=none
+predict_token=1/2
+jinja=0
+batch=1024
+ubatch=512
+_test_model
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                  | Batch/Ub. | Note              |
+| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | --------------------------------------- | --------- |------------------ |
+|  36 t/s |  64 k |   4 | 41/41 | 15.6 | 14.6/0.1  | q4_0 (none) |    618 |  17s | none                                 -- |  1024/512 |                   |
+|  31 t/s |  64 k |   5 | 41/41 | 15.5 | 14.3/0.1  | q8_0 (none) |    511 |  16s | none                                 -- |  1024/512 |                   |
+|  27 t/s |  64 k |   3 | 41/41 | 15.7 | 15.0/0.1  | q4_0 (none) |    586 |  22s | none                                 -- |  1024/512 |                   |
+|  21 t/s |  64 k |  11 | 41/41 | 13.1 | 12.2/0.1  | q4_0 (none) |    647 |  32s | none                                 -- |  1024/512 |                   |
+
+
 # Q4
 model=Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf
 ctx_k=128
 gpu_layers=99
 cpu_moe=4
 quant=q4_0
-spec=0
+spec=none
 draft_model=none
 predict_token=0/0
 jinja=0
