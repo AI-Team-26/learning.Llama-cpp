@@ -1,6 +1,5 @@
 ﻿using System.Reflection;
 using System.Text.Json;
-using System.Windows.Forms.VisualStyles;
 using LlamaServerCore;
 
 namespace LlamaServerUI;
@@ -16,6 +15,7 @@ public sealed class MainForm : Form
         Multiline = true,
         ReadOnly = true,
         ScrollBars = ScrollBars.Vertical,
+        Dock = DockStyle.Fill,
         Font = new Font(FontFamily.GenericMonospace, 9f),
     };
 
@@ -23,13 +23,11 @@ public sealed class MainForm : Form
     private readonly Label _warningLabel = new()
     {
         AutoSize = true,
-        Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right,
         Dock = DockStyle.Fill,
         ForeColor = Color.DarkRed,
-        Font = new Font(FontFamily.GenericSansSerif, 10f, FontStyle.Bold),
+        Font = new Font(FontFamily.GenericSansSerif, 11f, FontStyle.Bold),
         Visible = false,
         Padding = new Padding(8),
-        //BackColor = Color.LightYellow,
     };
 
     private readonly List<string> _modelIds = [];
@@ -54,7 +52,6 @@ public sealed class MainForm : Form
             Margin = Padding.Empty,
             Padding = new Padding(0),
             BorderStyle = BorderStyle.None,
-            //BackColor = Color.Red
         };
 
         // Button row (below status)
@@ -64,10 +61,8 @@ public sealed class MainForm : Form
             AutoSizeMode = AutoSizeMode.GrowAndShrink,
             FlowDirection = FlowDirection.LeftToRight,
             WrapContents = false,
-            BorderStyle = BorderStyle.None,
             Margin = Padding.Empty,
             Padding = new Padding(8),
-            //BackColor = Color.LightGreen,
         };
 
         buttonRow.Controls.Add(_configureButton);
@@ -80,13 +75,9 @@ public sealed class MainForm : Form
             AutoSize = true,
             AutoSizeMode = AutoSizeMode.GrowAndShrink,
             FlowDirection = FlowDirection.LeftToRight,
-            Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right,
             WrapContents = false,
-            BorderStyle = BorderStyle.None,
             Margin = Padding.Empty,
             Padding = new Padding(0),
-            //Padding = Padding.Empty,
-            //BackColor = Color.LightBlue,
         };
         statusBarRow.Controls.Add(_warningLabel);
 
@@ -99,17 +90,14 @@ public sealed class MainForm : Form
         _modelsList.Dock = DockStyle.Fill;
         _modelsList.SelectionMode = SelectionMode.One;
 
-        _logBox.Dock = DockStyle.Fill;
-
         var modelsSplitter = new Splitter { Dock = DockStyle.Bottom, Height = 5 };
         var logHost = new Panel { Dock = DockStyle.Bottom, Height = 200 };
         logHost.Controls.Add(_logBox);
 
         Controls.Add(headerPanel);
         Controls.Add(modelsSplitter);
-        Controls.Add(logHost);
-        
         Controls.Add(_modelsList);
+        Controls.Add(logHost);
 
         _configureButton.Click += OnConfigureClick;
         _startButton.Click += OnStartClick;
