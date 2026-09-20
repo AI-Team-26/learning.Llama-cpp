@@ -4,10 +4,16 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationIcon>assets\app.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="assets\app.ico" LogicalName="app.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj" />
   </ItemGroup>
+
 
 </Project>

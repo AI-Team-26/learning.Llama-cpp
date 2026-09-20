@@ -9,6 +9,7 @@
     <PackageVersion Include="NUnit" Version="4.6.1" />
     <PackageVersion Include="NUnit3TestAdapter" Version="6.3.0" />
     <PackageVersion Include="Unquote" Version="7.0.1" />
+    <PackageVersion Include="YamlDotNet" Version="18.1.0" />
   </ItemGroup>
 
 </Project>
