@@ -6,11 +6,11 @@ namespace LlamaServerUI;
 
 public sealed class MainForm : Form
 {
-    private readonly ListBox _modelsList = new();
-    private readonly Button _startButton = new() { Text = "Start", AutoSize = true };
-    private readonly Button _stopButton = new() { Text = "Stop", AutoSize = true, Enabled = false };
-    private readonly Button _configureButton = new() { Text = "\u2699 Configure", AutoSize = true, };
-    private readonly TextBox _logBox = new()
+    private readonly ListBox modelsList = new();
+    private readonly Button startButton = new() { Text = "Start", AutoSize = true };
+    private readonly Button stopButton = new() { Text = "Stop", AutoSize = true, Enabled = false };
+    private readonly Button configureButton = new() { Text = "\u2699 Configure", AutoSize = true, };
+    private readonly TextBox logBox = new()
     {
         Multiline = true,
         ReadOnly = true,
@@ -20,7 +20,7 @@ public sealed class MainForm : Form
     };
 
     // Warning label — shown when config is incomplete
-    private readonly Label _warningLabel = new()
+    private readonly Label warningLabel = new()
     {
         AutoSize = true,
         Dock = DockStyle.Fill,
@@ -30,8 +30,8 @@ public sealed class MainForm : Form
         Padding = new Padding(8),
     };
 
-    private readonly List<string> _modelIds = [];
-    private readonly AppConfig _config;
+    private readonly List<string> modelIds = [];
+    private readonly AppConfig config;
 
     public MainForm()
     {
@@ -65,9 +65,9 @@ public sealed class MainForm : Form
             Padding = new Padding(8),
         };
 
-        buttonRow.Controls.Add(_configureButton);
-        buttonRow.Controls.Add(_startButton);
-        buttonRow.Controls.Add(_stopButton);
+        buttonRow.Controls.Add(configureButton);
+        buttonRow.Controls.Add(startButton);
+        buttonRow.Controls.Add(stopButton);
 
         // Status bar (top of header)
         var statusBarRow = new FlowLayoutPanel
@@ -79,7 +79,7 @@ public sealed class MainForm : Form
             Margin = Padding.Empty,
             Padding = new Padding(0),
         };
-        statusBarRow.Controls.Add(_warningLabel);
+        statusBarRow.Controls.Add(warningLabel);
 
         // Last added is docked first; add buttonRow before statusBarRow so
         // the status/message bar appears above the button row.
@@ -87,26 +87,26 @@ public sealed class MainForm : Form
         headerPanel.Controls.Add(statusBarRow);
 
         // Main layout
-        _modelsList.Dock = DockStyle.Fill;
-        _modelsList.SelectionMode = SelectionMode.One;
+        modelsList.Dock = DockStyle.Fill;
+        modelsList.SelectionMode = SelectionMode.One;
 
         var modelsSplitter = new Splitter { Dock = DockStyle.Bottom, Height = 5 };
         var logHost = new Panel { Dock = DockStyle.Bottom, Height = 200 };
-        logHost.Controls.Add(_logBox);
+        logHost.Controls.Add(logBox);
 
         Controls.Add(headerPanel);
         Controls.Add(modelsSplitter);
-        Controls.Add(_modelsList);
+        Controls.Add(modelsList);
         Controls.Add(logHost);
 
-        _configureButton.Click += OnConfigureClick;
-        _startButton.Click += OnStartClick;
-        _stopButton.Click += OnStopClick;
+        configureButton.Click += OnConfigureClick;
+        startButton.Click += OnStartClick;
+        stopButton.Click += OnStopClick;
 
-        _config = AppConfig.Load(AppConfig.DefaultConfigPath);
+        config = AppConfig.Load(AppConfig.DefaultConfigPath);
 
         // Auto-discover llama-server.exe on first run.
-        if (_config.LlamaBinsFolder.Length == 0)
+        if (config.LlamaBinsFolder.Length == 0)
         {
             DiscoverLlamaBins();
         }
@@ -129,19 +129,19 @@ public sealed class MainForm : Form
 
     private void ShowError(string message)
     {
-        _warningLabel.Text = "\u26A0 " + message;
-        _warningLabel.ForeColor = Color.DarkRed;
-        _warningLabel.Visible = true;
+        warningLabel.Text = "\u26A0 " + message;
+        warningLabel.ForeColor = Color.DarkRed;
+        warningLabel.Visible = true;
     }
 
     private void SetStatus(string text)
     {
-        _warningLabel.Text = text;
-        _warningLabel.ForeColor = Color.Black;
-        _warningLabel.Visible = true;
+        warningLabel.Text = text;
+        warningLabel.ForeColor = Color.Black;
+        warningLabel.Visible = true;
     }
 
-    private void ClearStatus() => _warningLabel.Visible = false;
+    private void ClearStatus() => warningLabel.Visible = false;
 
 
 
@@ -149,27 +149,27 @@ public sealed class MainForm : Form
     {
         try
         {
-            var models = ModelsConfigLoader.Load(_config.ResolvedModelsConfigPath);
+            var models = ModelsConfigLoader.Load(config.ResolvedModelsConfigPath);
             foreach (var (id, model) in models)
             {
-                _modelIds.Add(id);
-                var exists = File.Exists(Path.Combine(_config.GgufFolder, model.File));
-                _modelsList.Items.Add($"{id} {(exists ? "\uD83D\uDFE2" : "\uD83C\uDFA4")}");
+                modelIds.Add(id);
+                var exists = File.Exists(Path.Combine(config.GgufFolder, model.File));
+                modelsList.Items.Add($"{id} {(exists ? "\uD83D\uDFE2" : "\uD83C\uDFA4")}");
             }
 
-            if (_config.LastModelId.Length > 0)
+            if (config.LastModelId.Length > 0)
             {
-                var idx = _modelIds.IndexOf(_config.LastModelId);
+                var idx = modelIds.IndexOf(config.LastModelId);
                 if (idx >= 0)
-                    _modelsList.SelectedIndex = idx;
+                    modelsList.SelectedIndex = idx;
             }
-            else if (_modelIds.Count > 0)
+            else if (modelIds.Count > 0)
             {
-                _modelsList.SelectedIndex = 0;
+                modelsList.SelectedIndex = 0;
             }
 
             ClearStatus();
-            SetStatus($"{_modelIds.Count} model(s) loaded");
+            SetStatus($"{modelIds.Count} model(s) loaded");
         }
        catch (FileNotFoundException)
         {
@@ -190,9 +190,9 @@ public sealed class MainForm : Form
     }
 
     private string? SelectedModelId =>
-        _modelsList.SelectedIndex >= 0 ? _modelIds[_modelsList.SelectedIndex] : null;
+        modelsList.SelectedIndex >= 0 ? modelIds[modelsList.SelectedIndex] : null;
 
-    private void AppendLog(string line) => _logBox.AppendText(line + Environment.NewLine);
+    private void AppendLog(string line) => logBox.AppendText(line + Environment.NewLine);
 
     // --- Configuration dialog ---
 
@@ -201,7 +201,7 @@ public sealed class MainForm : Form
         Visible = false;
         try
         {
-            using var dlg = new ConfigurationForm(_config, LoadModels);
+            using var dlg = new ConfigurationForm(config, LoadModels);
             dlg.ShowDialog(this);
         }
         finally
@@ -230,8 +230,8 @@ public sealed class MainForm : Form
                     var exe = Path.Combine(match.FullName, "llama-server.exe");
                     if (File.Exists(exe))
                     {
-                        _config.LlamaBinsFolder = match.FullName;
-                        _config.Save(AppConfig.DefaultConfigPath);
+                        config.LlamaBinsFolder = match.FullName;
+                        config.Save(AppConfig.DefaultConfigPath);
                         return;
                     }
                 }
@@ -245,14 +245,14 @@ public sealed class MainForm : Form
             var exe = Path.Combine(p, "llama-server.exe");
             if (File.Exists(exe))
             {
-                _config.LlamaBinsFolder = p;
-                _config.Save(AppConfig.DefaultConfigPath);
+                config.LlamaBinsFolder = p;
+                config.Save(AppConfig.DefaultConfigPath);
                 return;
             }
         }
 
         ShowError("The configuration of the app is not complete");
-        _startButton.Enabled = false;
+        startButton.Enabled = false;
     }
 
     // --- Server stubs ---
