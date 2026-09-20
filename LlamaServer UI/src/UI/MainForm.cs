@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 using System.Text.Json;
 using LlamaServerCore;
 
@@ -9,12 +9,13 @@ public sealed class MainForm : Form
     private readonly ListBox _modelsList = new();
     private readonly Button _startButton = new() { Text = "Start", AutoSize = true };
     private readonly Button _stopButton = new() { Text = "Stop", AutoSize = true, Enabled = false };
-    private readonly Button _configureButton = new() { Text = "\u2699 Configure", Width = 100, FlatStyle = FlatStyle.Standard };
+    private readonly Button _configureButton = new() { Text = "\u2699 Configure", AutoSize = true, };
     private readonly TextBox _logBox = new()
     {
         Multiline = true,
         ReadOnly = true,
         ScrollBars = ScrollBars.Vertical,
+        Dock = DockStyle.Fill,
         Font = new Font(FontFamily.GenericMonospace, 9f),
     };
 
@@ -22,9 +23,11 @@ public sealed class MainForm : Form
     private readonly Label _warningLabel = new()
     {
         AutoSize = true,
+        Dock = DockStyle.Fill,
         ForeColor = Color.DarkRed,
-        Font = new Font(FontFamily.GenericSansSerif, 9f, FontStyle.Bold),
+        Font = new Font(FontFamily.GenericSansSerif, 11f, FontStyle.Bold),
         Visible = false,
+        Padding = new Padding(8),
     };
 
     private readonly List<string> _modelIds = [];
@@ -39,35 +42,44 @@ public sealed class MainForm : Form
         Icon = LoadAppIcon();
 
         // Parent panel for all top content (deterministic stacking)
-        var headerPanel = new Panel
+        var headerPanel = new FlowLayoutPanel()
         {
             Dock = DockStyle.Top,
+            FlowDirection = FlowDirection.TopDown,
+            WrapContents = false,
             AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink,
+            Margin = Padding.Empty,
             Padding = new Padding(0),
+            BorderStyle = BorderStyle.None,
         };
-
-        // Status bar (top of header)
-        var statusBarRow = new FlowLayoutPanel
-        {
-            Height = 24,
-            FlowDirection = System.Windows.Forms.FlowDirection.LeftToRight,
-            Padding = new Padding(8, 0, 0, 0),
-            BackColor = Color.LightGray,
-        };
-        statusBarRow.Controls.Add(_warningLabel);
 
         // Button row (below status)
         var buttonRow = new FlowLayoutPanel
         {
-            Height = 32,
-            FlowDirection = System.Windows.Forms.FlowDirection.LeftToRight,
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink,
+            FlowDirection = FlowDirection.LeftToRight,
+            WrapContents = false,
+            Margin = Padding.Empty,
             Padding = new Padding(8),
         };
+
         buttonRow.Controls.Add(_configureButton);
-        buttonRow.Controls.Add(new Panel { Width = 4 });
         buttonRow.Controls.Add(_startButton);
-        buttonRow.Controls.Add(new Panel { Width = 4 });
         buttonRow.Controls.Add(_stopButton);
+
+        // Status bar (top of header)
+        var statusBarRow = new FlowLayoutPanel
+        {
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink,
+            FlowDirection = FlowDirection.LeftToRight,
+            WrapContents = false,
+            Margin = Padding.Empty,
+            Padding = new Padding(0),
+        };
+        statusBarRow.Controls.Add(_warningLabel);
 
         // Last added is docked first; add buttonRow before statusBarRow so
         // the status/message bar appears above the button row.
@@ -78,16 +90,14 @@ public sealed class MainForm : Form
         _modelsList.Dock = DockStyle.Fill;
         _modelsList.SelectionMode = SelectionMode.One;
 
-        _logBox.Dock = DockStyle.Fill;
-
         var modelsSplitter = new Splitter { Dock = DockStyle.Bottom, Height = 5 };
         var logHost = new Panel { Dock = DockStyle.Bottom, Height = 200 };
         logHost.Controls.Add(_logBox);
 
-        Controls.Add(modelsSplitter);
-        Controls.Add(logHost);
         Controls.Add(headerPanel);
+        Controls.Add(modelsSplitter);
         Controls.Add(_modelsList);
+        Controls.Add(logHost);
 
         _configureButton.Click += OnConfigureClick;
         _startButton.Click += OnStartClick;
