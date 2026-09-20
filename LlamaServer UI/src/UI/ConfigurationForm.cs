@@ -5,19 +5,19 @@ namespace LlamaServerUI;
 /// <summary>Standalone configuration dialog for editing config.json values.</summary>
 public sealed class ConfigurationForm : Form
 {
-    private readonly AppConfig _config;
-    private readonly Action _onRestored;
-    private readonly TextBox _txtBins = new();
-    private readonly TextBox _txtGguf = new();
-    private readonly NumericUpDown _numPort = new() { Minimum = 1, Maximum = 65535, Value = 8001 };
-    private readonly TextBox _txtYaml = new();
-    private readonly Button _btnSave = new() { Text = "Save", Width = 80 };
-    private readonly Button _btnCancel = new() { Text = "Cancel", Width = 80 };
+    private readonly AppConfig config;
+    private readonly Action onRestored;
+    private readonly TextBox txtBins = new();
+    private readonly TextBox txtGguf = new();
+    private readonly NumericUpDown numPort = new() { Minimum = 1, Maximum = 65535, Value = 8001 };
+    private readonly TextBox txtYaml = new();
+    private readonly Button btnSave = new() { Text = "Save", Width = 80 };
+    private readonly Button btnCancel = new() { Text = "Cancel", Width = 80 };
 
     public ConfigurationForm(AppConfig config, Action onRestored)
     {
-        _config = config;
-        _onRestored = onRestored;
+        this.config = config;
+        this.onRestored = onRestored;
         Text = "Configuration";
         StartPosition = FormStartPosition.CenterScreen;
         FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -78,23 +78,23 @@ public sealed class ConfigurationForm : Form
             return btn;
         }
 
-        _txtBins.Anchor = _txtGguf.Anchor = _txtYaml.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-        _numPort.Anchor = AnchorStyles.Left;
+        txtBins.Anchor = txtGguf.Anchor = txtYaml.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+        numPort.Anchor = AnchorStyles.Left;
 
         grid.Controls.Add(MakeLabel("llama.cpp bin:"), 0, 0);
-        grid.Controls.Add(_txtBins, 1, 0);
-        grid.Controls.Add(MakeBrowse(_txtBins, isFile: false), 3, 0);
+        grid.Controls.Add(txtBins, 1, 0);
+        grid.Controls.Add(MakeBrowse(txtBins, isFile: false), 3, 0);
 
         grid.Controls.Add(MakeLabel("GGUF folder:"), 0, 1);
-        grid.Controls.Add(_txtGguf, 1, 1);
-        grid.Controls.Add(MakeBrowse(_txtGguf, isFile: false), 3, 1);
+        grid.Controls.Add(txtGguf, 1, 1);
+        grid.Controls.Add(MakeBrowse(txtGguf, isFile: false), 3, 1);
 
         grid.Controls.Add(MakeLabel("Port:"), 0, 2);
-        grid.Controls.Add(_numPort, 1, 2);
+        grid.Controls.Add(numPort, 1, 2);
 
         grid.Controls.Add(MakeLabel("Models config:"), 0, 3);
-        grid.Controls.Add(_txtYaml, 1, 3);
-        grid.Controls.Add(MakeBrowse(_txtYaml, isFile: true), 3, 3);
+        grid.Controls.Add(txtYaml, 1, 3);
+        grid.Controls.Add(MakeBrowse(txtYaml, isFile: true), 3, 3);
 
         var btnPanel = new FlowLayoutPanel
         {
@@ -103,9 +103,9 @@ public sealed class ConfigurationForm : Form
             Anchor = AnchorStyles.Left,
             Margin = new Padding(0, 8, 0, 0),
         };
-        btnPanel.Controls.Add(_btnSave);
+        btnPanel.Controls.Add(btnSave);
         btnPanel.Controls.Add(new Panel { Width = 8, Height = 1 });
-        btnPanel.Controls.Add(_btnCancel);
+        btnPanel.Controls.Add(btnCancel);
         grid.SetColumnSpan(btnPanel, 4);
         grid.Controls.Add(btnPanel, 0, 4);
 
@@ -113,23 +113,23 @@ public sealed class ConfigurationForm : Form
         Controls.Add(lblTitle);
 
         // Populate from config
-        _txtBins.Text = _config.LlamaBinsFolder;
-        _txtGguf.Text = _config.GgufFolder;
-        _numPort.Value = Math.Clamp(_config.Port, 1, 65535);
-        _txtYaml.Text = _config.ModelsConfigPath;
+        txtBins.Text = config.LlamaBinsFolder;
+        txtGguf.Text = config.GgufFolder;
+        numPort.Value = Math.Clamp(config.Port, 1, 65535);
+        txtYaml.Text = config.ModelsConfigPath;
 
-        _btnSave.Click += OnSaveClick;
-        _btnCancel.Click += (_, _) => Close();
+        btnSave.Click += OnSaveClick;
+        btnCancel.Click += (_, _) => Close();
     }
 
     private void OnSaveClick(object? sender, EventArgs e)
     {
-        _config.LlamaBinsFolder = _txtBins.Text.Trim();
-        _config.GgufFolder = _txtGguf.Text.Trim();
-        _config.Port = (int)_numPort.Value;
-        _config.ModelsConfigPath = _txtYaml.Text.Trim();
-        _config.Save(AppConfig.DefaultConfigPath);
-        _onRestored();
+        config.LlamaBinsFolder = txtBins.Text.Trim();
+        config.GgufFolder = txtGguf.Text.Trim();
+        config.Port = (int)numPort.Value;
+        config.ModelsConfigPath = txtYaml.Text.Trim();
+        config.Save(AppConfig.DefaultConfigPath);
+        onRestored();
         Close();
     }
 }
