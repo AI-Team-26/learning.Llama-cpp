@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using System.Text.Json;
+using System.Windows.Forms.VisualStyles;
 using LlamaServerCore;
 
 namespace LlamaServerUI;
@@ -9,7 +10,7 @@ public sealed class MainForm : Form
     private readonly ListBox _modelsList = new();
     private readonly Button _startButton = new() { Text = "Start", AutoSize = true };
     private readonly Button _stopButton = new() { Text = "Stop", AutoSize = true, Enabled = false };
-    private readonly Button _configureButton = new() { Text = "\u2699 Configure", Width = 100, FlatStyle = FlatStyle.Standard };
+    private readonly Button _configureButton = new() { Text = "\u2699 Configure", AutoSize = true, };
     private readonly TextBox _logBox = new()
     {
         Multiline = true,
@@ -22,10 +23,13 @@ public sealed class MainForm : Form
     private readonly Label _warningLabel = new()
     {
         AutoSize = true,
-        Height = 24,
+        Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right,
+        Dock = DockStyle.Fill,
         ForeColor = Color.DarkRed,
-        Font = new Font(FontFamily.GenericSansSerif, 9f, FontStyle.Bold),
+        Font = new Font(FontFamily.GenericSansSerif, 10f, FontStyle.Bold),
         Visible = false,
+        Padding = new Padding(8),
+        //BackColor = Color.LightYellow,
     };
 
     private readonly List<string> _modelIds = [];
@@ -47,20 +51,11 @@ public sealed class MainForm : Form
             WrapContents = false,
             AutoSize = true,
             AutoSizeMode = AutoSizeMode.GrowAndShrink,
+            Margin = Padding.Empty,
             Padding = new Padding(0),
             BorderStyle = BorderStyle.None,
-            BackColor = Color.Red
+            //BackColor = Color.Red
         };
-
-        // Status bar (top of header)
-        var statusBarRow = new Panel
-        {
-            Height = 24,
-            Padding = new Padding(8, 0, 0, 0),
-            BackColor = Color.LightBlue,
-        };
-        _warningLabel.Anchor = AnchorStyles.Left | AnchorStyles.Top;
-        statusBarRow.Controls.Add(_warningLabel);
 
         // Button row (below status)
         var buttonRow = new FlowLayoutPanel
@@ -70,14 +65,30 @@ public sealed class MainForm : Form
             FlowDirection = FlowDirection.LeftToRight,
             WrapContents = false,
             BorderStyle = BorderStyle.None,
+            Margin = Padding.Empty,
             Padding = new Padding(8),
-            BackColor = Color.LightGreen,
+            //BackColor = Color.LightGreen,
         };
-        _startButton.Margin = new Padding(8, 3, 3, 3);
-        _stopButton.Margin = new Padding(8, 3, 3, 3);
+
         buttonRow.Controls.Add(_configureButton);
         buttonRow.Controls.Add(_startButton);
         buttonRow.Controls.Add(_stopButton);
+
+        // Status bar (top of header)
+        var statusBarRow = new FlowLayoutPanel
+        {
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink,
+            FlowDirection = FlowDirection.LeftToRight,
+            Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right,
+            WrapContents = false,
+            BorderStyle = BorderStyle.None,
+            Margin = Padding.Empty,
+            Padding = new Padding(0),
+            //Padding = Padding.Empty,
+            //BackColor = Color.LightBlue,
+        };
+        statusBarRow.Controls.Add(_warningLabel);
 
         // Last added is docked first; add buttonRow before statusBarRow so
         // the status/message bar appears above the button row.
