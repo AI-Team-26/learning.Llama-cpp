@@ -22,10 +22,17 @@
 | Qwen3.8-27B-UD-Q2_K_XL_unsloth.gguf                        |  9.2 | ❌ It changed the CHANGELOG for the test PR |
 | Qwen3.8-27B-Q3_K_S_unsloth.gguf                            | 11.7 | ❌ It changed the CHANGELOG for the test PR |
 | Qwen3.8-27B-UD-IQ3_S_unsloth.gguf                          | 11.2 |                          |
-| Qwen3.8-27B-IQ3_XS_ukisai.gguf                             | 12.1 |                          |
+| Swift-Qwen3.8-27B-IQ3_XS_ukisai.gguf                       | 12.1 |                          |
+| Swift-Qwen3.8-27b-IQ3_M_bartowski.gguf                     | 13.8 | ❌ Max 32K.                                 |
+| Swift-Qwen3.8-27b-i1-IQ4_XS-Smaller_ahmeddelkilami01.gguf  | 12.6 |     |
 
-## Qwen3.8-27B-IQ3_XS_ukisai.gguf                            
-https://huggingface.co/ukisai/Swift-Qwen3.8-27B-GGUF 
+
+## Swift IQ3_XS (ukisai)                            
+Swift-Qwen3.8-27B-IQ3_XS_ukisai.gguf                             12.1 GB
+https://huggingface.co/ukisai/Swift-Qwen3.8-27B-GGUF
+
+##
+Swift-Qwen3.8-27b-i1-IQ4_XS-Smaller_ahmeddelkilami01.gguf       12.6 GB
 
 
 ## ✔️ Uncensored-IQ3_M (orcarouter)
@@ -77,6 +84,9 @@ Qwen3.8-27B-UD-Q3_K_XL_unsloth.gguf                                  12.2 GB
 ## ✔️ Q3_K_M (Observerx)
 RVN-Q3_K_M-mtp_observerx.gguf                                      12.8 GB
 
+## ❌ Ukisai Swift IQ3_M (bartowski)
+Swift-Qwen3.8-27b-IQ3_M_bartowski.gguf
+Max 32k (Q4 52k).
 
 ## ❌ UD Q5_K_S (Unsloth)
 Qwen3.8-27B-UD-Q5_K_S_unsloth.gguf
@@ -117,8 +127,79 @@ It changed the CHANGELOG for the test PR
 
 
 ```bash
+model=Swift-Qwen3.8-27b-i1-IQ4_XS-Smaller_ahmeddelkilami01.gguf
+ctx_k=56
+gpu_layers=99
+cpu_moe=0
+quant=q8_0/q4_0
+spec=draft-mtp
+draft_model=none
+predict_token=1/4
+ngram_values=12/8
+jinja=0
+batch=768
+ubatch=512
+_test_model
 
-model=Qwen3.8-27B-IQ3_XS_ukisai.gguf
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                  | Batch/Ub. | Note              |
+| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | --------------------------------------- | --------- |------------------ |
+|  33 t/s |  68 k |   0 | 66/66 | 15.7 | 12.0/0.1  | q8_0 (q4_0) |    551 |  16s | MTP        min=1 max=3 p_min=0.20 (94%) |  1024/512 |                   |
+|  26 t/s |  68 k |   0 | 66/66 | 15.7 | 12.0/0.1  | q8_0 (q4_0) |    551 |  20s | MTP        min=1 max=2 p_min=0.20 (98%) |  1024/512 |                   |
+
+|  39 t/s |  64 k |   0 | 66/66 | 15.6 | 12.0/0.0  | q8_0 (q4_0) |    551 |  14s | MTP        min=1 max=3 p_min=0.20 (93%) |   768/256 |                   |
+|  39 t/s |  64 k |   0 | 66/66 | 15.7 | 12.0/0.1  | q8_0 (q4_0) |    551 |  14s | MTP        min=1 max=3 p_min=0.20 (94%) |  1024/512 |                   |
+|  37 t/s |  64 k |   0 | 66/66 | 15.7 | 12.0/0.0  | q8_0 (q4_0) |    551 |  15s | MTP        min=1 max=4 p_min=0.20 (92%) |   768/256 |                   |
+|  33 t/s |  64 k |   0 | 66/66 | 15.7 | 12.0/0.1  | q8_0 (q4_0) |    551 |  17s | MTP        min=1 max=3 p_min=0.20 (94%) |  2048/512 |                   |
+|  24 t/s |  64 k |   0 | 66/66 | 15.7 | 12.0/0.2  | q8_0 (q4_0) |    557 |  23s | MTP        min=1 max=3 p_min=0.20 (93%) | 1024/1024 |                   |
+
+
+|  34 t/s |  64 k |   0 | 66/66 | 15.7 | 12.0/0.1  | q8_0 (q8_0) |    551 |  16s | MTP        min=1 max=3 p_min=0.20 (95%) |  1024/512 |                   |
+
+|  40 t/s |  64 k |   0 | 66/66 | 15.7 | 12.0/0.1  | q8_0 (q4_0) |    551 |  14s | MTP        min=1 max=3 p_min=0.20 (94%) |  1024/512 |                   |
+|  36 t/s |  64 k |   0 | 66/66 | 15.7 | 12.0/0.1  | q8_0 (q4_0) |    551 |  15s | MTP        min=1 max=4 p_min=0.20 (92%) |  1024/512 |                   |
+
+|  41 t/s |  64 k |   0 | 66/66 | 14.9 | 12.0/0.1  | q4_0 (q4_0) |    546 |  14s | MTP        min=1 max=4 p_min=0.20 (84%) |  1024/512 |                   |
+
+|  43 t/s |  60 k |   0 | 66/66 | 15.7 | 12.0/0.1  | q8_0 (q4_0) |    551 |  13s | MTP        min=1 max=4 p_min=0.20 (92%) |  1024/512 |                   |
+|  32 t/s |  60 k |   0 | 66/66 | 15.7 | 12.0/0.2  | q8_0 (q4_0) |    557 |  17s | MTP        min=1 max=3 p_min=0.20 (93%) | 1024/1024 |                   |
+|  44 t/s |  56 k |   0 | 66/66 | 15.5 | 12.0/0.1  | q8_0 (q4_0) |    551 |  13s | MTP        min=1 max=4 p_min=0.20 (92%) |   768/512 |                   |
+
+
+
+
+
+model=Swift-Qwen3.8-27b-IQ3_M_bartowski.gguf
+ctx_k=36
+gpu_layers=99
+cpu_moe=0
+quant=q4_0
+spec=draft-mtp
+draft_model=none
+predict_token=1/4
+ngram_values=12/8
+jinja=0
+batch=1024
+ubatch=512
+_test_model
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                  | Batch/Ub. | Note              |
+| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | --------------------------------------- | --------- |------------------ |
+|  35 t/s |  32 k |   0 | 66/66 | 15.7 | 13.2/0.1  | q8_0 (q8_0) |    511 |  15s | MTP        min=1 max=4 p_min=0.20 (94%) | 1024/1024 |                   |
+
+|  42 t/s |  36 k |   0 | 66/66 | 15.3 | 13.2/0.1  | q4_0 (q4_0) |    528 |  12s | MTP        min=1 max=4 p_min=0.20 (90%) |  1024/512 |                   |
+
+|  43 t/s |  32 k |   0 | 66/66 | 15.7 | 13.2/0.1  | q8_0 (q4_0) |    533 |  12s | MTP        min=1 max=4 p_min=0.20 (92%) |  1024/512 |                   |
+|  38 t/s |  32 k |   0 | 66/66 | 15.5 | 13.2/0.1  | q8_0 (q4_0) |    533 |  14s | MTP        min=1 max=3 p_min=0.20 (93%) |  1024/512 |                   |
+|  36 t/s |  32 k |   0 | 66/66 | 15.7 | 13.2/0.1  | q8_0 (q4_0) |    533 |  15s | MTP        min=1 max=5 p_min=0.20 (88%) |  1024/512 |                   |
+
+|  37 t/s |  52 k |   0 | 66/66 | 15.6 | 13.2/0.1  | q4_0 (q4_0) |    524 |  14s | MTP        min=1 max=3 p_min=0.20 (91%) |  1024/512 |                   |
+
+|  37 t/s |  56 k |   0 | 66/66 | 15.7 | 13.2/0.1  | q4_0 (q4_0) |    524 |  14s | MTP        min=1 max=3 p_min=0.20 (91%) |  1024/512 |                   |
+|  42 t/s |  48 k |   0 | 66/66 | 15.6 | 13.2/0.1  | q4_0 (q4_0) |    528 |  13s | MTP        min=1 max=4 p_min=0.20 (90%) |  1024/512 |                   |
+|  42 t/s |  36 k |   0 | 66/66 | 15.3 | 13.2/0.1  | q4_0 (q4_0) |    528 |  13s | MTP        min=1 max=4 p_min=0.20 (90%) |  1024/512 |                   |
+
+
+model=Swift-Qwen3.8-27B-IQ3_XS_ukisai.gguf
 ctx_k=68
 gpu_layers=99
 cpu_moe=0
