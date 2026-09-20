@@ -26,15 +26,6 @@ public sealed class ConfigurationForm : Form
         MinimizeBox = false;
         ClientSize = new Size(520, 250);
 
-        var lblTitle = new Label
-        {
-            Text = "Configuration",
-            Font = new Font(FontFamily.GenericSansSerif, 11f, FontStyle.Bold),
-            AutoSize = true,
-            Dock = DockStyle.Top,
-            Padding = new Padding(0, 0, 0, 8),
-        };
-
         // Grid with columns: [label 120] [value 100%] [spacer 10] [browse 70]
         var grid = new TableLayoutPanel
         {
@@ -110,7 +101,6 @@ public sealed class ConfigurationForm : Form
         grid.Controls.Add(btnPanel, 0, 4);
 
         Controls.Add(grid);
-        Controls.Add(lblTitle);
 
         // Populate from config
         txtBins.Text = config.LlamaBinsFolder;
