@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 using System.Text.Json;
 using LlamaServerCore;
 
@@ -22,6 +22,7 @@ public sealed class MainForm : Form
     private readonly Label _warningLabel = new()
     {
         AutoSize = true,
+        Height = 24,
         ForeColor = Color.DarkRed,
         Font = new Font(FontFamily.GenericSansSerif, 9f, FontStyle.Bold),
         Visible = false,
@@ -39,31 +40,36 @@ public sealed class MainForm : Form
         Icon = LoadAppIcon();
 
         // Parent panel for all top content (deterministic stacking)
-        var headerPanel = new Panel
+        var headerPanel = new FlowLayoutPanel()
         {
             Dock = DockStyle.Top,
+            FlowDirection = FlowDirection.TopDown,
+            WrapContents = false,
             AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink,
             Padding = new Padding(0),
+            BorderStyle = BorderStyle.None,
             BackColor = Color.Red
         };
 
         // Status bar (top of header)
-        var statusBarRow = new FlowLayoutPanel
+        var statusBarRow = new Panel
         {
             Height = 24,
-            FlowDirection = System.Windows.Forms.FlowDirection.LeftToRight,
             Padding = new Padding(8, 0, 0, 0),
-            //BackColor = Color.LightGray,
             BackColor = Color.LightBlue,
         };
+        _warningLabel.Anchor = AnchorStyles.Left | AnchorStyles.Top;
         statusBarRow.Controls.Add(_warningLabel);
 
         // Button row (below status)
         var buttonRow = new FlowLayoutPanel
         {
             AutoSize = true,
-            FlowDirection = System.Windows.Forms.FlowDirection.LeftToRight,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink,
+            FlowDirection = FlowDirection.LeftToRight,
             WrapContents = false,
+            BorderStyle = BorderStyle.None,
             Padding = new Padding(8),
             BackColor = Color.LightGreen,
         };
@@ -76,7 +82,7 @@ public sealed class MainForm : Form
         // Last added is docked first; add buttonRow before statusBarRow so
         // the status/message bar appears above the button row.
         headerPanel.Controls.Add(buttonRow);
-//        headerPanel.Controls.Add(statusBarRow);
+        headerPanel.Controls.Add(statusBarRow);
 
         // Main layout
         _modelsList.Dock = DockStyle.Fill;
@@ -88,9 +94,10 @@ public sealed class MainForm : Form
         var logHost = new Panel { Dock = DockStyle.Bottom, Height = 200 };
         logHost.Controls.Add(_logBox);
 
+        Controls.Add(headerPanel);
         Controls.Add(modelsSplitter);
         Controls.Add(logHost);
-        Controls.Add(headerPanel);
+        
         Controls.Add(_modelsList);
 
         _configureButton.Click += OnConfigureClick;
