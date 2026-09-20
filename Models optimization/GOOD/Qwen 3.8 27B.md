@@ -128,16 +128,16 @@ It changed the CHANGELOG for the test PR
 
 ```bash
 model=Swift-Qwen3.8-27b-i1-IQ4_XS-Smaller_ahmeddelkilami01.gguf
-ctx_k=56
+ctx_k=64
 gpu_layers=99
 cpu_moe=0
 quant=q8_0/q4_0
 spec=draft-mtp
 draft_model=none
-predict_token=1/4
+predict_token=1/3
 ngram_values=12/8
 jinja=0
-batch=768
+batch=1024
 ubatch=512
 _test_model
 
