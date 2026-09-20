@@ -40,7 +40,7 @@ public sealed class ConfigurationForm : Form
         {
             Dock = DockStyle.Fill,
             ColumnCount = 4,
-            RowCount = 6,
+            RowCount = 5,
             Padding = new Padding(16, 4, 16, 8),
         };
         for (var c = 0; c < grid.ColumnCount; c++)

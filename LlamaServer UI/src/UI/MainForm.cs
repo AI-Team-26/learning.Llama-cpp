@@ -191,11 +191,7 @@ public sealed class MainForm : Form
         Visible = false;
         try
         {
-            using var dlg = new ConfigurationForm(_config, () =>
-            {
-                Visible = true;
-                LoadModels();
-            });
+            using var dlg = new ConfigurationForm(_config, LoadModels);
             dlg.ShowDialog(this);
         }
         finally
