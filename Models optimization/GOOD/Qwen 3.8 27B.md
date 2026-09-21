@@ -24,8 +24,11 @@
 | Qwen3.8-27B-UD-IQ3_S_unsloth.gguf                          | 11.2 |                          |
 | Swift-Qwen3.8-27B-IQ3_XS_ukisai.gguf                       | 12.1 |                          |
 | Swift-Qwen3.8-27b-IQ3_M_bartowski.gguf                     | 13.8 | ❌ Max 32K.                                 |
-| Swift-Qwen3.8-27b-i1-IQ4_XS-Smaller_ahmeddelkilami01.gguf  | 12.6 |     |
+| Swift-Qwen3.8-27b-i1-IQ4_XS-Smaller_ahmeddelkilami01.gguf  | 12.6 |      |
+| Qwen3.8-27B-IQ4_XS-3.84bpw_byteshape.gguf                  | 12.1 |      |
 
+# IQ4_XS (byteshape)
+Qwen3.8-27B-IQ4_XS-3.84bpw_byteshape.gguf                       12.1 GB
 https://huggingface.co/byteshape/Qwen3.8-27B-GGUF
 
 
@@ -129,6 +132,33 @@ It changed the CHANGELOG for the test PR
 
 
 ```bash
+
+model=Qwen3.8-27B-IQ4_XS-3.84bpw_byteshape.gguf
+ctx_k=64
+gpu_layers=99
+cpu_moe=0
+quant=q8_0/q8_0
+spec=draft-mtp
+draft_model=none
+predict_token=1/4
+ngram_values=none
+jinja=1
+batch=1024
+ubatch=512
+_test_model
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                  | Batch/Ub. | Note              |
+| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | --------------------------------------- | --------- |------------------ |
+|  43 t/s |  72 k |   0 | 66/66 | 15.6 | 11.5/0.0  | q8_0 (q4_0) |    601 |  14s | MTP        min=1 max=4 p_min=0.20 (87%) |   512/256 | R: medium         |
+
+|  42 t/s |  64 k |   0 | 66/66 | 15.4 | 11.5/0.0  | q8_0 (q4_0) |    601 |  14s | MTP        min=1 max=5 p_min=0.20 (84%) |   512/256 | R: medium         |
+|  42 t/s |  64 k |   0 | 66/66 | 15.3 | 11.5/0.0  | q8_0 (q4_0) |    601 |  15s | MTP        min=1 max=4 p_min=0.20 (87%) |   512/256 | R: medium         |
+|  38 t/s |  64 k |   0 | 66/66 | 15.2 | 11.5/0.0  | q8_0 (q4_0) |    601 |  15s | MTP        min=1 max=3 p_min=0.20 (90%) |   512/256 | R: medium         |
+|  37 t/s |  64 k |   0 | 66/66 | 15.3 | 11.5/0.1  | q8_0 (q4_0) |    563 |  15s | MTP        min=1 max=3 p_min=0.20 (91%) |  1024/512 | R: medium         |
+|  18 t/s |  60 k |   0 | 66/66 | 14.1 | 11.4/0.1  | q8_0 (none) |    622 |  35s | none                                 -- |  1024/512 | R: medium         |
+
+
+
 model=Swift-Qwen3.8-27b-i1-IQ4_XS-Smaller_ahmeddelkilami01.gguf
 ctx_k=64
 gpu_layers=99
