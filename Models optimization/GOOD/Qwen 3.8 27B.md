@@ -26,6 +26,8 @@
 | Swift-Qwen3.8-27b-IQ3_M_bartowski.gguf                     | 13.8 | ❌ Max 32K.                                 |
 | Swift-Qwen3.8-27b-i1-IQ4_XS-Smaller_ahmeddelkilami01.gguf  | 12.6 |     |
 
+https://huggingface.co/byteshape/Qwen3.8-27B-GGUF
+
 
 ## Swift IQ3_XS (ukisai)                            
 Swift-Qwen3.8-27B-IQ3_XS_ukisai.gguf                             12.1 GB
@@ -163,8 +165,6 @@ _test_model
 |  43 t/s |  60 k |   0 | 66/66 | 15.7 | 12.0/0.1  | q8_0 (q4_0) |    551 |  13s | MTP        min=1 max=4 p_min=0.20 (92%) |  1024/512 |                   |
 |  32 t/s |  60 k |   0 | 66/66 | 15.7 | 12.0/0.2  | q8_0 (q4_0) |    557 |  17s | MTP        min=1 max=3 p_min=0.20 (93%) | 1024/1024 |                   |
 |  44 t/s |  56 k |   0 | 66/66 | 15.5 | 12.0/0.1  | q8_0 (q4_0) |    551 |  13s | MTP        min=1 max=4 p_min=0.20 (92%) |   768/512 |                   |
-
-
 
 
 

@@ -1,19 +1,51 @@
 # Tiel-Coder
 
 
+| File                                                 | GB   | Result                                |
+| ---                                                  | ---  | ---                                   |
+| Cyber-Tiel-Coder-35B-A3B-MTP-UD-IQ4_XS_peculiar.gguf | 16.8 | X Slow. Too chatty.                   |
+| Tiel-Coder-35B-A3B-UD-IQ4_XS_peculiar.gguf           |      |                                       |
+
+
+
+##
+Cyber-Tiel-Coder-35B-A3B-MTP-UD-IQ4_XS_peculiar.gguf             16.8 GB
+
+## Tiel-Coder-35B-A3B (peculiar-ragdoll)
+Tiel-Coder-35B-A3B-UD-IQ4_XS_peculiar.gguf        
+https://huggingface.co/peculiar-ragdoll/Tiel-Coder-35B-A3B-GGUF
+MTP: no
 Fast but:
 - long time/tokens
 - many errors and got stuck with error "Response was truncated before completion."
 - hasn't create the PR of feat/12. When asked to create, it did, but no link.
 
 
-## Tiel-Coder-35B-A3B (peculiar-ragdoll)
-Tiel-Coder-35B-A3B-UD-IQ4_XS_peculiar.gguf        
-https://huggingface.co/peculiar-ragdoll/Tiel-Coder-35B-A3B-GGUF
-MTP: no
-
-
 ```bash
+
+model=Cyber-Tiel-Coder-35B-A3B-MTP-UD-IQ4_XS_peculiar.gguf
+ctx_k=60
+gpu_layers=99
+cpu_moe=7
+quant=q8_0/q4_0
+spec=draft-mtp
+draft_model=none
+predict_token=1/3
+jinja=0
+batch=512
+ubatch=256
+_test_model
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                  | Batch/Ub. | Note              |
+| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | --------------------------------------- | --------- |------------------ |
+|  33 t/s |  64 k |   5 | 42/42 | 15.4 | 14.3/0.0  | q8_0 (none) |    490 |  14s | none                                 -- |  1024/256 |                   |
+|  31 t/s |  64 k |   6 | 42/42 | 15.2 | 13.9/0.1  | q8_0 (none) |    541 |  17s | none                                 -- |  1024/512 |                   |
+|  31 t/s |  64 k |   7 | 42/42 | 15.4 | 13.9/0.0  | q8_0 (q4_0) |    505 |  16s | MTP        min=1 max=2 p_min=0.20 (88%) |   512/256 |                   |
+|  30 t/s |  64 k |   7 | 42/42 | 15.6 | 13.9/0.1  | q8_0 (q4_0) |    528 |  17s | MTP        min=1 max=2 p_min=0.20 (84%) |  1024/512 |                   |
+|  22 t/s |  64 k |   4 | 42/42 | 15.7 | 14.6/0.1  | q8_0 (none) |    521 |  23s | none                                 -- |  1024/512 |                   |
+|  20 t/s |  64 k |   5 | 42/42 | 15.7 | 14.6/0.0  | q8_0 (q4_0) |    480 |  24s | MTP        min=1 max=2 p_min=0.20 (91%) |  1024/256 |                   |
+|  20 t/s |  64 k |   6 | 42/42 | 15.7 | 14.3/0.1  | q8_0 (q4_0) |    507 |  26s | MTP        min=1 max=2 p_min=0.20 (89%) |  1024/512 |                   |
+
 
 model=Tiel-Coder-35B-A3B-UD-IQ4_XS_peculiar.gguf
 ctx_k=64

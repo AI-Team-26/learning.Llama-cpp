@@ -75,14 +75,38 @@ models:
 
 ### Qwen 3.8 27B ###
 
+  Qwen3.8-27B-IQ4_XS_ahmeddelkilami01_64k:
+    file: Swift-Qwen3.8-27b-i1-IQ4_XS-Smaller_ahmeddelkilami01.gguf
+    ctx_k: 64
+    gpu_layers: 99
+    cpu_moe: 0
+    quant: q8_0/q4_0
+    batch: 1024
+    ubatch: 512
+    spec_type: draft-mtp
+    spec_draft_n_min: 1
+    spec_draft_n_max: 3
+    jinja: 0
+    pi_agent_model: >
+      { 
+         "_test": "?",
+         "_speed": "? t/s",
+          "id": "Qwen3.8-27B-IQ3_XS_ulisai_64k",
+          "name": "Qwen 3.8 27B IQ3_XS (UkisAI) [64k]",
+          "contextWindow": 65536,
+          "maxTokens": 8192,
+          "reasoning": true,
+          "input": [ "text" ]
+      },
+
   Qwen3.8-27B-IQ3_XS_ulisai_64k:
     file: Qwen3.8-27B-IQ3_XS_ukisai.gguf
     ctx_k: 64
     gpu_layers: 99
     cpu_moe: 0
     quant: q8_0
-    batch: 2048
-    ubatch: 1024
+    batch: 1024
+    ubatch: 512
     spec_type: draft-mtp
     spec_draft_n_min: 1
     spec_draft_n_max: 4
@@ -639,8 +663,8 @@ models:
     spec_type: none 
     pi_agent_model: >
        { 
-            "_test": "?",
-            "_speed": "? t/s",
+            "_test": "Super fast, but indisciplinate and liar. Use only as executor.",
+            "_speed": "45 t/s",
             "id": "KAT-Coder-V2.5-Dev-REAP-205E-MTP-UD-IQ4_XS_(gbuxhf)_128k",
             "name": "KAT-Coder-V2.5 REAP-205E MTP UD-IQ4_XS (gbuxhf) [128k]",
             "contextWindow": 131072,

@@ -43,25 +43,30 @@ public sealed class MainForm : Form
         {
             Dock = DockStyle.Top,
             AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink,
             Padding = new Padding(0),
+            BackColor = Color.Red
         };
 
         // Status bar (top of header)
         var statusBarRow = new FlowLayoutPanel
         {
+            Dock = DockStyle.Top,
             Height = 24,
             FlowDirection = System.Windows.Forms.FlowDirection.LeftToRight,
             Padding = new Padding(8, 0, 0, 0),
-            BackColor = Color.LightGray,
+            BackColor = Color.LemonChiffon,
         };
         statusBarRow.Controls.Add(_warningLabel);
 
         // Button row (below status)
         var buttonRow = new FlowLayoutPanel
         {
-            Height = 32,
             FlowDirection = System.Windows.Forms.FlowDirection.LeftToRight,
+            AutoSize=true,
+            AutoSizeMode=AutoSizeMode.GrowAndShrink,
             Padding = new Padding(8),
+            BackColor = Color.Orange,
         };
         buttonRow.Controls.Add(_configureButton);
         buttonRow.Controls.Add(new Panel { Width = 4 });
@@ -84,9 +89,10 @@ public sealed class MainForm : Form
         var logHost = new Panel { Dock = DockStyle.Bottom, Height = 200 };
         logHost.Controls.Add(_logBox);
 
+        Controls.Add(headerPanel);
         Controls.Add(modelsSplitter);
         Controls.Add(logHost);
-        Controls.Add(headerPanel);
+        
         Controls.Add(_modelsList);
 
         _configureButton.Click += OnConfigureClick;
