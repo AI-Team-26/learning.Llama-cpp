@@ -1,13 +1,13 @@
 # KAT Coder
 
-| File                                                   | GB   | Result                                |
-| ---                                                    | ---- |                                       |
-| KAT-Coder-V2.5-Dev_Q3_K_M_imatrix_MTP_offmonreal.gguf  | 16.8 | ✔️ 40 t/s (64k) / 40 t/s (52k) Q8     |
-| KAT-Coder-V2.5-Dev-Cerebellum-14GB-v2_deucebucket.gguf | 11.8 | ✔️ 45 t/s (160k)                      |
-| KAT-Coder-V2.5-Dev-APEX-dynamic-v2_myric.gguf          | 11.9 | ✔️ 50 t/s (192k)  ❌ Indisciplinate   |
-| KAT-Coder-V2.5-Dev-REAP-205E-MTP-UD-IQ4_XS_gbuxhf.gguf | 14.0 | ✔️ 45 t/s (128k)  ❌ Indisciplinate   | 
-| KAT-Coder-V2.5-Dev_Q2_K-AllGPU_offmonreal.gguf         | 13.0 | ✔️ 50 t/s (160k)  ❌ Indisciplinate   | 
-| KAT-Coder-V2.5-Dev-MTP-MXFP4_MOE_noctrex.gguf          |      | ❌ Too slow                           |
+| File                                                   | GB   | Result                                         |
+| ---                                                    | ---- |                                                |
+| KAT-Coder-V2.5-Dev_Q3_K_M_imatrix_MTP_offmonreal.gguf  | 16.8 | ✔️ 40 t/s (64k) / 40 t/s (52k) Q8              |
+| KAT-Coder-V2.5-Dev-Cerebellum-14GB-v2_deucebucket.gguf | 11.8 | ✔️ 45 t/s (160k)                               |
+| KAT-Coder-V2.5-Dev-APEX-dynamic-v2_myric.gguf          | 11.9 | ✔️ 50 t/s (192k)  ❌ Indisciplinate           |
+| KAT-Coder-V2.5-Dev-REAP-205E-MTP-UD-IQ4_XS_gbuxhf.gguf | 14.0 | ✔️ 45 t/s (128k)  ❌ Indisciplinate ❌ Liar   | 
+| KAT-Coder-V2.5-Dev_Q2_K-AllGPU_offmonreal.gguf         | 13.0 | ✔️ 50 t/s (160k)  ❌ Indisciplinate           | 
+| KAT-Coder-V2.5-Dev-MTP-MXFP4_MOE_noctrex.gguf          |      | ❌ Too slow                                    |
 
 
 ## ✔️ Cerebellum-14GB-V2 (deucebucket)
