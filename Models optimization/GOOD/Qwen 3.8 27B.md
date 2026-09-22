@@ -4,6 +4,7 @@
 |------------------------------------------------------------| ---- |---------------------------------------------|
 | Qwen3.8-27B-Uncensored-Aggressive-IQ3_M_HauhauCS.gguf      | 12.9 | ? 128k: 25-40 t/s. Good                     |
 | Qwen3.8-27B-UD-Q3_K_XL_unsloth.gguf                        | 12.2 | ✔️ 80k: 20-45 t/s Super smart.              |
+| Qwen3.8-27B-IQ4_XS-3.84bpw_byteshape.gguf                  | 12.1 | ✔️ 64k: 25-45 t/s  Good PR                  |
 | Qwen3.8-27B-i1-IQ4_XS-GGUF-Smaller_jrell.gguf              | 12.6 | ✔️ 56k: 15-45 t/s Good                      |
 | Qwen3.8-27B-UD-IQ4_XS_unsloth.gguf                         | 13.2 | ✔️ 64k: 20-40 t/s  80k: 20-30 t/s           |
 | Qwen3.8-27B-Cold-Fusion-GAIN-V1.1-MTP-IQ3_M_davidau.gguf   | 13.5 | ✔️ 64k: 15-30 t/s Short reasoning           |
@@ -25,11 +26,24 @@
 | Swift-Qwen3.8-27B-IQ3_XS_ukisai.gguf                       | 12.1 |                          |
 | Swift-Qwen3.8-27b-IQ3_M_bartowski.gguf                     | 13.8 | ❌ Max 32K.                                 |
 | Swift-Qwen3.8-27b-i1-IQ4_XS-Smaller_ahmeddelkilami01.gguf  | 12.6 |      |
-| Qwen3.8-27B-IQ4_XS-3.84bpw_byteshape.gguf                  | 12.1 |      |
+| Qwen3.8-27B-IQ3_S-3.23bpw_byteshape.gguf                   | 10.2 |      |
+| Qwen3.8-27B-GSQ-RCO-IQ3_S-mtp_ista.gguf                    | 11.2 |      |
+
+
+# (ISTA-DASLAb)
+Qwen3.8-27B-GSQ-RCO-IQ3_S-mtp_ista.gguf                         11.2 GB
+https://huggingface.co/ISTA-DASLab/Qwen3.8-27B-GSQ-RCO-GGUF
+mmproj:
+
+# https://huggingface.co/troed/Qwen3.8-27B-ASCII-Condensed
 
 # IQ4_XS (byteshape)
 Qwen3.8-27B-IQ4_XS-3.84bpw_byteshape.gguf                       12.1 GB
 https://huggingface.co/byteshape/Qwen3.8-27B-GGUF
+
+
+# IQ3_S (byteshape)
+Qwen3.8-27B-IQ3_S-3.23bpw_byteshape.gguf                      10.2 GB
 
 
 ## Swift IQ3_XS (ukisai)                            
@@ -132,6 +146,44 @@ It changed the CHANGELOG for the test PR
 
 
 ```bash
+
+model=Qwen3.8-27B-GSQ-RCO-IQ3_S-mtp_ista.gguf
+ctx_k=60
+gpu_layers=99
+cpu_moe=0
+quant=q8_0/q8_0
+spec=draft-mtp,ngram-simple
+draft_model=none
+predict_token=1/4
+ngram_values=32/24/1
+jinja=1
+batch=1024
+ubatch=512
+_test_model
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                  | Batch/Ub. | Note              |
+| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | --------------------------------------- | --------- |------------------ |
+|  44 t/s |  64 k |   0 | 66/66 | 15.1 | 10.9/0.1  | q8_0 (q8_0) |    551 |  13s | MTP        min=1 max=4 p_min=0.20 (89%) |  1024/512 | R: medium         |
+|  42 t/s |  68 k |   0 | 66/66 | 15.2 | 10.9/0.1  | q8_0 (q8_0) |    551 |  13s | MTP        min=1 max=4 p_min=0.20 (87%) |  1024/512 | R: medium         |
+
+
+
+
+model=Qwen3.8-27B-IQ3_S-3.23bpw_byteshape.gguf
+ctx_k=64
+gpu_layers=99
+cpu_moe=0
+quant=q8_0/q8_0
+spec=draft-mtp
+draft_model=none
+predict_token=1/4
+ngram_values=none
+jinja=1
+batch=1024
+ubatch=512
+_test_model
+
+
 
 model=Qwen3.8-27B-IQ4_XS-3.84bpw_byteshape.gguf
 ctx_k=64
@@ -358,16 +410,19 @@ ctx_k=64
 gpu_layers=99
 cpu_moe=0
 quant=q4_0
-spec=draft-mtp
+spec=draft-mtp,ngram-simple
 draft_model=none
-predict_token=1/3
+predict_token=1/4
+ngram_values=24/16/1
 jinja=0
 batch=1024
-ubatch=512
+ubatch=256
 _test_model
 
 | Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                  | Batch/Ub. | Note              |
 | ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | --------------------------------------- | --------- |------------------ |
+|  42 t/s |  64 k |   0 | 66/66 | 15.6 | 12.9/0.0  | q4_0 (q4_0) |    570 |  13s | MTP        min=1 max=4 p_min=0.20 (89%) |  1024/256 | R: medium         |
+|  38 t/s |  64 k |   0 | 66/66 | 15.5 | 12.9/0.0  | q4_0 (q4_0) |    557 |  14s | MTP        min=1 max=3 p_min=0.20 (92%) |  1024/256 | R: medium         |
 |  38 t/s |  64 k |   0 | 66/66 | 15.7 | 12.9/0.1  | q4_0 (q4_0) |    585 |  15s | MTP        min=2 max=3 p_min=0.20 (94%) |  1024/512 | R: medium         |
 |  34 t/s |  64 k |   0 | 66/66 | 15.7 | 12.9/0.1  | q4_0 (q4_0) |    604 |  17s | MTP        min=3 max=4 p_min=0.20 (88%) |  1024/512 | R: medium         |
 |  33 t/s |  64 k |   0 | 66/66 | 15.5 | 12.9/0.1  | q4_0 (q4_0) |    587 |  18s | MTP        min=1 max=2 p_min=0.20 (96%) |  1024/512 | R: medium         |

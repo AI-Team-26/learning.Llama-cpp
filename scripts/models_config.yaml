@@ -155,10 +155,13 @@ models:
     cpu_moe: 0
     quant: q4_0
     batch: 1024
-    ubatch: 512
-    spec_type: draft-mtp
+    ubatch: 256
+    spec_type: draft-mtp,ngram-simple
     spec_draft_n_min: 1
     spec_draft_n_max: 4
+    spec_ngram_simple_size_n: 24
+    spec_ngram_simple_size_m: 16
+    spec_ngram_simple_min_hits: 1
     jinja: 0
     pi_agent_model: >
       { 
@@ -274,7 +277,7 @@ models:
     cpu_moe: 0
     quant: q4_0
     batch: 1024
-    ubatch: 1024
+    ubatch: 256
     spec_type: draft-mtp
     spec_draft_n_min: 1
     spec_draft_n_max: 3
