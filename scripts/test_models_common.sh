@@ -76,9 +76,11 @@ print_test_call() {
         print_value "Accepted prediction %" "$accepted_pct"
     fi
 
-    # speculative prediction cell: "<Name> <params> (<accepted %>)" per detected type, e.g.
-    # "DFlash 1/4 (56%) N-gram 32/24/1 (78%)". Per-type accepted rates are not gathered
-    # from the log yet: use the global rate when a single type is active, else "(n.a.)"
+    # speculative prediction cell: whole acceptance rate prefix followed by
+    # "<Name> <params> (<accepted %>)" per detected type, e.g.
+    # "95% | MTP 2/4 (95%)", "95% | DFlash 1/4 (n.a.) N-gram 32/24/1 (n.a.)"
+    # Per-type accepted rates are not gathered from the log yet:
+    # use the global rate when a single type is active, else "(n.a.)"
     local spec_cell="--"
     if [[ "$pred_type" != "none" ]]; then
         local names=()
@@ -93,8 +95,10 @@ print_test_call() {
             # :-? makes a future names/infos desync visible instead of rendering empty params
             spec_cell+="${names[$i]} ${infos[$i]:-?} $ap"
         done
-        # guard: >2 active types would overflow the 40-char column and break alignment
-        spec_cell="${spec_cell:0:40}"
+        # whole acceptance rate as cell prefix when available
+        [[ "$accepted_pct" != "" ]] && spec_cell="$(printf "%.0f" "$accepted_pct")% | $spec_cell"
+        # guard: overflow beyond the 48-char column would break row alignment
+        spec_cell="${spec_cell:0:48}"
     fi
 
     local note=""
@@ -103,9 +107,9 @@ print_test_call() {
 
     #[[ "$K_Q8_CACHE" == "1" ]] && note+=" K:q8_0"
     
-    printf "| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                    | Batch/Ub. | Note              |\n"
-    printf "| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | ------------------------------------------| --------- |------------------ |\n"
-    printf "| %3.0f t/s | %3s k | %3s | %5s | %4.1f | %-9s | %-3s (%3s) | %6s | %3.0fs | %-40s | %9s | %-17s |\n" \
+    printf "| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                          | Batch/Ub. | Note              |\n"
+    printf "| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | -------------------------------------------- | --------- |------------------ |\n"
+    printf "| %3.0f t/s | %3s k | %3s | %5s | %4.1f | %-9s | %-3s (%3s) | %6s | %3.0fs | %-48s | %9s | %-17s |\n" \
         "$eval_rate" \
         "$ctx_k" \
         "$cpu_moe" \
