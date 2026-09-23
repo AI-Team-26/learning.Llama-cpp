@@ -1,5 +1,17 @@
 # TODO
 
+## Backlog
+
+- Feature 8: /new command should maintain the selected model, not switch to the default one set in settings.json or the first one found in models.json
+  This requires an investigation. Use the branch doc/8_investigate_new_command to store gathered info and possible solutions
+
+- **Feature 7.1**: Print dflash info in test_call output without making lines too long (depends on Feature 7)
+- **Feature 7.2**: Extract dflash accepted speculative rate (depends on Feature 7)
+- **Feature 6**: [feat/06_sharpyaml] Replace YamlDotNet with SharpYaml (PropertyNamingPolicy=SnakeCaseLower); drop [YamlMember] aliases except [JsonPropertyName("ubatch")] on UBatch — TODO notes already in ModelsConfigLoader.cs/ModelConfig.cs
+- Unify the llama-server call of test and prod calls
+- Remove/comment out error check of JSON response in run_llamacpp function
+- Manage server start failing due to error loading the model
+
 ## ✅ Done
 
 ### **[feat/02_llama_server_ui]** Llama Server UI program — all merged (PRs #1–#11)
@@ -14,12 +26,3 @@
 - PR #11 (fix/UI_main_form): Replace panel spacers with button margins in header row
 
 - **[feat/07_get_prediction_info_dflash]** Feature 7 — get_prediction_info, dflash extraction
-
-## Backlog
-
-- **Feature 7.1**: Print dflash info in test_call output without making lines too long (depends on Feature 7)
-- **Feature 7.2**: Extract dflash accepted speculative rate (depends on Feature 7)
-- **Feature 6**: [feat/06_sharpyaml] Replace YamlDotNet with SharpYaml (PropertyNamingPolicy=SnakeCaseLower); drop [YamlMember] aliases except [JsonPropertyName("ubatch")] on UBatch — TODO notes already in ModelsConfigLoader.cs/ModelConfig.cs
-- Unify the llama-server call of test and prod calls
-- Remove/comment out error check of JSON response in run_llamacpp function
-- Manage server start failing due to error loading the model
