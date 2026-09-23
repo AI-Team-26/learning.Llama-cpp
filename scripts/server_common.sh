@@ -610,7 +610,8 @@ get_prediction_info() {
     
     local draft_dflash=$(grep -E "I common_speculative_impl_draft_dflash: adding speculative implementation 'draft-dflash'" "$log" | tail -n 1)
     
-    if [[ -n $draft_dflash ]]; then
+    # only set if no other spec type was detected first, to avoid overriding it
+    if [[ -n $draft_dflash && "$pred_type" == "none" ]]; then
         pred_type="DFlash"
 
         #0.12.004.484 I common_speculative_impl_draft_dflash: - n_max=4, n_min=1, p_min=0.20
@@ -628,21 +629,6 @@ get_prediction_info() {
             return_value "error" "found spec type '$pred_type' but failed to find its parameters'"
             printf "ERROR: found spec type '$pred_type' but failed to find its parameters"
             return 1
-        fi
-    fi
-
-    # Extract dflash accepted speculative rate from statistics line (Feature 7.2)
-    # e.g., I statistics ... #acc drafts = ...
-    local dflash_stats=$(grep -E "I statistics.*common_speculative_impl_draft_dflash" "$log" | tail -n 1)
-    if [[ -z "$dflash_stats" && "$pred_type" == "DFlash" ]]; then
-        # Try generic statistics line for dflash
-        dflash_stats=$(grep -E "I statistics.*draft-dflash" "$log" | tail -n 1)
-    fi
-    if [[ -n "$dflash_stats" ]]; then
-        local dflash_acc_drafts=$(echo "$dflash_stats" | grep -oE '#acc drafts = *[0-9]+' | awk '{print $4}')
-        local dflash_acc_tokens=$(echo "$dflash_stats" | grep -oE '#acc tokens = *[0-9]+' | awk '{print $4}')
-        if [[ -n "$dflash_acc_drafts" && "$dflash_acc_drafts" -gt 0 && -n "$dflash_acc_tokens" ]]; then
-            return_value "dflash_accepted_pct" "$(awk -v a="$dflash_acc_drafts" -v n="$dflash_acc_tokens" 'BEGIN { if (n > 0) printf "%.1f", (a/n)*100; else printf "0.0" }')"
         fi
     fi
 

@@ -72,17 +72,6 @@ print_test_call() {
     # normalize (where is the "--" value came from??)
     [[ "$accepted_pct" == "n.a." ]] && accepted_pct=""
 
-    # Feature 7.2: use dflash-specific accepted rate if available
-    if [[ "$pred_type" == "DFlash" && -n "${dflash_accepted_pct:-}" && "$dflash_accepted_pct" != "0.0" ]]; then
-        accepted_pct="$dflash_accepted_pct"
-    fi
-
-    # Feature 7.1: print dflash info concisely to avoid overly long lines
-    local pred_info_short="$pred_info"
-    if [[ "$pred_type" == "DFlash" ]]; then
-        pred_info_short=$(echo "$pred_info" | sed 's/p_min=//')
-    fi
-
     if [[ "$accepted_pct" != "" ]]; then
         print_value "Accepted prediction %" "$accepted_pct"
         pred_info+=" ($(printf "%.0f" "$accepted_pct")%)"
@@ -96,7 +85,7 @@ print_test_call() {
     
     printf "| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                  | Batch/Ub. | Note              |\n"
     printf "| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | --------------------------------------- | --------- |------------------ |\n"
-    printf "| %3.0f t/s | %3s k | %3s | %5s | %4.1f | %-9s | %-3s (%3s) | %6s | %3.0fs | %-10s %-28s | %9s | %-17s |\n" \
+    printf "| %3.0f t/s | %3s k | %3s | %5s | %4.1f | %-9s | %-3s (%3s) | %6s | %3.0fs | %-10s %28s | %9s | %-17s |\n" \
         "$eval_rate" \
         "$ctx_k" \
         "$cpu_moe" \
@@ -108,7 +97,7 @@ print_test_call() {
         "$eval_count" \
         "$total_duration_s" \
         "$pred_type" \
-        "$pred_info_short" \
+        "$pred_info" \
         "$batch/$ubatch" \
         "$note" 
 }
