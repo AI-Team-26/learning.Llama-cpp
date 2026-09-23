@@ -78,20 +78,27 @@ print_test_call() {
 
     # speculative prediction cell: whole acceptance rate prefix followed by
     # "<Name> <params> (<accepted %>)" per detected type, e.g.
-    # "95% = MTP 2/4 (95%)", "95% = DFlash 1/4 (---) N-gram 32/24/1 (---)"
-    # Per-type accepted rates are not gathered from the log yet:
-    # use the global rate when a single type is active, else "(---)"
+    # "95% = MTP 2/4 (95%)", "95% = DFlash 1/4 (85%) N-gram 32/24/1 (---)"
+    # Per-type rates come from each implementation's statistics line in the
+    # server log; fall back to the global rate when a single type is active,
+    # else "(---)"
     local spec_cell="--"
     if [[ "$pred_type" != "none" ]]; then
         local names=()
         local infos=()
+        local accepted=()
         read -ra names <<< "$pred_type"
         read -ra infos <<< "$pred_info"
+        read -ra accepted <<< "$pred_accepted"
         spec_cell=""
         for i in "${!names[@]}"; do
             # (---) keeps the same width as (NN%) so rows stay aligned
             local ap="(---)"
-            ((${#names[@]} == 1)) && [[ "$accepted_pct" != "" ]] && ap="($(printf "%.0f" "$accepted_pct")%)"
+            if [[ "${accepted[$i]:--}" != "-" ]]; then
+                ap="(${accepted[$i]}%)"
+            elif ((${#names[@]} == 1)) && [[ "$accepted_pct" != "" ]]; then
+                ap="($(printf "%.0f" "$accepted_pct")%)"
+            fi
             [[ -n $spec_cell ]] && spec_cell+=" "
             # :-? makes a future names/infos desync visible instead of rendering empty params
             spec_cell+="${names[$i]} ${infos[$i]:-?} $ap"
