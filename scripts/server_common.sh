@@ -540,11 +540,12 @@ extract_info_from_server_log() {
 
 # Extract the cumulative acceptance rate (%) of one speculative implementation
 # from its statistics line(s), e.g.:
-# I statistics     statistics draft-dflash: #calls(b,g,a) = 1 100 0, #gen drafts = 400, #acc drafts = 320, ...
+# I spec common_specu: statistics     draft-dflash: #calls(b,g,a) = 1 119 119, #gen drafts = 119, #acc drafts = 110, ...
+# NOTE: the implementation name is padded with multiple spaces after "statistics"
 # Prints an integer percentage, or nothing when no usable stats are found.
 get_spec_acceptance_rate() {
     local spec_name="$1"
-    local stats_line=$(grep -E "statistics ${spec_name}:.*#gen drafts *= *[0-9]+, *#acc drafts *= *[0-9]+" "$log" | tail -n 1)
+    local stats_line=$(grep -E "statistics +${spec_name}:.*#gen drafts *= *[0-9]+, *#acc drafts *= *[0-9]+" "$log" | tail -n 1)
     [[ -z $stats_line ]] && return 0
 
     local gen acc
