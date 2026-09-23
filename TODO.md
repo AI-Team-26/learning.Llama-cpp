@@ -15,9 +15,10 @@
 
 - **[feat/07_get_prediction_info_dflash]** Feature 7 — get_prediction_info, dflash extraction
 
+- **[feat/07_1_print_dflash_info_concise]** Feature 7.1 — print dflash info concisely in test_call output
+
 ## Backlog
 
-- **Feature 7.1**: Print dflash info in test_call output without making lines too long (depends on Feature 7)
 - **Feature 7.2**: Extract dflash accepted speculative rate (depends on Feature 7)
 - **Feature 6**: [feat/06_sharpyaml] Replace YamlDotNet with SharpYaml (PropertyNamingPolicy=SnakeCaseLower); drop [YamlMember] aliases except [JsonPropertyName("ubatch")] on UBatch — TODO notes already in ModelsConfigLoader.cs/ModelConfig.cs
 - Unify the llama-server call of test and prod calls
