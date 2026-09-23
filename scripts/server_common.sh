@@ -555,11 +555,12 @@ get_prediction_info() {
         #0.12.004.484 I common_speculative_impl_draft_dflash: - n_max=4, n_min=1, p_min=0.20
         local spec_line=$(grep -E 'common_speculative_impl_draft_dflash:.*n_max=.*n_min=.*p_min=.*' "$log" | tail -n 1)
         if [[ -n $spec_line ]]; then
-            read -r n_max n_min p_min <<< \
+            # p_min (min acceptance probability) is intentionally not extracted: compact cell shows only <n_min>/<n_max>
+            read -r n_max n_min <<< \
                 $(echo "$spec_line" | awk '
                     /.*/ {
                         split($0, a, /,|n_max=|n_min=|p_min=/)
-                        print a[2], a[4], a[6]
+                        print a[2], a[4]
                     }
                 ')
             pred_types+=("DFlash")
@@ -584,11 +585,12 @@ get_prediction_info() {
         local spec_line=$(grep -E 'common_specu:.*n_max=.*n_min=.*p_min=.*' "$log" | tail -n 1)
 
         if [[ -n $spec_line ]]; then
-            read -r n_max n_min p_min <<< \
+            # p_min (min acceptance probability) is intentionally not extracted: compact cell shows only <n_min>/<n_max>
+            read -r n_max n_min <<< \
                 $(echo "$spec_line" | awk '
                     /.*/ {
                         split($0, a, /,|n_max=|n_min=|p_min=/)
-                        print a[2], a[4], a[6] 
+                        print a[2], a[4]
                     }
                 ')
             pred_types+=("MTP")

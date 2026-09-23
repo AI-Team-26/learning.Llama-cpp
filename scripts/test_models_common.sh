@@ -81,15 +81,20 @@ print_test_call() {
     # from the log yet: use the global rate when a single type is active, else "(n.a.)"
     local spec_cell="--"
     if [[ "$pred_type" != "none" ]]; then
-        local names=($pred_type)
-        local infos=($pred_info)
+        local names=()
+        local infos=()
+        read -ra names <<< "$pred_type"
+        read -ra infos <<< "$pred_info"
         spec_cell=""
         for i in "${!names[@]}"; do
             local ap="(n.a.)"
             ((${#names[@]} == 1)) && [[ "$accepted_pct" != "" ]] && ap="($(printf "%.0f" "$accepted_pct")%)"
             [[ -n $spec_cell ]] && spec_cell+=" "
-            spec_cell+="${names[$i]} ${infos[$i]} $ap"
+            # :-? makes a future names/infos desync visible instead of rendering empty params
+            spec_cell+="${names[$i]} ${infos[$i]:-?} $ap"
         done
+        # guard: >2 active types would overflow the 40-char column and break alignment
+        spec_cell="${spec_cell:0:40}"
     fi
 
     local note=""
