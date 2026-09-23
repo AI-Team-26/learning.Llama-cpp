@@ -73,14 +73,14 @@ print_test_call() {
     [[ "$accepted_pct" == "n.a." ]] && accepted_pct=""
 
     # Feature 7.2: use dflash-specific accepted rate if available
-    if [[ -n "${dflash_accepted_pct:-}" && "$dflash_accepted_pct" != "0.0" ]]; then
+    if [[ "$pred_type" == "DFlash" && -n "${dflash_accepted_pct:-}" && "$dflash_accepted_pct" != "0.0" ]]; then
         accepted_pct="$dflash_accepted_pct"
     fi
 
     # Feature 7.1: print dflash info concisely to avoid overly long lines
     local pred_info_short="$pred_info"
     if [[ "$pred_type" == "DFlash" ]]; then
-        pred_info_short=$(echo "$pred_info" | sed 's/p_min=\([^ ]*\)/p=\1/')
+        pred_info_short=$(echo "$pred_info" | sed 's/p_min=//')
     fi
 
     if [[ "$accepted_pct" != "" ]]; then

@@ -515,7 +515,6 @@ extract_info_from_server_log() {
 
     return_value "layers_info" "$layers_info"
 
-    # TODO: calling "get_prediction_info" requires also "return_output_values" or can be avoided ?
     return_output_values "$(get_prediction_info)" 1
 
     # Extract caches quantization  (example: main + MTP)
