@@ -25,5 +25,4 @@
 - PR #11 (fix/UI_main_form): Replace panel spacers with button margins in header row
 
 - **[feat/07_get_prediction_info_dflash]** Feature 7 — get_prediction_info, dflash extraction
-
-- **[feat/07_1_compact_pred_info]** Feature 7.1 — print dflash/spec prediction info compactly in test_call output
+- **[feat/07_1_compact_pred_info]** Feature 7.1 — print spec prediction info compactly in test_call output

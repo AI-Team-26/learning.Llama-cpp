@@ -541,33 +541,32 @@ extract_info_from_server_log() {
 # Extract the speculative prediction used settings
 get_prediction_info() {
     debug_function "get_prediction_info"
-	local pred_type="none"
-    local pred_info="--"
+	local pred_types=()
+    local pred_infos=()
 
-    ### ngram-simple
-    # 0.32.990.479 I statistics     statistics #calls(b,g,a) =    1   1263      0, #gen drafts =      0, #acc drafts =     0, #gen tokens =      0, #acc tokens =     0, dur(b,g,a) = 0.003, 2.524, 0.000 ms
-    # 0.14.367.078 I spec common_specu: adding speculative implementation 'ngram-simple'
-    local ngram_simple=$(grep -E "I spec common_specu: adding speculative implementation 'ngram-simple'" "$log" | tail -n 1)
+    ### draft-dflash
+    #0.12.004.469 I common_speculative_impl_draft_dflash: adding speculative implementation 'draft-dflash'
+    #0.12.004.484 I common_speculative_impl_draft_dflash: - n_max=4, n_min=1, p_min=0.20
+    #0.12.004.486 I common_speculative_impl_draft_dflash: - block_size=8, mask_token_id=128756, n_extract=5, sample_from_anchor=true
     
-    if [[ -n $ngram_simple ]]; then
-        pred_type="N-gram"
-
-        #b9937
-        # I spec common_specu: - size_n=12, size_m=24, min_hits=1
-        local spec_line=$(grep -E 'common_specu:.*size_n=.*size_m=.*min_hits=.*' "$log" | tail -n 1)
+    local draft_dflash=$(grep -E "I common_speculative_impl_draft_dflash: adding speculative implementation 'draft-dflash'" "$log" | tail -n 1)
+    
+    if [[ -n $draft_dflash ]]; then
+        #0.12.004.484 I common_speculative_impl_draft_dflash: - n_max=4, n_min=1, p_min=0.20
+        local spec_line=$(grep -E 'common_speculative_impl_draft_dflash:.*n_max=.*n_min=.*p_min=.*' "$log" | tail -n 1)
         if [[ -n $spec_line ]]; then
-            read -r size_n size_m min_hits <<< \
+            read -r n_max n_min p_min <<< \
                 $(echo "$spec_line" | awk '
-                    /size_n=/ {
-                        split($0, a, /size_n=|,|size_m=|,|min_hits=/)
+                    /.*/ {
+                        split($0, a, /,|n_max=|n_min=|p_min=/)
                         print a[2], a[4], a[6]
                     }
                 ')
-            pred_info=$(printf 'N=%s M=%s min=%s' "$size_n" "$size_m" "$min_hits")
-
+            pred_types+=("DFlash")
+            pred_infos+=("$n_min/$n_max")
         else
-            return_value "error" "found spec type 'ngram-simple' but failed to find its parameters'"
-            printf 'ERROR: found spec type "ngram-simple" but failed to find its parameters'
+            return_value "error" "found spec type 'DFlash' but failed to find its parameters'"
+            printf "ERROR: found spec type 'DFlash' but failed to find its parameters"
             return 1
         fi
     fi
@@ -578,8 +577,6 @@ get_prediction_info() {
     local draft_mtp=$(grep -E "I spec common_specu: adding speculative implementation 'draft-mtp'" "$log" | tail -n 1)
     
     if [[ -n $draft_mtp ]]; then
-        pred_type="MTP"
-
         # b10456
         # I spec common_specu: - n_max=4, n_min=2, p_min=0.70, n_embd=2688, backend_sampling=1
         # I spec common_specu: - gpu_layers=-1, cache_k=f16, cache_v=f16, ctx_tgt=yes, ctx_dft=yes, devices=[default]        
@@ -594,47 +591,48 @@ get_prediction_info() {
                         print a[2], a[4], a[6] 
                     }
                 ')
-            pred_info=$(printf 'min=%s max=%s p_min=%s' "$n_min" "$n_max" "$p_min")
+            pred_types+=("MTP")
+            pred_infos+=("$n_min/$n_max")
         else
-            return_value "error" "found spec type '$pred_type' but failed to find its parameters'"
-            printf "ERROR: found spec type '$pred_type' but failed to find its parameters"
+            return_value "error" "found spec type 'MTP' but failed to find its parameters'"
+            printf "ERROR: found spec type 'MTP' but failed to find its parameters"
             return 1
         fi
     fi
 
-    # TODO
-    ### draft-dflash
-    #0.12.004.469 I common_speculative_impl_draft_dflash: adding speculative implementation 'draft-dflash'
-    #0.12.004.484 I common_speculative_impl_draft_dflash: - n_max=4, n_min=1, p_min=0.20
-    #0.12.004.486 I common_speculative_impl_draft_dflash: - block_size=8, mask_token_id=128756, n_extract=5, sample_from_anchor=true
+    ### ngram-simple
+    # 0.32.990.479 I statistics     statistics #calls(b,g,a) =    1   1263      0, #gen drafts =      0, #acc drafts =     0, #gen tokens =      0, #acc tokens =     0, dur(b,g,a) = 0.003, 2.524, 0.000 ms
+    # 0.14.367.078 I spec common_specu: adding speculative implementation 'ngram-simple'
+    local ngram_simple=$(grep -E "I spec common_specu: adding speculative implementation 'ngram-simple'" "$log" | tail -n 1)
     
-    local draft_dflash=$(grep -E "I common_speculative_impl_draft_dflash: adding speculative implementation 'draft-dflash'" "$log" | tail -n 1)
-    
-    # TODO: if multiple spec types are found in the log, all of them have to be printed;
-    # maybe widen the table row by 5/10 chars and use short names ("MTP", "NGRAM")
-    # instead of full impl names to save space. For now keep only the first detected type.
-    if [[ -n $draft_dflash && "$pred_type" == "none" ]]; then
-        pred_type="DFlash"
-
-        #0.12.004.484 I common_speculative_impl_draft_dflash: - n_max=4, n_min=1, p_min=0.20
-        local spec_line=$(grep -E 'common_speculative_impl_draft_dflash:.*n_max=.*n_min=.*p_min=.*' "$log" | tail -n 1)
+    if [[ -n $ngram_simple ]]; then
+        #b9937
+        # I spec common_specu: - size_n=12, size_m=24, min_hits=1
+        local spec_line=$(grep -E 'common_specu:.*size_n=.*size_m=.*min_hits=.*' "$log" | tail -n 1)
         if [[ -n $spec_line ]]; then
-            read -r n_max n_min p_min <<< \
+            read -r size_n size_m min_hits <<< \
                 $(echo "$spec_line" | awk '
-                    /.*/ {
-                        split($0, a, /,|n_max=|n_min=|p_min=/)
+                    /size_n=/ {
+                        split($0, a, /size_n=|,|size_m=|,|min_hits=/)
                         print a[2], a[4], a[6]
                     }
                 ')
-            pred_info=$(printf 'min=%s max=%s p_min=%s' "$n_min" "$n_max" "$p_min")
+            pred_types+=("N-gram")
+            pred_infos+=("$size_n/$size_m/$min_hits")
+
         else
-            return_value "error" "found spec type '$pred_type' but failed to find its parameters'"
-            printf "ERROR: found spec type '$pred_type' but failed to find its parameters"
+            return_value "error" "found spec type 'ngram-simple' but failed to find its parameters'"
+            printf 'ERROR: found spec type "ngram-simple" but failed to find its parameters'
             return 1
         fi
     fi
 
-    return_value "pred_type" "$pred_type"  
-    return_value "pred_info" "$pred_info" 
+    if ((${#pred_types[@]} == 0)); then
+        return_value "pred_type" "none"
+        return_value "pred_info" "--"
+    else
+        return_value "pred_type" "${pred_types[*]}"
+        return_value "pred_info" "${pred_infos[*]}"
+    fi
 }
 
