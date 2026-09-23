@@ -78,9 +78,9 @@ print_test_call() {
 
     # speculative prediction cell: whole acceptance rate prefix followed by
     # "<Name> <params> (<accepted %>)" per detected type, e.g.
-    # "95% | MTP 2/4 (95%)", "95% | DFlash 1/4 (n.a.) N-gram 32/24/1 (n.a.)"
+    # "95% | MTP 2/4 (95%)", "95% | DFlash 1/4 (---) N-gram 32/24/1 (---)"
     # Per-type accepted rates are not gathered from the log yet:
-    # use the global rate when a single type is active, else "(n.a.)"
+    # use the global rate when a single type is active, else "(---)"
     local spec_cell="--"
     if [[ "$pred_type" != "none" ]]; then
         local names=()
@@ -89,7 +89,8 @@ print_test_call() {
         read -ra infos <<< "$pred_info"
         spec_cell=""
         for i in "${!names[@]}"; do
-            local ap="(n.a.)"
+            # (---) keeps the same width as (NN%) so rows stay aligned
+            local ap="(---)"
             ((${#names[@]} == 1)) && [[ "$accepted_pct" != "" ]] && ap="($(printf "%.0f" "$accepted_pct")%)"
             [[ -n $spec_cell ]] && spec_cell+=" "
             # :-? makes a future names/infos desync visible instead of rendering empty params
