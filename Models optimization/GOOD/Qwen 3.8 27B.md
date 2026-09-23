@@ -157,14 +157,14 @@ It changed the CHANGELOG for the test PR
 
 model=Qwen3.8-27B-ASCII-Condensed-IQ4_XS-3.84bpw_troed.gguf
 draft_model=Qwen3.8-27B-ASCII-Condensed-DFlash2-Q2_K_S-MIX_troed.gguf
-ctx_k=80
+ctx_k=64
 gpu_layers=99
 cpu_moe=0
 quant=q4_0/q4_0
 spec=draft-dflash,ngram-simple
-predict_token=1/4
-ngram_values=32/24/1
-jinja=0
+predict_token=1/3
+ngram_values=24/24/1
+jinja=1
 batch=1024
 ubatch=512
 _test_model
@@ -176,7 +176,9 @@ _test_model
 
 |  43 t/s |  80 k |   0 | 66/66 | 15.7 | 10.9/0.1  | q8_0 (q4_0) |    563 |  13s | N-gram            N=32 M=24 min=1 (80%) |  1024/512 | R: medium         |
 
+
 |  54 t/s |  64 k |   0 | 66/66 | 15.3 | 10.9/0.1  | q8_0 (q4_0) |    563 |  10s | N-gram            N=32 M=24 min=1 (75%) |  1024/512 | R: medium         |
+|  53 t/s |  64 k |   0 | 66/66 | 14.5 | 10.9/0.1  | q4_0 (q4_0) |    619 |  11s | N-gram            N=32 M=24 min=1 (66%) |  1024/512 | R: medium         |
 |  51 t/s |  64 k |   0 | 66/66 | 15.2 | 10.9/0.1  | q8_0 (q4_0) |    563 |  11s | N-gram            N=32 M=24 min=1 (80%) |  1024/512 | R: medium         |
 
 
