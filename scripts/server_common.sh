@@ -515,9 +515,9 @@ extract_info_from_server_log() {
 
     return_value "layers_info" "$layers_info"
 
-    # TODO: calling "get_pred_info" requires also "return_output_values" ?
+    # TODO: calling "get_prediction_info" requires also "return_output_values" or can be avoided ?
     #get_pred_info
-    return_output_values "$(get_pred_info)" 1
+    return_output_values "$(get_prediction_info)" 1
 
     # Extract caches quantization  (example: main + MTP)
     # I llama_kv_cache: size =  680.00 MiB ( 65536 cells,  10 layers,  1/1 seqs), K (q8_0):  340.00 MiB, V (q8_0):  340.00 MiB
@@ -540,11 +540,13 @@ extract_info_from_server_log() {
 }
 
 
-get_pred_info() {
+# Extract the speculative prediction used settings
+get_prediction_info() {
     debug_function "get_pred_info"
 	local pred_type="none"
     local pred_info="--"
 
+    ### ngram-simple
     # 0.32.990.479 I statistics     statistics #calls(b,g,a) =    1   1263      0, #gen drafts =      0, #acc drafts =     0, #gen tokens =      0, #acc tokens =     0, dur(b,g,a) = 0.003, 2.524, 0.000 ms
     # 0.14.367.078 I spec common_specu: adding speculative implementation 'ngram-simple'
     local ngram_simple=$(grep -E "I spec common_specu: adding speculative implementation 'ngram-simple'" "$log" | tail -n 1)
@@ -572,6 +574,7 @@ get_pred_info() {
         fi
     fi
 
+    ### draft-mtp
     # b9856
     # 0.57.644.917 I spec common_specu: adding speculative implementation 'draft-mtp'
     local draft_mtp=$(grep -E "I spec common_specu: adding speculative implementation 'draft-mtp'" "$log" | tail -n 1)
@@ -600,6 +603,12 @@ get_pred_info() {
             return 1
         fi
     fi
+
+    # TODO
+    ### draft-dflah
+    #0.12.004.469 I common_speculative_impl_draft_dflash: adding speculative implementation 'draft-dflash'
+    #0.12.004.484 I common_speculative_impl_draft_dflash: - n_max=4, n_min=1, p_min=0.20
+    #0.12.004.486 I common_speculative_impl_draft_dflash: - block_size=8, mask_token_id=128756, n_extract=5, sample_from_anchor=true
    
     return_value "pred_type" "$pred_type"  
     return_value "pred_info" "$pred_info" 

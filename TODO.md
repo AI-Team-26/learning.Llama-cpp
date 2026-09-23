@@ -1,7 +1,16 @@
 # TODO
 
 ## Backlog
-- **[feat/06_sharpyaml]** Replace YamlDotNet with SharpYaml (PropertyNamingPolicy=SnakeCaseLower); drop [YamlMember] aliases except [JsonPropertyName("ubatch")] on UBatch — TODO notes already in ModelsConfigLoader.cs/ModelConfig.cs
+
+- Feature 7: add retrieving and print of DFlash info when run tests
+  get_pred_info (to be renamed get_prediction_info) has to extract the draft-dflash values.
+
+- Feature 7.1: print dflash info
+  It has to be printed in the test_call ... without making the line too long (difficult).
+  
+- Feature 7.2: extract dflash accepted speculative rate (depends from Feature 7)
+
+- Feature 6: **[feat/06_sharpyaml]** Replace YamlDotNet with SharpYaml (PropertyNamingPolicy=SnakeCaseLower); drop [YamlMember] aliases except [JsonPropertyName("ubatch")] on UBatch — TODO notes already in ModelsConfigLoader.cs/ModelConfig.cs
 - Unify the llama-server call of test and prod calls
 - Removed/commented out error check of JSON response in run_llamacpp function
 - Manage server start failing due to error loading the model
