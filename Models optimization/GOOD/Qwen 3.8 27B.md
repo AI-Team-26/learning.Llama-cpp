@@ -28,6 +28,14 @@
 | Swift-Qwen3.8-27b-i1-IQ4_XS-Smaller_ahmeddelkilami01.gguf  | 12.6 |      |
 | Qwen3.8-27B-IQ3_S-3.23bpw_byteshape.gguf                   | 10.2 |      |
 | Qwen3.8-27B-GSQ-RCO-IQ3_S-mtp_ista.gguf                    | 11.2 |      |
+| Qwen3.8-27B-ASCII-Condensed-IQ4_XS-3.84bpw_troed.gguf      | 11.4 |      |
+
+
+# ASCII-Condensed-IQ4_XS-3 (troed)
+Qwen3.8-27B-ASCII-Condensed-IQ4_XS-3.84bpw_troed.gguf
+Qwen3.8-27B-ASCII-Condensed-DFlash2-Q2_K_S-MIX_troed.gguf
+https://huggingface.co/troed/Qwen3.8-27B-ASCII-Condensed
+required DFlash file too   spec-type = draft-dflash
 
 
 # (ISTA-DASLAb)
@@ -147,11 +155,38 @@ It changed the CHANGELOG for the test PR
 
 ```bash
 
+model=Qwen3.8-27B-ASCII-Condensed-IQ4_XS-3.84bpw_troed.gguf
+draft_model=Qwen3.8-27B-ASCII-Condensed-DFlash2-Q2_K_S-MIX_troed.gguf
+ctx_k=80
+gpu_layers=99
+cpu_moe=0
+quant=q4_0/q4_0
+spec=draft-dflash,ngram-simple
+predict_token=1/4
+ngram_values=32/24/1
+jinja=0
+batch=1024
+ubatch=512
+_test_model
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                  | Batch/Ub. | Note              |
+| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | --------------------------------------- | --------- |------------------ |
+|  53 t/s |  80 k |   0 | 66/66 | 15.2 | 10.9/0.2  | q4_0 (q4_0) |    553 |  10s | N-gram            N=32 M=24 min=1 (74%) | 1024/1024 | R: medium         |
+|  52 t/s |  80 k |   0 | 66/66 | 14.6 | 10.9/0.1  | q4_0 (q4_0) |    578 |  12s | N-gram            N=32 M=24 min=1 (80%) |  1024/512 | R: medium         |
+
+|  43 t/s |  80 k |   0 | 66/66 | 15.7 | 10.9/0.1  | q8_0 (q4_0) |    563 |  13s | N-gram            N=32 M=24 min=1 (80%) |  1024/512 | R: medium         |
+
+|  54 t/s |  64 k |   0 | 66/66 | 15.3 | 10.9/0.1  | q8_0 (q4_0) |    563 |  10s | N-gram            N=32 M=24 min=1 (75%) |  1024/512 | R: medium         |
+|  51 t/s |  64 k |   0 | 66/66 | 15.2 | 10.9/0.1  | q8_0 (q4_0) |    563 |  11s | N-gram            N=32 M=24 min=1 (80%) |  1024/512 | R: medium         |
+
+
+
+
 model=Qwen3.8-27B-GSQ-RCO-IQ3_S-mtp_ista.gguf
 ctx_k=60
 gpu_layers=99
 cpu_moe=0
-quant=q8_0/q8_0
+quant=q8_0/q4_0
 spec=draft-mtp,ngram-simple
 draft_model=none
 predict_token=1/4
@@ -164,6 +199,7 @@ _test_model
 | Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                  | Batch/Ub. | Note              |
 | ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | --------------------------------------- | --------- |------------------ |
 |  44 t/s |  64 k |   0 | 66/66 | 15.1 | 10.9/0.1  | q8_0 (q8_0) |    551 |  13s | MTP        min=1 max=4 p_min=0.20 (89%) |  1024/512 | R: medium         |
+|  43 t/s |  60 k |   0 | 66/66 | 14.9 | 10.9/0.1  | q8_0 (q8_0) |    551 |  13s | MTP        min=1 max=4 p_min=0.20 (89%) |  1024/512 | R: medium         |
 |  42 t/s |  68 k |   0 | 66/66 | 15.2 | 10.9/0.1  | q8_0 (q8_0) |    551 |  13s | MTP        min=1 max=4 p_min=0.20 (87%) |  1024/512 | R: medium         |
 
 

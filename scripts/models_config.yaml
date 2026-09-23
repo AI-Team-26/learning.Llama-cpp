@@ -75,6 +75,22 @@ models:
 
 ### Qwen 3.8 27B ###
 
+  Qwen3.8-27B-IQ3_S_ista_64k:
+    file: Qwen3.8-27B-GSQ-RCO-IQ3_S-mtp_ista.gguf
+    ctx_k: 64
+    gpu_layers: 99
+    cpu_moe: 0
+    quant: q8_0/q4_0
+    batch: 1024
+    ubatch: 512
+    spec_type: draft-mtp,ngram-simple
+    spec_draft_n_min: 1
+    spec_draft_n_max: 4
+    spec_ngram_simple_size_n: 32
+    spec_ngram_simple_size_m: 24
+    spec_ngram_simple_min_hits: 1
+    jinja: 1
+
   Qwen3.8-27B-IQ4_XS_byteshape_64k:
     file: Qwen3.8-27B-IQ4_XS-3.84bpw_byteshape.gguf
     ctx_k: 64
