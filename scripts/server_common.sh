@@ -538,11 +538,29 @@ extract_info_from_server_log() {
 }
 
 
+# Extract the cumulative acceptance rate (%) of one speculative implementation
+# from its statistics line(s), e.g.:
+# I statistics     statistics draft-dflash: #calls(b,g,a) = 1 100 0, #gen drafts = 400, #acc drafts = 320, ...
+# Prints an integer percentage, or nothing when no usable stats are found.
+get_spec_acceptance_rate() {
+    local spec_name="$1"
+    local stats_line=$(grep -E "statistics ${spec_name}:.*#gen drafts *= *[0-9]+, *#acc drafts *= *[0-9]+" "$log" | tail -n 1)
+    [[ -z $stats_line ]] && return 0
+
+    local gen acc
+    read -r gen acc <<< \
+        $(echo "$stats_line" | sed -E 's/.*#gen drafts *= *([0-9]+), *#acc drafts *= *([0-9]+).*/\1 \2/')
+    (( gen > 0 )) || return 0
+
+    awk -v g="$gen" -v a="$acc" 'BEGIN{printf "%.0f", (a/g)*100}'
+}
+
 # Extract the speculative prediction used settings
 get_prediction_info() {
     debug_function "get_prediction_info"
 	local pred_types=()
     local pred_infos=()
+    local pred_accepted=()
 
     ### draft-dflash
     #0.12.004.469 I common_speculative_impl_draft_dflash: adding speculative implementation 'draft-dflash'
@@ -565,6 +583,8 @@ get_prediction_info() {
                 ')
             pred_types+=("DFlash")
             pred_infos+=("$n_min/$n_max")
+            local rate=$(get_spec_acceptance_rate "draft-dflash")
+            pred_accepted+=("${rate:--}")
         else
             return_value "error" "found spec type 'DFlash' but failed to find its parameters'"
             printf "ERROR: found spec type 'DFlash' but failed to find its parameters"
@@ -595,6 +615,8 @@ get_prediction_info() {
                 ')
             pred_types+=("MTP")
             pred_infos+=("$n_min/$n_max")
+            local rate=$(get_spec_acceptance_rate "draft-mtp")
+            pred_accepted+=("${rate:--}")
         else
             return_value "error" "found spec type 'MTP' but failed to find its parameters'"
             printf "ERROR: found spec type 'MTP' but failed to find its parameters"
@@ -621,6 +643,8 @@ get_prediction_info() {
                 ')
             pred_types+=("N-gram")
             pred_infos+=("$size_n/$size_m/$min_hits")
+            local rate=$(get_spec_acceptance_rate "ngram-simple")
+            pred_accepted+=("${rate:--}")
 
         else
             return_value "error" "found spec type 'ngram-simple' but failed to find its parameters'"
@@ -629,12 +653,15 @@ get_prediction_info() {
         fi
     fi
 
+    # per-type acceptance rates, aligned with pred_type/pred_info; "-" = not available
     if ((${#pred_types[@]} == 0)); then
         return_value "pred_type" "none"
         return_value "pred_info" "--"
+        return_value "pred_accepted" "--"
     else
         return_value "pred_type" "${pred_types[*]}"
         return_value "pred_info" "${pred_infos[*]}"
+        return_value "pred_accepted" "${pred_accepted[*]}"
     fi
 }
 
