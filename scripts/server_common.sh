@@ -515,8 +515,6 @@ extract_info_from_server_log() {
 
     return_value "layers_info" "$layers_info"
 
-    # TODO: calling "get_prediction_info" requires also "return_output_values" or can be avoided ?
-    #get_pred_info
     return_output_values "$(get_prediction_info)" 1
 
     # Extract caches quantization  (example: main + MTP)
@@ -542,7 +540,7 @@ extract_info_from_server_log() {
 
 # Extract the speculative prediction used settings
 get_prediction_info() {
-    debug_function "get_pred_info"
+    debug_function "get_prediction_info"
 	local pred_type="none"
     local pred_info="--"
 
@@ -605,11 +603,37 @@ get_prediction_info() {
     fi
 
     # TODO
-    ### draft-dflah
+    ### draft-dflash
     #0.12.004.469 I common_speculative_impl_draft_dflash: adding speculative implementation 'draft-dflash'
     #0.12.004.484 I common_speculative_impl_draft_dflash: - n_max=4, n_min=1, p_min=0.20
     #0.12.004.486 I common_speculative_impl_draft_dflash: - block_size=8, mask_token_id=128756, n_extract=5, sample_from_anchor=true
-   
+    
+    local draft_dflash=$(grep -E "I common_speculative_impl_draft_dflash: adding speculative implementation 'draft-dflash'" "$log" | tail -n 1)
+    
+    # TODO: if multiple spec types are found in the log, all of them have to be printed;
+    # maybe widen the table row by 5/10 chars and use short names ("MTP", "NGRAM")
+    # instead of full impl names to save space. For now keep only the first detected type.
+    if [[ -n $draft_dflash && "$pred_type" == "none" ]]; then
+        pred_type="DFlash"
+
+        #0.12.004.484 I common_speculative_impl_draft_dflash: - n_max=4, n_min=1, p_min=0.20
+        local spec_line=$(grep -E 'common_speculative_impl_draft_dflash:.*n_max=.*n_min=.*p_min=.*' "$log" | tail -n 1)
+        if [[ -n $spec_line ]]; then
+            read -r n_max n_min p_min <<< \
+                $(echo "$spec_line" | awk '
+                    /.*/ {
+                        split($0, a, /,|n_max=|n_min=|p_min=/)
+                        print a[2], a[4], a[6]
+                    }
+                ')
+            pred_info=$(printf 'min=%s max=%s p_min=%s' "$n_min" "$n_max" "$p_min")
+        else
+            return_value "error" "found spec type '$pred_type' but failed to find its parameters'"
+            printf "ERROR: found spec type '$pred_type' but failed to find its parameters"
+            return 1
+        fi
+    fi
+
     return_value "pred_type" "$pred_type"  
     return_value "pred_info" "$pred_info" 
 }
