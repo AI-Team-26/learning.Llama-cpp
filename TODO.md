@@ -13,9 +13,7 @@
 - PR #8 (fix/02_config_frame): ConfigurationForm rewrite, ShowDialog pattern, start/stop wiring
 - PR #11 (fix/UI_main_form): Replace panel spacers with button margins in header row
 
-### **[feat/07_get_prediction_info_dflash]** Feature 7 — get_prediction_info, dflash extraction
-- `get_pred_info` → `get_prediction_info` (debug_function rename)
-- Added draft-dflash extraction in `get_prediction_info()` in server_common.sh
+- **[feat/07_get_prediction_info_dflash]** Feature 7 — get_prediction_info, dflash extraction
 
 ## Backlog
 

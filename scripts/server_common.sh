@@ -610,7 +610,9 @@ get_prediction_info() {
     
     local draft_dflash=$(grep -E "I common_speculative_impl_draft_dflash: adding speculative implementation 'draft-dflash'" "$log" | tail -n 1)
     
-    # only set if no other spec type was detected first, to avoid overriding it
+    # TODO: if multiple spec types are found in the log, all of them have to be printed;
+    # maybe widen the table row by 5/10 chars and use short names ("MTP", "NGRAM")
+    # instead of full impl names to save space. For now keep only the first detected type.
     if [[ -n $draft_dflash && "$pred_type" == "none" ]]; then
         pred_type="DFlash"
 
