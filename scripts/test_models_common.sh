@@ -78,7 +78,7 @@ print_test_call() {
 
     # speculative prediction cell: whole acceptance rate prefix followed by
     # "<Name> <params> (<accepted %>)" per detected type, e.g.
-    # "95% | MTP 2/4 (95%)", "95% | DFlash 1/4 (---) N-gram 32/24/1 (---)"
+    # "95% = MTP 2/4 (95%)", "95% = DFlash 1/4 (---) N-gram 32/24/1 (---)"
     # Per-type accepted rates are not gathered from the log yet:
     # use the global rate when a single type is active, else "(---)"
     local spec_cell="--"
@@ -97,9 +97,9 @@ print_test_call() {
             spec_cell+="${names[$i]} ${infos[$i]:-?} $ap"
         done
         # whole acceptance rate as cell prefix when available
-        [[ "$accepted_pct" != "" ]] && spec_cell="$(printf "%.0f" "$accepted_pct")% | $spec_cell"
-        # guard: overflow beyond the 48-char column would break row alignment
-        spec_cell="${spec_cell:0:48}"
+        [[ "$accepted_pct" != "" ]] && spec_cell="$(printf "%.0f" "$accepted_pct")% = $spec_cell"
+        # guard: overflow beyond the 44-char column would break row alignment
+        spec_cell="${spec_cell:0:44}"
     fi
 
     local note=""
@@ -108,9 +108,9 @@ print_test_call() {
 
     #[[ "$K_Q8_CACHE" == "1" ]] && note+=" K:q8_0"
     
-    printf "| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                          | Batch/Ub. | Note              |\n"
+    printf "| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                       | Batch/Ub. | Note              |\n"
     printf "| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | -------------------------------------------- | --------- |------------------ |\n"
-    printf "| %3.0f t/s | %3s k | %3s | %5s | %4.1f | %-9s | %-3s (%3s) | %6s | %3.0fs | %-48s | %9s | %-17s |\n" \
+    printf "| %3.0f t/s | %3s k | %3s | %5s | %4.1f | %-9s | %-3s (%3s) | %6s | %3.0fs | %-44s | %9s | %-17s |\n" \
         "$eval_rate" \
         "$ctx_k" \
         "$cpu_moe" \
