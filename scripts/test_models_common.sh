@@ -72,9 +72,29 @@ print_test_call() {
     # normalize (where is the "--" value came from??)
     [[ "$accepted_pct" == "n.a." ]] && accepted_pct=""
 
+    # Feature 7.1: compact display form of the speculative prediction info so table rows
+    # stay within the column width:
+    #   DFlash/MTP: "min=1 max=4 p_min=0.20" -> "1/4/p0.20"  (<n_min>/<n_max>/p<p_min>)
+    #   N-gram:     "N=12 M=24 min=1"        -> "12/24/1"    (<size_n>/<size_m>/<min_hits>)
+    local pred_disp="$pred_info"
+    case "$pred_type" in
+        DFlash|MTP)
+            local a="${pred_disp#min=}"
+            a="${a/max=/}"
+            a="${a// /\/}"
+            pred_disp="${a/p_min=/p}"
+            ;;
+        N-gram)
+            local a="${pred_disp#N=}"
+            a="${a/M=/}"
+            a="${a// /\/}"
+            pred_disp="${a/min=/}"
+            ;;
+    esac
+
     if [[ "$accepted_pct" != "" ]]; then
         print_value "Accepted prediction %" "$accepted_pct"
-        pred_info+=" ($(printf "%.0f" "$accepted_pct")%)"
+        pred_disp+=" ($(printf "%.0f" "$accepted_pct")%)"
     fi
 
     local note=""
@@ -85,7 +105,7 @@ print_test_call() {
     
     printf "| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                  | Batch/Ub. | Note              |\n"
     printf "| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | --------------------------------------- | --------- |------------------ |\n"
-    printf "| %3.0f t/s | %3s k | %3s | %5s | %4.1f | %-9s | %-3s (%3s) | %6s | %3.0fs | %-10s %28s | %9s | %-17s |\n" \
+    printf "| %3.0f t/s | %3s k | %3s | %5s | %4.1f | %-9s | %-3s (%3s) | %6s | %3.0fs | %-10s %-26s | %9s | %-17s |\n" \
         "$eval_rate" \
         "$ctx_k" \
         "$cpu_moe" \
@@ -97,7 +117,7 @@ print_test_call() {
         "$eval_count" \
         "$total_duration_s" \
         "$pred_type" \
-        "$pred_info" \
+        "$pred_disp" \
         "$batch/$ubatch" \
         "$note" 
 }
