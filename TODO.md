@@ -3,9 +3,9 @@
 ## Backlog
 
 - **Feature 6**: [feat/06_sharpyaml] Llama Server UI: Replace YamlDotNet with SharpYaml (PropertyNamingPolicy=SnakeCaseLower); drop [YamlMember] aliases except [JsonPropertyName("ubatch")] on UBatch — TODO notes already in ModelsConfigLoader.cs/ModelConfig.cs
-- Unify the llama-server call of test and prod calls
-- Remove/comment out error check of JSON response in run_llamacpp function
-- Manage server start failing due to error loading the model
+- Feature 8 | Unify the llama-server call of test and prod calls
+- Feature 9 | Remove/comment out error check of JSON response in run_llamacpp function
+- Feature 10 | Manage server start failing due to error loading the model
 
 ## Done
 
