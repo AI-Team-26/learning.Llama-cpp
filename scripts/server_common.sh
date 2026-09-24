@@ -425,8 +425,10 @@ set_cache_for_model() {
 }
 
 ## Check for model-loading failure messages in the server log.
-# Prints "error=<message>" to stdout if a known fatal error is found,
-# otherwise prints nothing (caller falls back to generic timeout).
+# Prints the specific model-loading error message to stdout when one is
+# detected in $SERVER_LOG; prints nothing otherwise.
+# Detection is based on the printed text (callers check for non-empty output),
+# so this function always returns 0.
 check_load_model_fail() {
     local log="$1"
     [[ -f "$log" ]] || return 0
@@ -445,7 +447,7 @@ check_load_model_fail() {
         return 0
     fi
 
-    return 1
+    return 0
 }
 
 extract_info_from_server_log() {
