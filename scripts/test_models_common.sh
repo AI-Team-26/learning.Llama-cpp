@@ -139,7 +139,7 @@ llamacpp_run() {
     local prompt="$1"
 
     if [ -z "$prompt" ]; then
-        echo "‼️ llamacpp_run_full called with empty prompt" >&2
+        echo "‼️ llamacpp_run_ called with empty prompt" >&2
         exit 1
     fi
 
@@ -250,6 +250,12 @@ llamacpp_run() {
         return 1
     fi
 
+    # UNCOMMENT THE LINE BELOW TO INSPECT API RAW OUTPUT IN TERMINAL:
+    #echo "DEBUG RAW OUTPUT: $raw" >&2
+    #echo "$raw" > logs/llama_api_response.log
+    local raw
+    raw=$(cat "$response_log")
+
     # "Compact" the streaming response to a single text
     # Strip the "data: " prefix, drop the terminator line, feed each JSON object to jq
     local reasoning=$(grep '^data: ' "$response_log" | sed 's/^data: //' | grep -v '^\[DONE\]' \
@@ -287,13 +293,6 @@ llamacpp_run() {
     echo "$content" >> $response_log_text
     echo "=== TOOL CALLS ===" >> $response_log_text
     echo "$tool_calls" >> $response_log_text
-
-    # UNCOMMENT THE LINE BELOW TO INSPECT API RAW OUTPUT IN TERMINAL:
-    #echo "DEBUG RAW OUTPUT: $raw" >&2
-    #echo "$raw" > logs/llama_api_response.log
-    local raw
-    raw=$(cat "$response_log")
-
 
     # last lines in llama_api_response.log
     # data: {"choices":[{"finish_reason":"tool_calls","index":0,"delta":{}}],"created":1779349198,"id":"chatcmpl-nFCxRKKHfmmnVXEHbeKtPcEqHXBZvQCr","model":"Qwen3.5-9B-Q4_K_M.gguf","system_fingerprint":"b9251-e2b129e1b","object":"chat.completion.chunk"}
