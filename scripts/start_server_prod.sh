@@ -1,16 +1,15 @@
-source common.sh
-source server_common.sh
-
 ## This script starts serving specific models for production (minimal log, no monitoring)
 
 # Usage: 
 # Use a subshell to temporary access source file (avoiding override functions)
 # (source "$LLAMACPP_SCRIPTS_DIRECTORY/start_server_prod.sh"; start_server)
 
-#models_config_file="$(dirname $0)/models_config.yaml"
+source common.sh
+source server_common.sh
+
 models_config_file="models_config.yaml"
 #path="$(dirname $BASH_SOURCE[1])"  # this works but we need to be in this folder anyway because of the previous sourcing (common.sh)
-#models_config_file="$path/models_config.yaml"
+
 
 if [[ ! -f "$models_config_file" ]]; then
     echo "File \"$models_config_file\" not found"
