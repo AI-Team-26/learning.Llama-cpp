@@ -366,6 +366,12 @@ start_server() {
 
         if [[ $i -eq 60 ]] ; then
             echo " not ready after 180 seconds" >&2
+            local err_msg=$(check_load_model_fail "$SERVER_LOG")
+            if [[ -n "$err_msg" ]]; then
+                echo -e "❌ Can't start the server. Error: ${err_msg}" >&2
+                printf 'error=%s\n' "$err_msg"
+                return 1
+            fi
             #return 1
         else
             echo -n "." >&2
@@ -418,11 +424,57 @@ set_cache_for_model() {
     echo "q8_0"
 }
 
-## TODO
-#check_load_model_fail() {
-#        ## TODO: capture this error in the server log
-#        ## 0.09.054.775 W llama_init_from_model: context type MTP requested but model doesn't contain MTP layers
-#}
+## Check for model-loading failure messages in the server log.
+# Prints "error=<message>" to stdout if a known fatal error is found,
+# otherwise prints nothing (caller falls back to generic timeout).
+check_load_model_fail() {
+    local log="$1"
+    [[ -f "$log" ]] || return 0
+
+    # Priority order: most specific → least specific
+    # 1) Speculative init / MTP errors
+    local mtp_err=$(grep -a 'common_speculative_init_result.*failed' "$log" | tail -n 1)
+    if [[ -n "$mtp_err" ]]; then
+        printf '%s\n' "$(echo "$mtp_err" | sed -E 's/^ *[0-9.]+ *E [^ ]+ //')"
+        return 0
+    fi
+
+    # 2) Model-init warnings that are actually fatal (no MTP layers, etc.)
+    local ctx_warn=$(grep -a 'llama_init_from_model:' "$log" | grep -i 'requested but\|doesn\''t contain\|not supported' | tail -n 1)
+    if [[ -n "$ctx_warn" ]]; then
+        printf '%s\n' "$(echo "$ctx_warn" | sed -E 's/^ *[0-9.]+ *W [^ ]+ //')"
+        return 0
+    fi
+
+    # 3) Generic load-model failures
+    local load_err=$(grep -a 'load_model: failed' "$log" | tail -n 1)
+    if [[ -n "$load_err" ]]; then
+        printf '%s\n' "$(echo "$load_err" | sed -E 's/^ *[0-9.]+ *E srv +//')"
+        return 0
+    fi
+
+    # 4) Server exit due to model loading error
+    local exit_err=$(grep -a 'exiting due to model loading error' "$log" | tail -n 1)
+    if [[ -n "$exit_err" ]]; then
+        # Walk backwards from this line to find the root cause
+        local idx=$(grep -na 'exiting due to model loading error' "$log" | tail -n 1 | cut -d: -f1)
+        local start=$((idx > 5 ? idx - 5 : 1))
+        local msg=$(sed -n "${start},${idx}p" "$log" | grep -aE '(W |E )' | tail -n 1 | sed -E 's/^ *[0-9.]+ *(W|E) [^ ]+ //')
+        if [[ -n "$msg" ]]; then
+            printf '%s\n' "$msg"
+            return 0
+        fi
+    fi
+
+    # 5) Generic "failed to load model"
+    local fail_load=$(grep -a 'failed to load model' "$log" | tail -n 1)
+    if [[ -n "$fail_load" ]]; then
+        printf '%s\n' "$(echo "$fail_load" | sed -E 's/^ *[0-9.]+ *E [^ ]+ //')"
+        return 0
+    fi
+
+    return 1
+}
 
 extract_info_from_server_log() {
     debug_function "extract_info_from_server_log"
