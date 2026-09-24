@@ -431,45 +431,17 @@ check_load_model_fail() {
     local log="$1"
     [[ -f "$log" ]] || return 0
 
-    # Priority order: most specific → least specific
-    # 1) Speculative init / MTP errors
-    local mtp_err=$(grep -a 'common_speculative_init_result.*failed' "$log" | tail -n 1)
-    if [[ -n "$mtp_err" ]]; then
-        printf '%s\n' "$(echo "$mtp_err" | sed -E 's/^ *[0-9.]+ *E [^ ]+ //')"
+    # 1) Exact MTP warning message
+    local mtp_msg=$(grep -a 'llama_init_from_model: context type MTP requested but model doesn\''t contain MTP layers' "$log" | tail -n 1)
+    if [[ -n "$mtp_msg" ]]; then
+        printf '%s\n' "$(echo "$mtp_msg" | sed -E 's/^ *[0-9.]+ *W llama_init_from_model: //')"
         return 0
     fi
 
-    # 2) Model-init warnings that are actually fatal (no MTP layers, etc.)
-    local ctx_warn=$(grep -a 'llama_init_from_model:' "$log" | grep -i 'requested but\|doesn\''t contain\|not supported' | tail -n 1)
-    if [[ -n "$ctx_warn" ]]; then
-        printf '%s\n' "$(echo "$ctx_warn" | sed -E 's/^ *[0-9.]+ *W [^ ]+ //')"
-        return 0
-    fi
-
-    # 3) Generic load-model failures
-    local load_err=$(grep -a 'load_model: failed' "$log" | tail -n 1)
-    if [[ -n "$load_err" ]]; then
-        printf '%s\n' "$(echo "$load_err" | sed -E 's/^ *[0-9.]+ *E srv +//')"
-        return 0
-    fi
-
-    # 4) Server exit due to model loading error
-    local exit_err=$(grep -a 'exiting due to model loading error' "$log" | tail -n 1)
-    if [[ -n "$exit_err" ]]; then
-        # Walk backwards from this line to find the root cause
-        local idx=$(grep -na 'exiting due to model loading error' "$log" | tail -n 1 | cut -d: -f1)
-        local start=$((idx > 5 ? idx - 5 : 1))
-        local msg=$(sed -n "${start},${idx}p" "$log" | grep -aE '(W |E )' | tail -n 1 | sed -E 's/^ *[0-9.]+ *(W|E) [^ ]+ //')
-        if [[ -n "$msg" ]]; then
-            printf '%s\n' "$msg"
-            return 0
-        fi
-    fi
-
-    # 5) Generic "failed to load model"
-    local fail_load=$(grep -a 'failed to load model' "$log" | tail -n 1)
-    if [[ -n "$fail_load" ]]; then
-        printf '%s\n' "$(echo "$fail_load" | sed -E 's/^ *[0-9.]+ *E [^ ]+ //')"
+    # 2) Exact server-exit line
+    local exit_line=$(grep -a 'srv  llama_server: exiting due to model loading error' "$log" | tail -n 1)
+    if [[ -n "$exit_line" ]]; then
+        printf '%s\n' "$(echo "$exit_line" | sed -E 's/^ *[0-9.]+ *E srv +//')"
         return 0
     fi
 
