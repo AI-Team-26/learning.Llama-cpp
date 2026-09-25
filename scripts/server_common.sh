@@ -366,6 +366,12 @@ start_server() {
 
         if [[ $i -eq 60 ]] ; then
             echo " not ready after 180 seconds" >&2
+            local err_msg=$(check_load_model_fail "$SERVER_LOG")
+            if [[ -n "$err_msg" ]]; then
+                echo -e "❌ Can't start the server. Error: ${err_msg}" >&2
+                printf 'error=%s\n' "$err_msg"
+                return 1
+            fi
             #return 1
         else
             echo -n "." >&2
@@ -418,11 +424,31 @@ set_cache_for_model() {
     echo "q8_0"
 }
 
-## TODO
-#check_load_model_fail() {
-#        ## TODO: capture this error in the server log
-#        ## 0.09.054.775 W llama_init_from_model: context type MTP requested but model doesn't contain MTP layers
-#}
+## Check for model-loading failure messages in the server log.
+# Prints the specific model-loading error message to stdout when one is
+# detected in $SERVER_LOG; prints nothing otherwise.
+# Detection is based on the printed text (callers check for non-empty output),
+# so this function always returns 0.
+check_load_model_fail() {
+    local log="$1"
+    [[ -f "$log" ]] || return 0
+
+    # 1) Exact MTP warning message
+    local mtp_msg=$(grep -a 'llama_init_from_model: context type MTP requested but model doesn\''t contain MTP layers' "$log" | tail -n 1)
+    if [[ -n "$mtp_msg" ]]; then
+        printf '%s\n' "$(echo "$mtp_msg" | sed -E 's/^ *[0-9.]+ *W llama_init_from_model: //')"
+        return 0
+    fi
+
+    # 2) Exact server-exit line
+    local exit_line=$(grep -a 'srv  llama_server: exiting due to model loading error' "$log" | tail -n 1)
+    if [[ -n "$exit_line" ]]; then
+        printf '%s\n' "$(echo "$exit_line" | sed -E 's/^ *[0-9.]+ *E srv +//')"
+        return 0
+    fi
+
+    return 0
+}
 
 extract_info_from_server_log() {
     debug_function "extract_info_from_server_log"
