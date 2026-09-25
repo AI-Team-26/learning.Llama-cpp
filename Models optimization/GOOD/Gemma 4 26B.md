@@ -1,15 +1,15 @@
 # Gemma 4 26B A4B
 
-| File                                                   | GB   | Result                                          |
-| ---                                                    | ---- | ---                                             |
-| Gemma-4-26B_Q4_0-it_google.gguf                        | ---- | ✔️ Smart and fast - 160k 45 t/s | 256k 35 t/s   |  
-| Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf              | 12.6 | ✔️ Smart and fast - 160k 35 t/s                 |
-| Gemma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf              | ---  |
-| Gemma4-26B-A4B-QAT-Unc-Balanced-Q4_K_M_hauhaucs.gguf   | ---  | ⚠️ WITHOUT MTP: too slow  (MTP not tested)      |
-| Gemma-4-26B-REAP126-pruned-UD-IQ4_NL_techhermit.gguf   | ---  | ❌ Looping on Pi and lie                                  |
-| Gemma-4-19B-REAP-Q4_K_M_vsark.gguf                     | ---  | ❌ Every here and then it breaks, 256k 40 t/s             |  
-| Gemma4-26b-uncensored-fast-v2-Q4_K_M_Jiunsong.gguf     | ---  | ❌ Gibberish and unformatted output. Also slow.           |
-| Gemma-4-26B-A4B-it-qat-UD-Q4_K_XL_unsloth.gguf         | 13.2 | ❌ Small Context. It doen't test its code. It requires a lot of rework.  |
+| File                                                   | GB   | Result                                               |
+| ---                                                    | ---- | ---                                                  |
+| Gemma-4-26B_Q4_0-it_google.gguf                        | ---- | ✔️ Smart and fast - 160k 45 t/s | 256k 35 t/s        |  
+| Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf              | 12.6 | ✔️ Smart and fast - 160k 35 t/s | 96k 40-180 t/s !!! |
+| Gemma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf              | ---  |                                                       |
+| Gemma4-26B-A4B-QAT-Unc-Balanced-Q4_K_M_hauhaucs.gguf   | ---  | ⚠️ WITHOUT MTP: too slow  (MTP not tested)           |
+| Gemma-4-26B-REAP126-pruned-UD-IQ4_NL_techhermit.gguf   | ---  | ❌ Looping on Pi and lie                             |
+| Gemma-4-19B-REAP-Q4_K_M_vsark.gguf                     | ---  | ❌ Every here and then it breaks, 256k 40 t/s        |  
+| Gemma4-26b-uncensored-fast-v2-Q4_K_M_Jiunsong.gguf     | ---  | ❌ Gibberish and unformatted output. Also slow.      |
+| Gemma-4-26B-A4B-it-qat-UD-Q4_K_XL_unsloth.gguf         | 13.2 | ❌ Small Context. Bad at coding.                     |
 
 
 
@@ -308,18 +308,35 @@ _test_model
 
 
 model=Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf
-ctx_k=80
+draft_model=mtp-gemma-4-26B-A4B-it-Q8_0_unsloth.gguf
+ctx_k=104
 cpu_moe=0
 quant=q8_0/q4_0
 gpu_layers=99
 spec=draft-mtp,ngram-simple
-draft_model=mtp-gemma-4-26B-A4B-it_unsloth.gguf
 predict_token=1/3
-ngram_values=3/3
+ngram_values=24/24
 jinja=0
 batch=1024
-ubatch=1024
+ubatch=512
 _test_model
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                       | Batch/Ub. | Note              |
+| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | -------------------------------------------- | --------- |------------------ |
+|  72 t/s | 104 k |   0 | 31/31 | 15.6 | 12.7/0.1  | q8_0 (q8_0) |    781 |  11s | 85% = MTP 1/3 (92%) N-gram 24/24/1 (---)     |  1024/512 |                   |
+|  70 t/s | 104 k |   0 | 31/31 | 15.6 | 12.7/0.1  | q8_0 (q8_0) |    780 |  12s | 80% = MTP 1/3 (91%) N-gram 16/16/1 (67%)     |  1024/512 |                   |
+|  69 t/s |  96 k |   0 | 31/31 | 15.5 | 12.7/0.1  | q8_0 (q8_0) |    884 |  13s | 69% = MTP 1/3 (90%) N-gram 12/12/1 (82%)     |  1024/512 |                   |
+|  67 t/s |  96 k |   0 | 31/31 | 15.5 | 12.7/0.1  | q8_0 (q8_0) |    884 |  13s | 69% = MTP 1/3 (90%) N-gram 12/12/1 (82%)     |  1024/512 |                   |
+|  67 t/s |  80 k |   0 | 31/31 | 15.1 | 12.7/0.1  | q8_0 (q8_0) |    884 |  13s | 69% = MTP 1/3 (90%) N-gram 12/12/1 (82%)     |  1024/512 |                   |
+|  66 t/s |  80 k |   0 | 31/31 | 15.1 | 12.7/0.1  | q8_0 (q8_0) |   1283 |  20s | 66% = MTP 1/4 (84%) N-gram 16/16/1 (100%)    |  1024/512 |                   |
+|  67 t/s |  84 k |   0 | 31/31 | 15.2 | 12.7/0.1  | q8_0 (q8_0) |   1283 |  19s | 69% = MTP 1/4 (84%) N-gram 24/24/1 (---)     |  1024/512 |                   |
+|  66 t/s |  72 k |   0 | 31/31 | 15.0 | 12.7/0.1  | q8_0 (q8_0) |   1135 |  17s | 63% = MTP 1/4 (85%) N-gram 12/12/1 (92%)     |  1024/512 |                   |
+|  65 t/s |  64 k |   0 | 31/31 | 14.8 | 12.7/0.1  | q8_0 (q8_0) |    884 |  14s | 69% = MTP 1/3 (90%) N-gram 12/12/1 (82%)     |  1024/512 |                   |
+
+
+
+
+
 
 | Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                  | Batch/Ub. | Note              |
 | ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | --------------------------------------- | --------- |------------------ |

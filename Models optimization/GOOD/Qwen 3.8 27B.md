@@ -27,31 +27,30 @@
 | Swift-Qwen3.8-27b-IQ3_M_bartowski.gguf                     | 13.8 | ❌ Max 32K.                                 |
 | Swift-Qwen3.8-27b-i1-IQ4_XS-Smaller_ahmeddelkilami01.gguf  | 12.6 |      |
 | Qwen3.8-27B-IQ3_S-3.23bpw_byteshape.gguf                   | 10.2 |      |
+| 
 | Qwen3.8-27B-GSQ-RCO-IQ3_S-mtp_ista.gguf                    | 11.2 |      |
 | Qwen3.8-27B-ASCII-Condensed-IQ4_XS-3.84bpw_troed.gguf      | 11.4 |      |
 
 
-# ASCII-Condensed-IQ4_XS-3 (troed)
+# ✔️ ASCII-Condensed-IQ4_XS-3 (troed)
 Qwen3.8-27B-ASCII-Condensed-IQ4_XS-3.84bpw_troed.gguf
 Qwen3.8-27B-ASCII-Condensed-DFlash2-Q2_K_S-MIX_troed.gguf
 https://huggingface.co/troed/Qwen3.8-27B-ASCII-Condensed
 required DFlash file too   spec-type = draft-dflash
 
 
-# (ISTA-DASLAb)
+# ✔️ (ISTA-DASLAb)
 Qwen3.8-27B-GSQ-RCO-IQ3_S-mtp_ista.gguf                         11.2 GB
 https://huggingface.co/ISTA-DASLab/Qwen3.8-27B-GSQ-RCO-GGUF
 mmproj:
-
-# https://huggingface.co/troed/Qwen3.8-27B-ASCII-Condensed
 
 # IQ4_XS (byteshape)
 Qwen3.8-27B-IQ4_XS-3.84bpw_byteshape.gguf                       12.1 GB
 https://huggingface.co/byteshape/Qwen3.8-27B-GGUF
 
-
-# IQ3_S (byteshape)
+# ✔️ IQ3_S (byteshape)
 Qwen3.8-27B-IQ3_S-3.23bpw_byteshape.gguf                      10.2 GB
+https://huggingface.co/byteshape/Qwen3.8-27B-GGUF
 
 
 ## Swift IQ3_XS (ukisai)                            
@@ -161,7 +160,7 @@ ctx_k=68
 gpu_layers=99
 cpu_moe=0
 quant=q8_0/q8_0
-spec=draft-dflash,ngram-simple
+spec=draft-flash,ngram-simple
 predict_token=1/6
 ngram_values=32/24/1
 jinja=1
@@ -192,8 +191,6 @@ _test_model
 |  52 t/s |  64 k |   0 | 66/66 | 14.2 | 10.9/0.1  | q4_0 (q4_0) |    578 |  11s | 80% = DFlash 1/4 (---) N-gram 24/16/1 (---)  |  1024/512 | R: medium         |
 |  46 t/s |  64 k |   0 | 66/66 | 15.2 | 10.9/0.1  | q8_0 (q4_0) |    563 |  13s | 73% = DFlash 1/4 (---) N-gram 16/16/1 (---)  |  1024/512 | R: medium         |
 |  45 t/s |  64 k |   0 | 66/66 | 14.0 | 10.9/0.1  | q4_0 (q4_0) |    592 |  13s | 83% = DFlash 1/3 (---) N-gram 24/16/1 (---)  |  1024/512 | R: medium         |
-
-
 
 
 
@@ -235,31 +232,47 @@ ubatch=512
 _test_model
 
 
-
 model=Qwen3.8-27B-IQ4_XS-3.84bpw_byteshape.gguf
-ctx_k=64
+ctx_k=72
 gpu_layers=99
 cpu_moe=0
 quant=q8_0/q8_0
-spec=draft-mtp
+spec=draft-mtp,ngram-simple
 draft_model=none
-predict_token=1/4
-ngram_values=none
+predict_token=1/7
+ngram_values=24/24
 jinja=1
-batch=1024
-ubatch=512
+batch=512
+ubatch=256
 _test_model
 
-| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                  | Batch/Ub. | Note              |
-| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | --------------------------------------- | --------- |------------------ |
-|  43 t/s |  72 k |   0 | 66/66 | 15.6 | 11.5/0.0  | q8_0 (q4_0) |    601 |  14s | MTP        min=1 max=4 p_min=0.20 (87%) |   512/256 | R: medium         |
 
-|  42 t/s |  64 k |   0 | 66/66 | 15.4 | 11.5/0.0  | q8_0 (q4_0) |    601 |  14s | MTP        min=1 max=5 p_min=0.20 (84%) |   512/256 | R: medium         |
-|  42 t/s |  64 k |   0 | 66/66 | 15.3 | 11.5/0.0  | q8_0 (q4_0) |    601 |  15s | MTP        min=1 max=4 p_min=0.20 (87%) |   512/256 | R: medium         |
-|  38 t/s |  64 k |   0 | 66/66 | 15.2 | 11.5/0.0  | q8_0 (q4_0) |    601 |  15s | MTP        min=1 max=3 p_min=0.20 (90%) |   512/256 | R: medium         |
-|  37 t/s |  64 k |   0 | 66/66 | 15.3 | 11.5/0.1  | q8_0 (q4_0) |    563 |  15s | MTP        min=1 max=3 p_min=0.20 (91%) |  1024/512 | R: medium         |
-|  18 t/s |  60 k |   0 | 66/66 | 14.1 | 11.4/0.1  | q8_0 (none) |    622 |  35s | none                                 -- |  1024/512 | R: medium         |
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                       | Batch/Ub. | Note              |
+| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | -------------------------------------------- | --------- |------------------ |
+|  43 t/s |  72 k |   0 | 66/66 | 15.7 | 11.5/0.0  | q8_0 (q8_0) |    601 |  14s | 76% = MTP 1/6 (95%) N-gram 24/24/1 (---)     |   512/256 | R: medium         |
+|  42 t/s |  72 k |   0 | 66/66 | 15.7 | 11.5/0.0  | q8_0 (q8_0) |    601 |  14s | 76% = MTP 1/6 (95%) N-gram 24/24/1 (---)     |  1024/256 | R: medium         |
+|  43 t/s |  72 k |   0 | 66/66 | 15.6 | 11.5/0.0  | q8_0 (q4_0) |    601 |  14s | 87% = MTP 1/4 (96%)                          |   512/256 | R: medium         |
+|  37 t/s |  72 k |   0 | 66/66 | 15.7 | 11.5/0.1  | q8_0 (q4_0) |    563 |  15s | 87% = MTP 1/4 (96%)                          |   512/512 | R: medium         |
+|  36 t/s |  72 k |   0 | 66/66 | 15.7 | 11.5/0.1  | q8_0 (q8_0) |    563 |  15s | 90% = MTP 1/4 (96%)                          |  1024/512 | R: medium         |
+|  35 t/s |  72 k |   0 | 66/66 | 15.7 | 11.5/0.1  | q8_0 (q4_0) |    563 |  16s | 87% = MTP 1/4 (94%)                          |  1024/512 | R: medium         |
+|  32 t/s |  72 k |   0 | 66/66 | 15.4 | 11.5/0.0  | q8_0 (q4_0) |    601 |  19s | 87% = MTP 1/2 (97%) N-gram 16/16/1 (100%)    |  1024/256 | R: medium         |
 
+|  44 t/s |  68 k |   0 | 66/66 | 15.7 | 11.5/0.1  | q8_0 (q8_0) |    563 |  12s | 90% = MTP 1/4 (96%)                          |  1024/512 | R: medium         |
+
+|  43 t/s |  64 k |   0 | 66/66 | 15.4 | 11.5/0.0  | q8_0 (q4_0) |    601 |  14s | 84% = MTP 1/5 (96%) N-gram 24/24/1 (---)     |  1024/256 | R: medium         |
+|  42 t/s |  64 k |   0 | 66/66 | 15.3 | 11.5/0.0  | q8_0 (q4_0) |    601 |  15s | 87% = MTP 1/4 (96%) N-gram 24/24/1 (---)     |  1024/256 | R: medium         |
+|  40 t/s |  64 k |   0 | 66/66 | 15.7 | 11.5/0.0  | q8_0 (q8_0) |    601 |  15s | 72% = MTP 1/6 (95%) N-gram 16/16/1 (100%)    |  1024/256 | R: medium         |
+|  40 t/s |  68 k |   0 | 66/66 | 15.5 | 11.5/0.0  | q8_0 (q4_0) |    601 |  15s | 83% = MTP 1/4 (96%) N-gram 16/16/1 (100%)    |  1024/256 | R: medium         |
+|  38 t/s |  68 k |   0 | 66/66 | 15.6 | 11.5/0.0  | q8_0 (q4_0) |    583 |  16s | 74% = MTP 1/5 (95%) N-gram 16/16/1 (100%)    |  1024/256 | R: medium         |
+
+
+|  44 t/s |  64 k |   0 | 66/66 | 15.7 | 11.5/0.1  | q8_0 (q8_0) |    563 |  13s | 85% = MTP 1/5 (94%)                          |  1024/512 | R: medium         |
+|  43 t/s |  64 k |   0 | 66/66 | 15.3 | 11.5/0.0  | q8_0 (q4_0) |    601 |  14s | 87% = MTP 1/4 (96%)                          |   512/256 | R: medium         |
+|  43 t/s |  64 k |   0 | 66/66 | 15.5 | 11.5/0.1  | q8_0 (q8_0) |    563 |  13s | 90% = MTP 1/4 (96%)                          |  1024/512 | R: medium         |
+|  43 t/s |  64 k |   0 | 66/66 | 15.6 | 11.5/0.1  | q8_0 (q4_0) |    563 |  13s | 84% = MTP 1/5 (94%)                          |  1024/512 | R: medium         |
+|  39 t/s |  64 k |   0 | 66/66 | 15.7 | 11.5/0.1  | q8_0 (q8_0) |    563 |  15s | 80% = MTP 1/6 (95%)                          |  1024/512 | R: medium         |
+
+|  18 t/s |  64 k |   0 | 66/66 | 14.1 | 11.4/0.0  | q8_0 (none) |    537 |  30s | --                                           |  1024/256 | R: medium         |
 
 
 model=Swift-Qwen3.8-27b-i1-IQ4_XS-Smaller_ahmeddelkilami01.gguf

@@ -106,6 +106,22 @@ models:
     spec_ngram_simple_min_hits: 1
     jinja: 1
 
+  Qwen3.8-27B-IQ4_XS_byteshape_72k:
+    file: Qwen3.8-27B-IQ4_XS-3.84bpw_byteshape.gguf
+    ctx_k: 72
+    gpu_layers: 99
+    cpu_moe: 0
+    quant: q8_0/q8_0
+    batch: 512
+    ubatch: 256
+    spec_type: draft-mtp,ngram-simle
+    spec_draft_n_min: 1
+    spec_draft_n_max: 6
+    spec_ngram_simple_size_n: 24
+    spec_ngram_simple_size_m: 24
+    spec_ngram_simple_min_hits: 1
+    jinja: 1
+
   Qwen3.8-27B-IQ4_XS_byteshape_64k:
     file: Qwen3.8-27B-IQ4_XS-3.84bpw_byteshape.gguf
     ctx_k: 64
@@ -939,29 +955,7 @@ models:
         "maxTokens": 4096,
         "reasoning": true
       },
-
-  Gemma-4-26B-UD-IQ4_NL_(Unsloth)_[104k]:
-    speed: 55 t/s
-    file: Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf
-    ctx_k: 104
-    gpu_layers: 99
-    cpu_moe: 0
-    quant: q8_0
-    batch: 2048
-    ubatch: 256
-    spec_type: draft-mtp 
-    draft_model: mtp-gemma-4-26B-A4B-it_unsloth.gguf
-    spec_draft_n_min: 1
-    spec_draft_n_max: 5
-    pi_agent_model: >
-      { 
-        "_test": "???",
-        "id": "Gemma-4-26B-UD-IQ4_NL_(Unsloth)_[104k]",
-        "name": "Gemma4 26B - UD-IQ4_NL (Unsloth) 104K",
-        "contextWindow": 184320,
-        "maxTokens": 8192,
-        "reasoning": true
-      },
+  
   Gemma-4-26B-UD-IQ4_NL_(Unsloth)_160k:
     speed: n.a.
     file: Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf
@@ -980,22 +974,26 @@ models:
         "maxTokens": 8192,
         "reasoning": true
       },
-  Gemma-4-26B-UD-IQ4_NL_(Unsloth)_160k_NGRAM:
-    speed: n.a.
+  Gemma-4-26B-UD-IQ4_NL_(Unsloth)_104k:
+    speed: "70 t/s"
     file: Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf
-    ctx_k: 160
-    gpu_layers: -1
-    cpu_moe: 1
+    draft_model: mtp-gemma-4-26B-A4B-it-Q8_0_unsloth.gguf
+    ctx_k: 104
+    gpu_layers: 99
+    quant: q8_0/q4_0
+    cpu_moe: 0
     batch: 1024
     ubatch: 512
     spec_type: draft-mtp,ngram-simple
-    spec_ngram_simple_size_m: 8
-    spec_ngram_simple_size_n: 8
+    spec_draft_n_min: 1
+    spec_draft_n_max: 3
+    spec_ngram_simple_size_m: 24
+    spec_ngram_simple_size_n: 24
     spec_ngram_simple_min_hits: 1
     pi_agent_model: >
       { 
         "_test": "???",
-        "id": "Gemma-4-26B-UD-IQ4_NL_(Unsloth)_160k_NGRAM",
+        "id": "Gemma-4-26B-UD-IQ4_NL_(Unsloth)_80k",
         "name": "Gemma4 26B - UD-IQ4_NL (by Unsloth) 160K",
         "contextWindow": 163840,
         "maxTokens": 8192,
