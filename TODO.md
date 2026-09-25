@@ -2,6 +2,28 @@
 
 ## Backlog
 
+- Feature 12: change the shell title when a local model is launched.
+  File: start_server_prod.sh
+  Example 1: printf '\033]2;✅ 🟢 pi-idle\007'; sleep 15
+  Example 2: PROMPT_COMMAND='printf "\033]2;✅ 🟢 pi-status - $(basename "$PWD")\007"'
+
+- Feature 11: error while handling argument "--spec-type": unknown speculative type: ngram-simle while calling a-start (llam_erver_prod.sh)
+  UI still shows "Waiting for llama-server to load model" in loop .
+  It has to stop and show the error.
+  llama srver log:
+  ```
+  error while handling argument "--spec-type": unknown speculative type: ngram-simle
+
+    usage:
+        --spec-type none,draft-simple,draft-eagle3,draft-mtp,draft-dflash,draft-dspark,ngram-simple,ngram-map-k,ngram-map-k4v,ngram-mod,ngram-cache
+                                        comma-separated list of types of speculative decoding to use (default:
+                                        none)
+                                        
+                                        (env: LLAMA_ARG_SPEC_TYPE)
+
+   to show complete usage, run with -h
+   ```
+
 - **Feature 6**: [feat/06_sharpyaml] Llama Server UI: Replace YamlDotNet with SharpYaml (PropertyNamingPolicy=SnakeCaseLower); drop [YamlMember] aliases except [JsonPropertyName("ubatch")] on UBatch — TODO notes already in ModelsConfigLoader.cs/ModelConfig.cs
 - Feature 8 | Unify the llama-server call of test and prod calls
 

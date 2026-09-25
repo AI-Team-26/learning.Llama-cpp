@@ -316,6 +316,45 @@
 
 
 # GLM 4.7 Flash
+
+  GLM_4.7-Flash_UD-Q3_K_XL_(Unsloth)_128k:
+    file: GLM-4.7-Flash-UD-Q3_K_XL_unsloth.gguf
+    ctx_k: 128
+    gpu_layers: 45
+    cpu_moe: 2
+    batch: 1024
+    ubatch: 256
+    spec_type: none
+    jinja: 1
+    pi_agent_model: >
+      { 
+        "_test": "?",
+        "_speed": "? t/s",
+        "id": "GLM-4.7-Flash-UD-Q3_K_XL_unsloth.gguf",
+        "name": "GLM 4.7 Flash UD Q3_K_XL (Unsloth) 128K",
+        "contextWindow": 131072,
+        "maxTokens": 4096,
+        "reasoning": true
+      },
+
+  GLM_4.7-Flash_(gaionaus)_128k:
+    file: GLM-4.7-flash-Q4_K_M_gaionaus.gguf
+    ctx_k: 128
+    gpu_layers: -1
+    cpu_moe: 2
+    batch: 1024
+    ubatch: 256
+    spec_type: none
+    pi_agent_model: >
+      { 
+        "_test": "?",
+        "id": "GLM-4.7-flash-Q4_K_M_gaionaus.gguf",
+        "name": "GLM 4.7 Flash Q4_K_M (by gaionaus) 128K",
+        "contextWindow": 131072,
+        "maxTokens": 4096,
+        "reasoning": true
+      },
+
   GLM-4.7-Flash_REAP-23B-A3B_UD-Q4_K_XL_(Unsloth):
     file: GLM-4.7-Flash-REAP-23B-A3B-UD-Q4_K_XL_unsloth.gguf
     ctx_k: 96
@@ -334,6 +373,88 @@
           "maxTokens": 4096,
           "reasoning": true
       },
+
+# GPT OSS 20B
+  GPT-OSS-20B_20b_UD-Q8_K_XL:
+    file: GPT-OSS-20b-UD-Q8_K_XL_unsloth.gguf
+    ctx_k: 128
+    gpu_layers: 99
+    cpu_moe: 0
+    batch: 2048
+    ubatch: 1024
+    spec_type: none
+    pi_agent_model: >
+        { 
+            "_test": "?",
+            "id": "GPT-OSS-20b-UD-Q8_K_XL_unsloth.gguf",
+            "name": "GPT OSS 20B UD Q8_K_XL (by Unsloth)",
+            "contextWindow": 131072,
+            "maxTokens": 2048,
+            "reasoning": true
+        },
+
+  GPT-OSS-20B_20b_UD-Q6_K_XL:
+    file: GPT-OSS-20b-UD-Q6_K_XL_unsloth.gguf
+    ctx_k: 128
+    gpu_layers: -1
+    cpu_moe: 0
+    batch: 2048
+    ubatch: 384
+    spec_type: none
+    pi_agent_model: >
+        { 
+            "_test": "?",
+            "id": "GPT-OSS-20b-UD-Q6_K_XL_unsloth.gguf",
+            "name": "GPT OSS 20B UD Q6_K_XL (by Unsloth)",
+            "contextWindow": 131072,
+            "maxTokens": 2048,
+            "reasoning": true
+        },
+
+  GPT-OSS-20B_UD-Q8_K_XL_UD-Q8_K_XL-N-gram_1:
+    file: GPT-OSS-20b-UD-Q8_K_XL_unsloth.gguf
+    ctx_k: 64
+    gpu_layers: -1
+    cpu_moe: 0
+    batch: 1024
+    ubatch: 256
+    spec_type: ngram-simple
+    spec_ngram_simple_size_m: 4
+    spec_ngram_simple_size_n: 6
+    spec_ngram_simple_min_hits: 1
+    pi_agent_model: >
+        { 
+            "_test": "?",
+            "id": "GPT-OSS-20b-UD-Q8_K_XL_unsloth.gguf",
+            "name": "GPT OSS 20B UD Q8_K_XL",
+            "contextWindow": 65536,
+            "maxTokens": 4096,
+            "reasoning": true
+        },
+
+  GPT-OSS-20B_IQ4_NL:
+    file: OpenAI-20B-NEO-CODE2-Plus-Uncensored-IQ4_NL_davidau.gguf
+    ctx_k: 128
+    gpu_layers: -1
+    cpu_moe: 0
+    batch: 2048
+    ubatch: 256
+    spec_type: none      
+
+    #spec_type="ngram-simple"
+    #spec_ngram_simple_size_m=5
+    #spec_ngram_simple_size_n=10
+    #spec_ngram_simple_min_hits=1
+
+    pi_agent_model: >
+        { 
+            "_test": "?",
+            "id": "OpenAI-20B-NEO-CODE2-Plus-Uncensored-IQ4_NL_davidau.gguf",
+            "name": "OpenAI-20B-NEO-CODE2_IQ4_NL",            
+            "contextWindow": 131072,
+            "maxTokens": 4096,
+            "reasoning": true
+        },
 
 
 # Qwythos  
