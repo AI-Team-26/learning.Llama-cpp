@@ -2,9 +2,6 @@
 
 ## Backlog
 
-- Bug 1: When Pi start I have this warning message:
-  "Warning: Could not restore model Llama.cpp/96K . Using Llama.cpp/64K"
-
 - Feature 11: error while handling argument "--spec-type": unknown speculative type: ngram-simle while calling a-start (llam_erver_prod.sh)
   UI still shows "Waiting for llama-server to load model" in loop .
   It has to stop and show the error.
