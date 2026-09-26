@@ -92,10 +92,10 @@ models:
 
   Qwen3.8-27B-IQ3_S_ista_64k:
     file: Qwen3.8-27B-GSQ-RCO-IQ3_S-mtp_ista.gguf
-    ctx_k: 64
+    ctx_k: 68
     gpu_layers: 99
     cpu_moe: 0
-    quant: q8_0/q4_0
+    quant: q8_0/q8_0
     batch: 1024
     ubatch: 512
     spec_type: draft-mtp,ngram-simple
@@ -961,10 +961,12 @@ models:
   
   Gemma-4-26B-UD-IQ4_NL_(Unsloth)_160k:
     speed: n.a.
-    file: Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf
+    file: Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.
+    draft_model: mtp-gemma-4-26B-A4B-it-Q4_0_unsloth.gguf
     ctx_k: 160
-    gpu_layers: -1
+    gpu_layers: 99
     cpu_moe: 1
+    quant: q8_0/q4_0
     batch: 1024
     ubatch: 256
     spec_type: none 

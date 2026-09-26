@@ -2,6 +2,9 @@
 
 ## Backlog
 
+- Bug 1: When Pi start I have this warning message:
+  "Warning: Could not restore model Llama.cpp/96K . Using Llama.cpp/64K"
+
 - Feature 12: change the shell title when a local model is launched.
   File: start_server_prod.sh
   Example 1: printf '\033]2;✅ 🟢 pi-idle\007'; sleep 15
