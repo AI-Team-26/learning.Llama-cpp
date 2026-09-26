@@ -185,6 +185,7 @@ start_server() {
 
     if ! yq -e ".models[\"$model_id\"]" "$models_config_file" > /dev/null 2>&1; then
         echo -e "❌ Error: Model '$model_id' not found in ${yellow}$models_config_file${reset}"
+        printf '\033]2;❌ Error: %s\007' "$model_id"
         #echo "Available models: $(yq '.models | keys | .[]' $models_config_file | tr '\n' ' ')"
         return 1
     fi
@@ -322,6 +323,9 @@ start_server() {
     echo "START SERVER: ${yellow}$model_file${reset} with ${yellow}$ctx_k K${reset} context" >&2
     echo "=========================================================" >&2
 
+    # Set terminal title for loading
+    printf '\033]2;✅ 🟢 Loading %s...\007' "$model_id"
+
     # The llama-server has to be launched as a detached process, to survive to shell closing
     # `nohup` does not work
     # `disown` does not work
@@ -347,6 +351,9 @@ start_server() {
         if curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${SERVER_PORT}/health" | grep -q "200"; then
             echo " Ready! 🚀" >&2
 
+            # Set terminal title for running
+            printf '\033]2;✅ 🟢 %s\007' "$model_id"
+
             #local vram_usage=$(get_readable_VRAM_usage)
             #echo "VRAM used/total: $vram_usage" >&2
 
@@ -358,6 +365,8 @@ start_server() {
             local err_msg=$(check_load_model_fail "$SERVER_LOG")
             if [[ -n "$err_msg" ]]; then
                 echo -e "❌ Can't start the server. Error: ${gray_light}${err_msg}${reset}" >&2
+                # Set terminal title for error
+                printf '\033]2;❌ Error: %s\007' "$model_id"
                 printf 'error=%s\n' "$err_msg"
                 return 1
             fi
