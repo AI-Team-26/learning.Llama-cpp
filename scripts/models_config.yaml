@@ -79,12 +79,12 @@ models:
     ctx_k: 64
     gpu_layers: 99
     cpu_moe: 0
-    quant: q8_0/q8_0
-    batch: 1024
-    ubatch: 512
+    quant: q8_0/q4_0
+    batch: 512
+    ubatch: 256
     spec_type: draft-dflash,ngram-simple
     spec_draft_n_min: 1
-    spec_draft_n_max: 6
+    spec_draft_n_max: 5
     spec_ngram_simple_size_n: 32
     spec_ngram_simple_size_m: 24
     spec_ngram_simple_min_hits: 1
