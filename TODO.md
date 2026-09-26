@@ -5,11 +5,6 @@
 - Bug 1: When Pi start I have this warning message:
   "Warning: Could not restore model Llama.cpp/96K . Using Llama.cpp/64K"
 
-- Feature 12: change the shell title when a local model is launched.
-  File: start_server_prod.sh
-  Example 1: printf '\033]2;✅ 🟢 pi-idle\007'; sleep 15
-  Example 2: PROMPT_COMMAND='printf "\033]2;✅ 🟢 pi-status - $(basename "$PWD")\007"'
-
 - Feature 11: error while handling argument "--spec-type": unknown speculative type: ngram-simle while calling a-start (llam_erver_prod.sh)
   UI still shows "Waiting for llama-server to load model" in loop .
   It has to stop and show the error.
@@ -23,15 +18,19 @@
                                         none)
                                         
                                         (env: LLAMA_ARG_SPEC_TYPE)
-
+  
    to show complete usage, run with -h
    ```
+
+- Feature 13: Add bash syntax check (shellcheck) in CI workflow for shell scripts
+  Run shellcheck on all .sh files in scripts/ directory
 
 - **Feature 6**: [feat/06_sharpyaml] Llama Server UI: Replace YamlDotNet with SharpYaml (PropertyNamingPolicy=SnakeCaseLower); drop [YamlMember] aliases except [JsonPropertyName("ubatch")] on UBatch — TODO notes already in ModelsConfigLoader.cs/ModelConfig.cs
 - Feature 8 | Unify the llama-server call of test and prod calls
 
 ## Done
 
+- **[feat/12_shell_title_change]** Feature 12 — change the shell title when a local model is launched
 - **[feat/02_llama_server_ui]** Llama Server UI program initial structure
 - **[feat/07_get_prediction_info_dflash]** Feature 7 — get_prediction_info, dflash extraction
 - **[feat/07_1_compact_pred_info]** Feature 7.1 — print spec prediction info compactly in test_call output

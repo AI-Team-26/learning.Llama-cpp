@@ -8,6 +8,11 @@ source common.sh
 source server_common.sh
 
 models_config_file="models_config.yaml"
+
+# Set terminal window title
+set_title() {
+    printf '\033]2;%s\007' "$1"
+}
 #path="$(dirname $BASH_SOURCE[1])"  # this works but we need to be in this folder anyway because of the previous sourcing (common.sh)
 
 
@@ -114,11 +119,13 @@ required_var() {
     local var_name="$1"
     if [[ ! -v "$var_name" ]]; then 
         echo -e "❌ Variable \"$var_name\" is missing!" >&2
+        set_title "🦙 🔴 error $model_id"
         return 1
     fi
 
     if [[ -z "$var_name" ]]; then 
         echo -e "❌ Variable \"$var_name\" is empty!" >&2
+        set_title "🦙 🔴 error $model_id"
         return 1
     fi
 }
@@ -128,6 +135,8 @@ required_var() {
 
 start_server() {
     local model_id="${1:-}"
+
+    set_title "🦙 🟡 starting"
 
     # 1. If no model ID provided, show a selection menu
     if [[ -z "$model_id" ]]; then
@@ -164,6 +173,7 @@ start_server() {
         done <<< "$models_list"
 
         # Show the menu
+        set_title "🦙 🟡 selecting model..."
         PS3="Please enter the model number to start (or Ctrl+C to quit): "
         select choice in "${choices[@]}"; do
             if [[ -n "$choice" ]]; then
@@ -179,6 +189,7 @@ start_server() {
         # If user pressed Ctrl+C during select, $model_id will be empty
         if [[ -z "$model_id" ]]; then
             echo "Aborted by user."
+            set_title "🦙 ⚪ aborted"
             return 0
         fi
     fi
@@ -186,8 +197,11 @@ start_server() {
     if ! yq -e ".models[\"$model_id\"]" "$models_config_file" > /dev/null 2>&1; then
         echo -e "❌ Error: Model '$model_id' not found in ${yellow}$models_config_file${reset}"
         #echo "Available models: $(yq '.models | keys | .[]' $models_config_file | tr '\n' ' ')"
+        set_title "🦙 🔴 error $model_id"
         return 1
     fi
+
+    set_title "🦙 🟡 loading $model_id"
 
     debug "Loading configuration for '$model_id'"
 
@@ -220,8 +234,8 @@ start_server() {
     local jinja
 
     # check mandatory variables
-    required_var "spec_type" || exit 1 
-    required_var "quant" || exit 1
+    required_var "spec_type" || { set_title "🦙 🔴 error $model_id"; exit 1; } 
+    required_var "quant" || { set_title "🦙 🔴 error $model_id"; exit 1; }
 
     # estrapolate Quantization parameters
     #check_var "quant"
@@ -244,6 +258,7 @@ start_server() {
 
     if [[ ! -f "$model_file" ]]; then
         echo -e "❌ File \"$model_file\" not found!"
+        set_title "🦙 🔴 error $model_id"
         return 1
     fi
 
@@ -303,12 +318,18 @@ start_server() {
         ### TODO: not implemented
         echo "Speculative type: DFlash ... "
         echo -e "❌ Spec \"DFlash\" not supported!"
+        set_title "🦙 🔴 error $model_id"
         return 1
     fi
 
     # External draft model
     if [[ -n "$draft_model" && "$draft_model" != "none" ]]; then
         local draft_model_path="$GGUF_FOLDER/$draft_model"
+        if [[ ! -f "$draft_model_path" ]]; then
+            echo -e "‼️ Draft model '$draft_model' file not found" >&2
+            set_title "🦙 🔴 error $model_id"
+            return 1
+        fi
         args+=(--spec-draft-model "$draft_model_path")
         print_value "Draft Model" "$draft_model"
     fi
@@ -347,6 +368,8 @@ start_server() {
         if curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${SERVER_PORT}/health" | grep -q "200"; then
             echo " Ready! 🚀" >&2
 
+            set_title "🦙 🟢 ready $model_id"
+
             #local vram_usage=$(get_readable_VRAM_usage)
             #echo "VRAM used/total: $vram_usage" >&2
 
@@ -358,9 +381,12 @@ start_server() {
             local err_msg=$(check_load_model_fail "$SERVER_LOG")
             if [[ -n "$err_msg" ]]; then
                 echo -e "❌ Can't start the server. Error: ${gray_light}${err_msg}${reset}" >&2
+                set_title "🦙 🔴 error $model_id"
                 printf 'error=%s\n' "$err_msg"
                 return 1
             fi
+            set_title "🦙 🔴 error $model_id"
+            return 1
         else
             echo -n "." >&2
             sleep 3
