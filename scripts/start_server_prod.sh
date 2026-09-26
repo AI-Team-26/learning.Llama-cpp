@@ -119,11 +119,13 @@ required_var() {
     local var_name="$1"
     if [[ ! -v "$var_name" ]]; then 
         echo -e "❌ Variable \"$var_name\" is missing!" >&2
+        set_title "🔴 pi-error $model_id"
         return 1
     fi
 
     if [[ -z "$var_name" ]]; then 
         echo -e "❌ Variable \"$var_name\" is empty!" >&2
+        set_title "🔴 pi-error $model_id"
         return 1
     fi
 }
@@ -171,6 +173,7 @@ start_server() {
         done <<< "$models_list"
 
         # Show the menu
+        set_title "🟡 pi-selecting model..."
         PS3="Please enter the model number to start (or Ctrl+C to quit): "
         select choice in "${choices[@]}"; do
             if [[ -n "$choice" ]]; then
@@ -231,8 +234,8 @@ start_server() {
     local jinja
 
     # check mandatory variables
-    required_var "spec_type" || exit 1 
-    required_var "quant" || exit 1
+    required_var "spec_type" || { set_title "🔴 pi-error $model_id"; exit 1; } 
+    required_var "quant" || { set_title "🔴 pi-error $model_id"; exit 1; }
 
     # estrapolate Quantization parameters
     #check_var "quant"
@@ -322,6 +325,11 @@ start_server() {
     # External draft model
     if [[ -n "$draft_model" && "$draft_model" != "none" ]]; then
         local draft_model_path="$GGUF_FOLDER/$draft_model"
+        if [[ ! -f "$draft_model_path" ]]; then
+            echo -e "‼️ Draft model '$draft_model' file not found" >&2
+            set_title "🔴 pi-error $model_id"
+            return 1
+        fi
         args+=(--spec-draft-model "$draft_model_path")
         print_value "Draft Model" "$draft_model"
     fi
@@ -377,6 +385,8 @@ start_server() {
                 printf 'error=%s\n' "$err_msg"
                 return 1
             fi
+            set_title "🔴 pi-error $model_id"
+            return 1
         else
             echo -n "." >&2
             sleep 3

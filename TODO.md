@@ -18,9 +18,12 @@
                                         none)
                                         
                                         (env: LLAMA_ARG_SPEC_TYPE)
-
+  
    to show complete usage, run with -h
    ```
+
+- Feature 13: Add bash syntax check (shellcheck) in CI workflow for shell scripts
+  Run shellcheck on all .sh files in scripts/ directory
 
 - **Feature 6**: [feat/06_sharpyaml] Llama Server UI: Replace YamlDotNet with SharpYaml (PropertyNamingPolicy=SnakeCaseLower); drop [YamlMember] aliases except [JsonPropertyName("ubatch")] on UBatch — TODO notes already in ModelsConfigLoader.cs/ModelConfig.cs
 - Feature 8 | Unify the llama-server call of test and prod calls
