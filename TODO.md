@@ -2,6 +2,24 @@
 
 ## Backlog
 
+- Bug 1 | error loading locel
+  When launch llama-server-prod and it has this error in the log:
+  ```
+  error while handling argument "--spec-type": unknown speculative type: draft-mtp.ngram-simple
+
+    usage:
+    --spec-type none,draft-simple,draft-eagle3,draft-mtp,draft-dflash,draft-dspark,ngram-simple,ngram-map-k,ngram-map-k4v,ngram-mod,ngram-cache
+                                        comma-separated list of types of speculative decoding to use (default:
+                                        none)
+                                        
+                                        (env: LLAMA_ARG_SPEC_TYPE)
+
+
+    to show complete usage, run with -h
+  ```
+  Still the UI shows  indefinitely: "Waiting for llama-server to load model............"
+
+
 - Feature 11: error while handling argument "--spec-type": unknown speculative type: ngram-simle while calling a-start (llam_erver_prod.sh)
   UI still shows "Waiting for llama-server to load model" in loop .
   It has to stop and show the error.

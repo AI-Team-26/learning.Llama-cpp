@@ -2,7 +2,7 @@
 
 | File                                                                      | Result                                                     |
 | Qwen_3-Coder-Next-REAP-40B-A3B.i1-IQ3_M_mradermacher.gguf                 | ✔️ Max 64k     22 t/s  Pi: GOOD                            |
-| Qwen3-Coder-30B-A3B-Instruct-IQ4_XS_unsloth.gguf                          | ✔️ 96k  30 t/s                                             |
+| Qwen3-Coder-30B-A3B-Instruct-IQ4_XS_unsloth.gguf                          | ✔️ 96k  30 t/s ❌ Pi: 20-25 t/s at 72k. edit file failed and it didn't noticed. Created a empty PR in GitHub ! |
 | Qwen3-Coder-30B-A3B-Instruct-UD-Q3_K_XL_unsloth.gguf                      | ❌ Q4 96k:70 t/s Q8 96k:30 t/s   Pi: indisciplinate        |
 | Qwen3-Coder-REAP-25B-A3B-Q4_K_M_bartowski.gguf                            | ✔️ Max 64k                                                 |
 | Qwen3-Coder-30B-A3B-Instruct-Q4_K_M_unsloth.gguf                          | ❌ Too slow                                                |
@@ -141,16 +141,26 @@ _test_model
 
 
 model=Qwen3-Coder-30B-A3B-Instruct-IQ4_XS_unsloth.gguf
-ctx_k=96
+ctx_k=72
 gpu_layers=99
-cpu_moe=8
-spec=0
+cpu_moe=6
+quant=q4_0
+spec=ngram-simple
 draft_model=none
 predict_token=0/0
-jinja=0
+ngram_values=24/24
+jinja=1
 batch=1024
-ubatch=256
+ubatch=512
 _test_model
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                       | Batch/Ub. | Note              |
+| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | -------------------------------------------- | --------- |------------------ |
+|  54 t/s |  72 k |   6 | 49/49 | 15.6 | 13.3/0.1  | q4_0 (none) |    534 |  10s | 91% = N-gram 24/24/1 (93%)                   |  1024/512 |                   |
+|  48 t/s |  72 k |   7 | 49/49 | 15.3 | 13.0/0.0  | q4_0 (none) |    569 |  12s | 91% = N-gram 24/24/1 (93%)                   |  1024/256 |                   |
+|  43 t/s |  72 k |   8 | 49/49 | 15.0 | 12.7/0.0  | q4_0 (none) |    560 |  13s | 92% = N-gram 16/16/1 (100%)                  |  1024/256 |                   |
+|  44 t/s |  64 k |   8 | 49/49 | 14.7 | 12.7/0.0  | q4_0 (none) |    560 |  13s | 92% = N-gram 16/16/1 (100%)                  |  1024/256 |                   |
+
 
 | Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | Cache | Tokens | Time | Prediction                       | Batch/Ub. | Note       |
 | ------- | ----- | --- | ----- | ---- | --------- | ----- | ------ | ---- | -------------------------------- | --------- |----------- |

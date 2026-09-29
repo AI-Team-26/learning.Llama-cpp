@@ -18,6 +18,15 @@
             "options": {
                 "cwd": "${workspaceFolder}/scripts"
             },
+        },
+        {
+            "label": "🛠️ Update Llama.cpp",
+            "type": "shell",
+            "command": "python UpdateLlamaCpp.py",
+            "group": "build",
+            "options": {
+                "cwd": "${workspaceFolder}/scripts"
+            },
         }
     ]
 }

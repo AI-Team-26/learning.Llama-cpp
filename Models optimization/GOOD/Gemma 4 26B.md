@@ -3,6 +3,7 @@
 | File                                                   | GB   | Result                                               |
 | ---                                                    | ---- | ---                                                  |
 | Gemma-4-26B_Q4_0-it_google.gguf                        | ---- | ✔️ Smart and fast - 160k 45 t/s | 256k 35 t/s        |  
+| Gemma-4-26B-A4B-it-UD-IQ4_XS_unsloth.gguf              | 12.6 | ✔️ Smart and fast                                    |
 | Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf              | 12.6 | ✔️ Smart and fast - 160k 35 t/s | 96k 40-180 t/s !!! |
 | Gemma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf              | ---  |                                                       |
 | Gemma4-26B-A4B-QAT-Unc-Balanced-Q4_K_M_hauhaucs.gguf   | ---  | ⚠️ WITHOUT MTP: too slow  (MTP not tested)           |
@@ -26,6 +27,10 @@ Gemma-4-26B-A4B-it-qat-UD-Q4_K_XL_unsloth.gguf                      13.2 GB
 ## ✔️ UD IQ4_NL (by Unsloth)
 Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf                           12.6 GB
 https://huggingface.co/unsloth/gemma-4-26B-A4B-it-GGUF
+
+
+## ✔️ UD IQ4_XS (by Unsloth)
+Gemma-4-26B-A4B-it-UD-IQ4_XS_unsloth.gguf                          12.6 GB
 
 
 ## ✔️ MXFP4 MOE (by Noctrex)
@@ -307,6 +312,31 @@ ubatch=128
 _test_model
 
 
+model=Gemma-4-26B-A4B-it-UD-IQ4_XS_unsloth.gguf
+draft_model=mtp-gemma-4-26B-A4B-it-Q8_0_unsloth.gguf
+ctx_k=104
+cpu_moe=0
+quant=q8_0
+gpu_layers=99
+spec=draft-mtp,ngram-simple
+predict_token=1/3
+ngram_values=16/16
+jinja=0
+batch=1024
+ubatch=512
+_test_model
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                       | Batch/Ub. | Note              |
+| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | -------------------------------------------- | --------- |------------------ |
+|  74 t/s | 104 k |   0 | 31/31 | 15.6 | 12.6/0.1  | q8_0 (q8_0) |    781 |  10s | 85% = MTP 1/3 (92%) N-gram 24/24/1 (---)     |  1024/512 |                   |
+|  73 t/s |  96 k |   0 | 31/31 | 15.4 | 12.6/0.1  | q8_0 (q8_0) |    780 |  10s | 80% = MTP 1/3 (91%) N-gram 16/16/1 (67%)     |  1024/512 |                   |
+|  67 t/s | 104 k |   0 | 31/31 | 15.6 | 12.6/0.1  | q8_0 (q8_0) |   1512 |  22s | 67% = MTP 1/4 (83%) N-gram 24/24/1 (---)     |  1024/512 |                   |
+|  67 t/s |  96 k |   0 | 31/31 | 15.4 | 12.6/0.1  | q8_0 (q8_0) |   1512 |  23s | 67% = MTP 1/4 (83%) N-gram 24/24/1 (---)     |  1024/512 |                   |
+|  66 t/s |  96 k |   0 | 31/31 | 15.4 | 12.6/0.1  | q8_0 (q8_0) |   1513 |  23s | 64% = MTP 1/4 (83%) N-gram 16/16/1 (80%)     |  1024/512 |                   |
+|  64 t/s | 104 k |   0 | 31/31 | 15.0 | 12.6/0.1  | q4_0 (q4_0) |   1455 |  23s | 67% = MTP 1/3 (84%) N-gram 16/16/1 (50%)     |  1024/512 |                   |
+
+
+
 model=Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf
 draft_model=mtp-gemma-4-26B-A4B-it-Q8_0_unsloth.gguf
 ctx_k=104
@@ -332,30 +362,6 @@ _test_model
 |  67 t/s |  84 k |   0 | 31/31 | 15.2 | 12.7/0.1  | q8_0 (q8_0) |   1283 |  19s | 69% = MTP 1/4 (84%) N-gram 24/24/1 (---)     |  1024/512 |                   |
 |  66 t/s |  72 k |   0 | 31/31 | 15.0 | 12.7/0.1  | q8_0 (q8_0) |   1135 |  17s | 63% = MTP 1/4 (85%) N-gram 12/12/1 (92%)     |  1024/512 |                   |
 |  65 t/s |  64 k |   0 | 31/31 | 14.8 | 12.7/0.1  | q8_0 (q8_0) |    884 |  14s | 69% = MTP 1/3 (90%) N-gram 12/12/1 (82%)     |  1024/512 |                   |
-
-
-
-
-
-
-| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                  | Batch/Ub. | Note              |
-| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | --------------------------------------- | --------- |------------------ |
-|  48 t/s | 180 k |   0 | 31/31 | 15.7 | 12.7/0.4  | q8_0 (q8_0) |   1784 |  38s | none                                 -- | 2048/1024 |                   |
-|  47 t/s | 160 k |   0 | 31/31 | 15.7 | 12.7/0.3  | q8_0 (q8_0) |   1784 |  38s | none                                 -- | 2048/1024 |                   |
-
-|  47 t/s | 128 k |   0 | 31/31 | 15.3 | 12.7/0.3  | q8_0 (q8_0) |   1784 |  38s | none                                 -- | 2048/1024 |                   |
-|  47 t/s | 128 k |   0 | 31/31 | 15.3 | 12.7/0.3  | q8_0 (q8_0) |   1784 |  38s | N-gram                    N=8 M=4 min=1 | 2048/1024 |                   |
-|  47 t/s | 128 k |   0 | 31/31 | 15.3 | 12.7/0.3  | q8_0 (q8_0) |   1784 |  38s | N-gram                  N=12 M=10 min=1 | 2048/1024 |                   |
-|  41 t/s | 128 k |   0 | 31/31 | 15.3 | 12.7/0.3  | q8_0 (q8_0) |    981 |  24s | N-gram              N=3 M=5 min=1 (43%) | 2048/1024 |                   |
-|  34 t/s | 160 k |   1 | 31/31 | 15.5 | 12.3/0.3  | q8_0 (q8_0) |   1149 |  34s | none                                 -- | 2048/1024 |                   |
-|  30 t/s | 160 k |   3 | 31/31 | 14.9 | 11.7/0.3  | q8_0 (q8_0) |   1245 |  41s | none                                 -- | 2048/1024 |                   |
-
-|  65 t/s |  92 k |   0 | 31/31 | 15.7 | 12.7/0.2  | q8_0 (q8_0) |   1700 |  26s | MTP        min=1 max=3 p_min=0.20 (60%) | 1024/1024 |                   |
-
-|  59 t/s |  96 k |   0 | 31/31 | 15.7 | 12.7/0.2  | q8_0 (q8_0) |   2048 |  35s | MTP        min=1 max=3 p_min=0.20 (73%) | 1024/1024 |                   |
-|  58 t/s |  96 k |   0 | 31/31 | 15.7 | 12.7/0.2  | q8_0 (q8_0) |   2048 |  35s | MTP        min=1 max=3 p_min=0.20 (73%) | 1024/1024 |                   |
-
-
 
 
 model=Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf

@@ -555,3 +555,26 @@
           "reasoning": true,
           "input": [ "text" ]
       },
+
+
+# Nemotron 3.5 Lightning
+  Nemotron-3.5-Lightning-30B-A3B-IQ4_NL_bartowski:
+    file: Nemotron-3.5-Lightning-30B-A3B-IQ4_NL_bartowski.gguf
+    alias: Nemotron-3.5-Lightning_(bartowski)_96k
+    ctx_k: 96
+    gpu_layers: 99
+    cpu_moe: 8
+    batch: 1024
+    ubatch: 256
+    spec_type: none 
+    pi_agent_model: >
+       { 
+            "_test": "Dangerous. Edit unrelated tests. Also, excessive reasoning and actions.",
+            "_speed": "? t/s",
+            "id_kelp": "it has to be the alias of llama.cpp"
+            "id": "Nemotron-3.5-Lightning_(bartowski)_96k",
+            "name": "Nemotron-3.5-Lightning (bartowski) [96k]",
+            "contextWindow": 98304,
+            "maxTokens": 4096,
+            "reasoning": true
+       },

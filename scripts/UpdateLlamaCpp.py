@@ -156,7 +156,7 @@ def main():
     args = ap.parse_args()
 
     tag, assets = get_latest_release()
-    print(f"Latest release: {tag}")
+    print(f"**Latest release:** {tag}")
     for a in assets:
         print(f"  {a['name']}\n    {a['browser_download_url']}")
     if args.dry_run:
@@ -164,11 +164,18 @@ def main():
 
     dest = Path(args.dest)
     dest.mkdir(parents=True, exist_ok=True)
-    print(f"Saving to: {dest.resolve()}")
+    print(f"**Downloading to:** {dest.resolve()}")
     for a in assets:
         download(a, dest)
-    print("Done.")
+    print(f"✔️ Downloaded")
 
+    # TODO: extract
+
+    # TODO: move duda dll
+
+    # TODO: copy to destination folder
+
+    # TODO: replace environment variable
 
 if __name__ == "__main__":
     main()
