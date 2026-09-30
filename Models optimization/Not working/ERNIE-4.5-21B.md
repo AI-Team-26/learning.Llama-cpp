@@ -1,11 +1,18 @@
 # Ernie 4.5 21B A3B Thinking
 
+| File                                              | GB   | Result                         |
+| ---                                               | ---  | ---                            |
+| ERNIE-4.5-21B-A3B-Thinking-MXFP4_MOE_noctrex.gguf | 11.5 |                                |  
+
 MTP: No
 
 ❌ ``--skip-chat-parsing`` parameter is required to get a OpenAI compatible response, but that kill the possibility of tools call compatibility  
 
 ❌ PiAgent:  Error: The model produced output that does not match the expected peg-native format
 
+
+## 
+ERNIE-4.5-21B-A3B-Thinking-MXFP4_MOE_noctrex.gguf        11.5 GB
 
 ## Q4_K_M (by Unsloth)
 File: ERNIE-4.5-21B-A3B-Thinking-Q4_K_M_unsloth.gguf
@@ -30,7 +37,28 @@ OpenAI tools compatibility : ❌
  
 
 ```bash
-cd scripts
+
+model=ERNIE-4.5-21B-A3B-Thinking-MXFP4_MOE_noctrex.gguf
+ctx_k=96
+gpu_layers=99
+cpu_moe=0
+quant=q8_0/q4_0
+spec=ngram-simple
+draft_model=none
+predict_token=1/4
+ngram_values=16/16
+jinja=1
+batch=1024
+ubatch=256
+_test_model
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                       | Batch/Ub. | Note              |
+| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | -------------------------------------------- | --------- |------------------ |
+|  26 t/s |  64 k |   0 | 29/29 | 13.6 | 11.5/0.0  | q8_0 (none) |    507 |  19s | --                                           |  1024/256 |                   |
+|  26 t/s |  64 k |   0 | 29/29 | 13.6 | 11.5/0.0  | q8_0 (none) |    507 |  19s | N-gram 16/16/1 (100%)                        |  1024/256 |                   |
+
+
+
 
 #model=unsloth_ERNIE-4.5-21B-A3B-Thinking-Q4_K_M.gguf
 model=ERNIE-4.5-21B-A3B-Thinking-Q4_K_M_unsloth.gguf

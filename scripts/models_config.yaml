@@ -258,7 +258,7 @@ models:
     quant: q4_0/q4_0
     batch: 1024
     ubatch: 512
-    spec_type: draft-mtp.ngram-simple
+    spec_type: draft-mtp,ngram-simple
     spec_draft_n_min: 1
     spec_draft_n_max: 4
     spec_ngram_simple_size_n: 16
@@ -656,30 +656,6 @@ models:
           "reasoning": true,
           "input": [ "text" ]
       },
-  Qwen_3.6_28b_reap_20_(barozp)_96k_Q8_NGRAM_16_16:
-    file: Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf
-    ctx_k: 96
-    gpu_layers: 99
-    cpu_moe: 4
-    quant: q8_0
-    batch: 2048
-    ubatch: 1024
-    spec_type: ngram-simple
-    spec_ngram_simple_size_n: 16
-    spec_ngram_simple_size_m: 16
-    spec_ngram_simple_min_hits: 1
-    jinja: 0
-    pi_agent_model: >
-      { 
-         "_test": "Really good",
-         "_speed": "35 t/s",
-          "id": "Qwen_3.6_28b_reap_20_(barozp)_96k_Q8_NGRAM_16_16",
-          "name": "Qwen 3.6 28B REAP20 (barozp) [96k] Q8",
-          "contextWindow": 98304,
-          "maxTokens": 8192,
-          "reasoning": true,
-          "input": [ "text" ]
-      },
 
   Qwen_3.6_35B_A3B_Genesis_v3_APEX_(luffythefox)_128k:
     file: Qwen3.6-35B-A3B-Un-Genesis-V3-APEX_luffythefox.gguf
@@ -714,37 +690,17 @@ models:
     ctx_k: 128
     gpu_layers: 99
     cpu_moe: 0
-    quant: q8_0
+    quant: q8_0/q4_0
     batch: 1024
     ubatch: 1024
-    spec_type: none 
+    spec_type: ngram-simple
+    spec_ngram_simple_size_n: 6
+    spec_ngram_simple_size_m: 6
+    spec_ngram_simple_min_hits: 1 
     pi_agent_model: >
        { 
             "_test": "Super fast, but indisciplinate and liar. Use only as executor.",
             "_speed": "45 t/s",
-            "id": "KAT-Coder-V2.5-Dev-REAP-205E-MTP-UD-IQ4_XS_(gbuxhf)_128k",
-            "name": "KAT-Coder-V2.5 REAP-205E MTP UD-IQ4_XS (gbuxhf) [128k]",
-            "contextWindow": 131072,
-            "maxTokens": 8192,
-            "reasoning": true
-       },
-
-  KAT-Coder-V2.5-Dev-REAP-205E-MTP-UD-IQ4_XS_(gbuxhf)_128k_2:
-    file: KAT-Coder-V2.5-Dev-REAP-205E-MTP-UD-IQ4_XS_gbuxhf.gguf
-    ctx_k: 128
-    gpu_layers: 99
-    cpu_moe: 0
-    quant: q8_0
-    batch: 2048
-    ubatch: 512
-    spec_type: ngram-simple
-    spec_ngram_simple_size_n: 6
-    spec_ngram_simple_size_m: 10 
-    spec_ngram_simple_min_hits: 1
-    pi_agent_model: >
-       { 
-            "_test": "?",
-            "_speed": "? t/s",
             "id": "KAT-Coder-V2.5-Dev-REAP-205E-MTP-UD-IQ4_XS_(gbuxhf)_128k",
             "name": "KAT-Coder-V2.5 REAP-205E MTP UD-IQ4_XS (gbuxhf) [128k]",
             "contextWindow": 131072,
@@ -824,7 +780,8 @@ models:
     spec_type: none
 
 
-# Gemma 4 26B  
+# Gemma 4 26B
+
   Gemma4-26B-A4B-QAT-Unc-Balanced-Q4_K_M_hauhaucs.gguf:
     file: Gemma4-26B-A4B-QAT-Unc-Balanced-Q4_K_M_hauhaucs.gguf
     ctx_k: 128
@@ -842,128 +799,7 @@ models:
             "maxTokens": 8192,
             "reasoning": true
         },
-
-  Gemma-4-26B-Q4_0_(Google)_64k:
-    speed: 0 t/s
-    file: Gemma-4-26B_Q4_0-it_google.gguf
-    ctx_k: 64
-    gpu_layers: -1
-    cpu_moe: 0
-    batch: 2048
-    ubatch: 1024
-    spec_type: none 
-    pi_agent_model: >
-       { 
-            "_test": "???",
-            "id": "Gemma-4-26B_Q4_0-it_google.gguf",
-            "name": "Gemma4 26B 64K - Q4_0 (by Google)",
-            "contextWindow": 65536,
-            "maxTokens": 4096,
-            "reasoning": true
-        },
-  Gemma-4-26B-Q4_0_(Google)_128k:
-    speed: 43 t/s
-    file: Gemma-4-26B_Q4_0-it_google.gguf
-    ctx_k: 128
-    gpu_layers: 99
-    cpu_moe: 0
-    batch: 1024
-    ubatch: 512
-    spec_type: none 
-    pi_agent_model: >
-       { 
-            "_test": "???",
-            "id": "Gemma-4-26B-Q4_0_(Google)_128k",
-            "name": "Gemma4 26B 128K - Q4_0 (Google) [120k]",
-            "contextWindow": 131072,
-            "maxTokens": 4096,
-            "reasoning": true
-        },
-  Gemma-4-26B-Q4_0_(Google)_256k:
-    speed: "?? t/s"
-    file: Gemma-4-26B_Q4_0-it_google.gguf
-    ctx_k: 256
-    gpu_layers: -1
-    cpu_moe: 3
-    batch: 1024
-    ubatch: 256
-    spec_type: none 
-    pi_agent_model: >
-       { 
-            "_test": "???",
-            "id": "Gemma-4-26B_Q4_0-it_google.gguf",
-            "name": "Gemma4 26B 256K - Q4_0 (by Google)",
-            "contextWindow": 131072,
-            "maxTokens": 4096,
-            "reasoning": true
-        },
-  Gemma-4_26B_MXFP4_(Noctrex)_128k:
-    speed: 33 t/s
-    file: Gemma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf
-    ctx_k: 128
-    gpu_layers: 99
-    cpu_moe: 3
-    batch: 1024
-    ubatch: 512
-    spec_type: none 
-    pi_agent_model: >
-      { 
-        "_test": "Good",
-        "_sped": "? t/s",
-        "id": "Gemma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf",
-        "name": "Gemma4 26B - MXFP4 (by Noctrex) 128K",
-        "contextWindow": 131072,
-        "maxTokens": 4096,
-        "reasoning": true
-      },
-  
-
-  Gemma-4-26B-UD-IQ4_NL_(Unsloth)_160k:
-    speed: n.a.
-    file: Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.
-    draft_model: mtp-gemma-4-26B-A4B-it-Q4_0_unsloth.gguf
-    ctx_k: 160
-    gpu_layers: 99
-    cpu_moe: 1
-    quant: q8_0/q4_0
-    batch: 1024
-    ubatch: 256
-    spec_type: none 
-    pi_agent_model: >
-      { 
-        "_test": "???",
-        "id": "Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf",
-        "name": "Gemma4 26B - UD-IQ4_NL (by Unsloth) 160K",
-        "contextWindow": 163840,
-        "maxTokens": 8192,
-        "reasoning": true
-      },
-  Gemma-4-26B-UD-IQ4_NL_(Unsloth)_104k:
-    speed: "70 t/s"
-    file: Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf
-    draft_model: mtp-gemma-4-26B-A4B-it-Q8_0_unsloth.gguf
-    ctx_k: 104
-    gpu_layers: 99
-    quant: q8_0/q4_0
-    cpu_moe: 0
-    batch: 1024
-    ubatch: 512
-    spec_type: draft-mtp,ngram-simple
-    spec_draft_n_min: 1
-    spec_draft_n_max: 3
-    spec_ngram_simple_size_m: 24
-    spec_ngram_simple_size_n: 24
-    spec_ngram_simple_min_hits: 1
-    pi_agent_model: >
-      { 
-        "_test": "???",
-        "id": "Gemma-4-26B-UD-IQ4_NL_(Unsloth)_80k",
-        "name": "Gemma4 26B - UD-IQ4_NL (by Unsloth) 160K",
-        "contextWindow": 163840,
-        "maxTokens": 8192,
-        "reasoning": true
-      },
-  
+ 
   Gemma-4-26B-UD-IQ4_XS_(unsloth)_104k:
     speed: "70 t/s"
     file: Gemma-4-26B-A4B-it-UD-IQ4_XS_unsloth.gguf

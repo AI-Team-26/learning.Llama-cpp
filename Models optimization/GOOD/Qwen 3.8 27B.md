@@ -276,18 +276,27 @@ _test_model
 
 
 model=Swift-Qwen3.8-27b-i1-IQ4_XS-Smaller_ahmeddelkilami01.gguf
-ctx_k=64
+ctx_k=60
 gpu_layers=99
 cpu_moe=0
 quant=q8_0/q4_0
-spec=draft-mtp
+spec=draft-mtp,ngram-simple
 draft_model=none
-predict_token=1/3
-ngram_values=12/8
+predict_token=1/4
+ngram_values=16/16
 jinja=0
 batch=1024
-ubatch=512
+ubatch=256
 _test_model
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                       | Batch/Ub. | Note              |
+| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | -------------------------------------------- | --------- |------------------ |
+|  45 t/s |  56 k |   0 | 66/66 | 15.5 | 12.0/0.0  | q8_0 (q4_0) |    551 |  12s | 89% = MTP 1/5 (97%) N-gram 16/16/1 (100%)    |  1024/256 |                   |
+|  44 t/s |  60 k |   0 | 66/66 | 15.6 | 12.0/0.0  | q8_0 (q4_0) |    551 |  13s | 92% = MTP 1/4 (98%) N-gram 24/24/1 (---)     |  1024/256 |                   |
+|  38 t/s |  60 k |   0 | 66/66 | 15.6 | 12.0/0.0  | q8_0 (q4_0) |    551 |  14s | 82% = MTP 1/4 (98%) N-gram 16/16/1 (100%)    |  1024/256 |                   |
+|  33 t/s |  64 k |   0 | 66/66 | 15.7 | 12.0/0.0  | q8_0 (q4_0) |    551 |  17s | 82% = MTP 1/4 (98%) N-gram 16/16/1 (100%)    |  1024/256 |                   |
+|  18 t/s |  80 k |   0 | 66/66 | 15.7 | 12.0/0.0  | q8_0 (q4_0) |    551 |  31s | 82% = MTP 1/4 (98%) N-gram 16/16/1 (100%)    |  1024/256 |                   |
+
 
 | Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                  | Batch/Ub. | Note              |
 | ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | --------------------------------------- | --------- |------------------ |

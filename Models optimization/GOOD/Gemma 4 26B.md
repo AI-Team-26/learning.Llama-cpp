@@ -11,6 +11,7 @@
 | Gemma-4-19B-REAP-Q4_K_M_vsark.gguf                     | ---  | ❌ Every here and then it breaks, 256k 40 t/s        |  
 | Gemma4-26b-uncensored-fast-v2-Q4_K_M_Jiunsong.gguf     | ---  | ❌ Gibberish and unformatted output. Also slow.      |
 | Gemma-4-26B-A4B-it-qat-UD-Q4_K_XL_unsloth.gguf         | 13.2 | ❌ Small Context. Bad at coding.                     |
+| Gemma-4-26B-A4B-it-UD-Q5_K_S_unsloth.gguf              | 17.5 | ❌ Small Context. Bad at coding.                     |
 
 
 
@@ -310,6 +311,26 @@ jinja=0
 batch=768
 ubatch=128
 _test_model
+
+
+model=Gemma-4-26B-A4B-it-UD-Q5_K_S_unsloth.gguf
+#draft_model=mtp-gemma-4-26B-A4B-it-Q8_0_unsloth.gguf
+draft_model=none
+ctx_k=16
+cpu_moe=4
+quant=q4_0
+gpu_layers=99
+spec=ngram-simple
+predict_token=1/2
+ngram_values=16/16
+jinja=0
+batch=1024
+ubatch=512
+_test_model
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                       | Batch/Ub. | Note              |
+| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | -------------------------------------------- | --------- |------------------ |
+|  23 t/s |  16 k |   5 | 31/31 | 15.7 | 15.0/0.0  | q4_0 (q4_0) |   2012 |  86s | 12% = N-gram 16/16/1 (75%)                   |  1024/512 |                   |
 
 
 model=Gemma-4-26B-A4B-it-UD-IQ4_XS_unsloth.gguf
