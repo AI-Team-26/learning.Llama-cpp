@@ -25,7 +25,7 @@
 | Qwen3.8-27B-UD-IQ3_S_unsloth.gguf                          | 11.2 |                          |
 | Swift-Qwen3.8-27B-IQ3_XS_ukisai.gguf                       | 12.1 |                          |
 | Swift-Qwen3.8-27b-IQ3_M_bartowski.gguf                     | 13.8 | ❌ Max 32K.                                 |
-| Swift-Qwen3.8-27b-i1-IQ4_XS-Smaller_ahmeddelkilami01.gguf  | 12.6 |      |
+| Swift-Qwen3.8-27b-i1-IQ4_XS-Smaller_ahmeddelkilami01.gguf  | 12.6 | ✔️   ❌Loop when ubatch is 512    |
 | Qwen3.8-27B-IQ3_S-3.23bpw_byteshape.gguf                   | 10.2 |      |
 | 
 | Qwen3.8-27B-GSQ-RCO-IQ3_S-mtp_ista.gguf                    | 11.2 |      |

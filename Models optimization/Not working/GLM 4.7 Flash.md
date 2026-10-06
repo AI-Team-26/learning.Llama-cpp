@@ -27,7 +27,7 @@ GLM-4.7-flash-Q4_K_M_gaionaus.gguf                                      9.1 GB
 ❌ Gibbersih and not valid format in Pi
 60 t/s at 128k
 
-## ❌ REAP-23B-A3B UD-Q4_K_XL (by Unsloth)
+## ❌ REAP-23B-A3B UD-Q4_K_XL (by Unsloth) [DELETED]
 GLM-4.7-Flash-REAP-23B-A3B-UD-Q4_K_XL_unsloth.gguf                       13.2 GB
 https://huggingface.co/unsloth/GLM-4.7-Flash-REAP-23B-A3B-GGUF
 For llama.cpp, use --jinja

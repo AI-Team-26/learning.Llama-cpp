@@ -1,77 +1,20 @@
 models:
 
-# Qwen 3 Coder
-  Qwen3-Coder-Next-REAP-40B-A3B.i1-IQ3_M_mradermacher_64k:
-    file: Qwen3-Coder-Next-REAP-40B-A3B.i1-IQ3_M_mradermacher.gguf
-    note: ...
-    ctx_k: 64
-    gpu_layers: 99
-    cpu_moe: 7
-    batch : 512
-    ubatch: 256
-    spec_type: none
-    pi_agent_model: >
-      { 
-          "_test": "✔️ Very good",
-          "_speed": "22 t/s",
-          "id": "Qwen3-Coder-Next-REAP-40B-A3B.i1-IQ3_M_mradermacher_64k",
-          "name": "Qwen3-Coder-Next REAP-40B-A3B i1 IQ3_M (mradermacher) [64k]",
-          "contextWindow": 65536,
-          "maxTokens": 4096,
-          "reasoning": true
-      },
+# North Mini Code
 
-  Qwen3_Coder_REAP-25B_(bartowski)_64k:
-    file: Qwen3-Coder-REAP-25B-A3B-Q4_K_M_bartowski.gguf
+  North-Mini-Code-1.0-UD-IQ4_XS_(unsloth)_64:
+    file: North-Mini-Code-1.0-UD-IQ4_XS_unsloth.gguf
     note: ...
     ctx_k: 64
     gpu_layers: 99
-    cpu_moe: 7
-    batch : 1024
-    ubatch: 256
-    jinja: 0
-    #spec_type: ngram-simple
-    #spec_ngram_simple_size_n: 16
-    #spec_ngram_simple_size_m: 16
-    #spec_ngram_simple_min_hits: 1
-    spec_type: none
-    pi_agent_model: >
-      { 
-          "_test": "??",
-          "_speed": "? t/s",
-          "id": "Qwen3-Coder-REAP-25B-A3B-Q4_K_M_bartowski.gguf",
-          "alias": "bartowski/Qwen3 Coder 25B-A3B Q4_K_M [64k]",
-          "name": "Qwen_3_Coder_REAP-25B_(bartowski)_64k",
-          "contextWindow": 65536,
-          "maxTokens": 4096,
-          "reasoning": true
-      },
-
-  Qwen3-Coder-30B-A3B-Instruct-IQ4_XS_unsloth:
-    file: Qwen3-Coder-30B-A3B-Instruct-IQ4_XS_unsloth.gguf
-    note: ...
-    ctx_k: 64
-    gpu_layers: 99
-    cpu_moe: 8
-    quant: q4_0
-    batch : 1024
-    ubatch: 256
-    jinja: 1
+    cpu_moe: 0
+    quant: q8_0/q4_0
+    batch : 2048
+    ubatch: 512
     spec_type: ngram-simple
-    spec_ngram_simple_size_n: 16
-    spec_ngram_simple_size_m: 16
+    spec_ngram_simple_size_n: 8
+    spec_ngram_simple_size_m: 8
     spec_ngram_simple_min_hits: 1
-    #spec_type: none
-    pi_agent_model: >
-      { 
-          "_test": "??",
-          "_speed": "? t/s",
-          "id": "Qwen3-Coder-30B-A3B-Instruct-IQ4_XS_unsloth.gguf",
-          "alias": "Unsloth/Qwen3-Coder 30B-A3B Instruct IQ4_XS [96k]",
-          "contextWindow": 98304,
-          "maxTokens": 4096,
-          "reasoning": true
-      },
 
 ### Qwen 3.8 27B ###
   Qwen3.8-27B-ASCII-Condensed-IQ4_XS-3_troed_64k:
@@ -97,7 +40,7 @@ models:
     gpu_layers: 99
     cpu_moe: 0
     quant: q8_0/q4_0
-    batch: 2048
+    batch: 1024
     ubatch: 256
     spec_type: draft-mtp,ngram-simple
     spec_draft_n_min: 1
@@ -107,23 +50,23 @@ models:
     spec_ngram_simple_min_hits: 1
     jinja: 1
 
-  Qwen3.8-27B-IQ4_XS_byteshape_72k:
+  Qwen3.8-27B-IQ4_XS_byteshape_64k:
     file: Qwen3.8-27B-IQ4_XS-3.84bpw_byteshape.gguf
-    ctx_k: 72
+    ctx_k: 64
     gpu_layers: 99
     cpu_moe: 0
-    quant: q8_0/q8_0
-    batch: 512
+    quant: q8_0/q4_0
+    batch: 2048
     ubatch: 256
     spec_type: draft-mtp,ngram-simple
     spec_draft_n_min: 1
-    spec_draft_n_max: 6
+    spec_draft_n_max: 3
     spec_ngram_simple_size_n: 24
     spec_ngram_simple_size_m: 24
     spec_ngram_simple_min_hits: 1
     jinja: 1
 
-  Qwen3.8-27B-IQ4_XS_byteshape_64k:
+  Qwen3.8-27B-IQ4_XS_byteshape_56k:
     file: Qwen3.8-27B-IQ4_XS-3.84bpw_byteshape.gguf
     ctx_k: 56
     gpu_layers: 99
@@ -133,22 +76,11 @@ models:
     ubatch: 256
     spec_type: draft-mtp,ngram-simple
     spec_draft_n_min: 1
-    spec_draft_n_max: 4
+    spec_draft_n_max: 5
     spec_ngram_simple_size_n: 24
     spec_ngram_simple_size_m: 24
     spec_ngram_simple_min_hits: 1
     jinja: 1
-    pi_agent_model: >
-      { 
-         "_test": "?",
-         "_speed": "? t/s",
-          "id": "Qwen3.8-27B-IQ4_XS_byteshape_64k",
-          "name": "Qwen 3.8 27B IQ4_XS (byteshape) [64k]",
-          "contextWindow": 65536,
-          "maxTokens": 8192,
-          "reasoning": true,
-          "input": [ "text" ]
-      },
 
   Qwen3.8-27B-IQ4_XS_ahmeddelkilami01_64k:
     file: Swift-Qwen3.8-27b-i1-IQ4_XS-Smaller_ahmeddelkilami01.gguf
@@ -158,46 +90,29 @@ models:
     quant: q8_0/q4_0
     batch: 1024
     ubatch: 512
-    spec_type: draft-mtp
+    spec_type: draft-mtp,ngram-simple
     spec_draft_n_min: 1
     spec_draft_n_max: 3
-    jinja: 0
-    pi_agent_model: >
-      { 
-         "_test": "?",
-         "_speed": "? t/s",
-          "id": "Qwen3.8-27B-IQ4_XS_ahmeddelkilami01_64k",
-          "name": "Qwen 3.8 27B IQ4_XS (ahmeddelkilami01) [64k]",
-          "contextWindow": 65536,
-          "maxTokens": 8192,
-          "reasoning": true,
-          "input": [ "text" ]
-      },
+    spec_ngram_simple_size_n: 24
+    spec_ngram_simple_size_m: 24
+    spec_ngram_simple_min_hits: 1
+    jinja: 1
 
-  Qwen3.8-27B-IQ3_XS_ulisai_64k:
-    file: Qwen3.8-27B-IQ3_XS_ukisai.gguf
+  Qwen3.8-27B-IQ3_XS_ukisai_64k:
+    file: Swift-Qwen3.8-27B-IQ3_XS_ukisai.gguf
     ctx_k: 64
     gpu_layers: 99
     cpu_moe: 0
-    quant: q8_0
-    batch: 1024
-    ubatch: 512
-    spec_type: draft-mtp
+    quant: q8_0/q4_0
+    batch: 2048
+    ubatch: 256
+    spec_type: draft-mtp,ngram-simple
     spec_draft_n_min: 1
     spec_draft_n_max: 4
+    spec_ngram_simple_size_n: 24
+    spec_ngram_simple_size_m: 24
+    spec_ngram_simple_min_hits: 1
     jinja: 0
-    pi_agent_model: >
-      { 
-         "_test": "?",
-         "_speed": "? t/s",
-          "id": "Qwen3.8-27B-IQ3_XS_ulisai_64k",
-          "name": "Qwen 3.8 27B IQ3_XS (UkisAI) [64k]",
-          "_contextWindow": 69632,
-          "contextWindow": 65536,
-          "maxTokens": 8192,
-          "reasoning": true,
-          "input": [ "text" ]
-      },
 
   Qwen3.8-27B-abliterated-UD-IQ4_XS_huihui_64k:
     file: Qwen3.8-27B-abliterated-UD-IQ4_XS_huihui.gguf
@@ -432,91 +347,6 @@ models:
     spec_draft_n_max: 5
     jinja: 0
 
-# Qwen 3.5 27B
-  Qwen_3.5_27B_(Unsloth)_48k:
-    file: Qwen3.5-27B-IQ4_XS_unsloth.gguf
-    ctx_k: 48
-    gpu_layers: 99
-    cpu_moe: 0
-    batch: 2048
-    ubatch: 1024
-    spec_type: none
-    jinja: 1
-    pi_agent_model: >
-      { 
-         "_test": "Slooooow",
-         "_speed": "16 t/s",
-          "id": "Qwen3.5-27B-IQ4_XS_unsloth.gguf",
-          "name": "Qwen 3.5 27B (Unsloth) 48k",
-          "contextWindow": 49152,
-          "maxTokens": 2048,
-          "reasoning": true,
-          "input": [ "text", "image" ]
-      },
-
-  Qwen3.5-27B_IQ4_XS_(unsloth)_64k:
-    file: Qwen3.5-27B-IQ4_XS_unsloth.gguf
-    ctx_k: 64
-    gpu_layers: 99
-    cpu_moe: 0
-    batch: 1024
-    ubatch: 512
-    spec_type: none
-    jinja: 0
-    pi_agent_model: >
-      { 
-         "_test": "?",
-         "_speed": "? t/s",
-          "id": "Qwen3.5-27B-IQ4_XS_unsloth.gguf",
-          "name": "name Qwen3.5 27B IQ4_XS (Unsloth) 64k",
-          "contextWindow": 65536,
-          "maxTokens": 4096,
-          "reasoning": true,
-          "input": [ "text", "image" ]
-      },
-
-  Qwen3.5-27B_IQ4_XS_(bartowski)_64k:
-    file: Qwen3.5-27B-IQ4_XS_bartowski.gguf
-    ctx_k: 64
-    gpu_layers: 99
-    cpu_moe: 0
-    batch: 1024
-    ubatch: 512
-    spec_type: none
-    jinja: 0
-    pi_agent_model: >
-      { 
-         "_test": "?",
-         "_speed": "? t/s",
-          "id": "Qwen3.5-27B-IQ4_XS_bartowski.gguf",
-          "name": "Qwen3.5 27B IQ4_XS (bartowski) [64k]",
-          "contextWindow": 65536,
-          "maxTokens": 4096,
-          "reasoning": true,
-          "input": [ "text", "image" ]
-      },
-
-  Qwen3.5-27B-IQ3_M_(gammaception)_128k:
-    file: Qwen3.5-27B-IQ3_M_gammaception.gguf
-    ctx_k: 128
-    gpu_layers: 99
-    cpu_moe: 0
-    batch: 1024
-    ubatch: 512
-    spec_type: none
-    jinja: 0
-    pi_agent_model: >
-      { 
-         "_test": "?",
-         "_speed": "? t/s",
-          "id": "Qwen3.5-27B-IQ3_M_(gammaception)_128k",
-          "name": "17 tps",
-          "contextWindow": 131072,
-          "maxTokens": 2048,
-          "reasoning": true,
-          "input": [ "text", "image" ]
-      },
-
 
 # Qwen 3.6 27B
   Qwen3.6-27B-Cerebellum-v5-Q2_K_(deucebucket)_96k:
@@ -563,52 +393,6 @@ models:
           "reasoning": true,
           "input": [ "text", "image" ]
       },
-
-  Qwen3.6-27B_IQ4_XS_(unsloth)_64k:
-    file: Qwen3.6-27B-IQ4_XS_unsloth.gguf
-    ctx_k: 64
-    gpu_layers: 99
-    cpu_moe: 0
-    batch: 1024
-    ubatch: 512
-    spec_type: none
-    jinja: 0
-    pi_agent_model: >
-      { 
-         "_test": "?",
-         "_speed": "? t/s",
-          "id": "Qwen3.6-27B-IQ4_XS_unsloth.gguf",
-          "name": "Qwen3.6 27B IQ4_XS (Unsloth) 64k",
-          "contextWindow": 65536,
-          "maxTokens": 4096,
-          "reasoning": true,
-          "input": [ "text", "image" ]
-      },
-
-  Qwen3.6-27B_IQ4_XS_(unsloth)_80k_spec:
-    file: Qwen3.6-27B-IQ4_XS_unsloth.gguf
-    ctx_k: 80
-    gpu_layers: 99
-    cpu_moe: 0
-    batch: 1024
-    ubatch: 256
-    spec_type: ngram-simple
-    spec_ngram_simple_size_n: 8
-    spec_ngram_simple_size_m: 16
-    spec_ngram_simple_min_hits: 1
-    jinja: 0
-    pi_agent_model: >
-      { 
-         "_test": "?",
-         "_speed": "? t/s",
-          "id": "Qwen3.6-27B-IQ4_XS_unsloth.gguf",
-          "name": "Qwen3.6 27B IQ4_XS (Unsloth) 64k",
-          "contextWindow": 65536,
-          "maxTokens": 4096,
-          "reasoning": true,
-          "input": [ "text", "image" ]
-      },
-
 
 # Qwen 3.6 35B A3B
   Qwen_3.6_28b_reap_20_(barozp)_128k_Q4:
