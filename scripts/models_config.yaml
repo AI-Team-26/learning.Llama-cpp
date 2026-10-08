@@ -82,7 +82,7 @@ models:
     spec_ngram_simple_min_hits: 1
     jinja: 1
 
-  Qwen3.8-27B-IQ4_XS_ahmeddelkilami01_64k:
+  Swift-Qwen3.8-27B-IQ4_XS_ahmeddelkilami01_64k:
     file: Swift-Qwen3.8-27b-i1-IQ4_XS-Smaller_ahmeddelkilami01.gguf
     ctx_k: 64
     gpu_layers: 99
@@ -98,8 +98,24 @@ models:
     spec_ngram_simple_min_hits: 1
     jinja: 1
 
-  Qwen3.8-27B-IQ3_XS_ukisai_64k:
+  Swift-Qwen3.8-27B-IQ3_XS_ukisai_64k:
     file: Swift-Qwen3.8-27B-IQ3_XS_ukisai.gguf
+    ctx_k: 64
+    gpu_layers: 99
+    cpu_moe: 0
+    quant: q8_0/q4_0
+    batch: 2048
+    ubatch: 512
+    spec_type: draft-mtp,ngram-simple
+    spec_draft_n_min: 1
+    spec_draft_n_max: 4
+    spec_ngram_simple_size_n: 24
+    spec_ngram_simple_size_m: 24
+    spec_ngram_simple_min_hits: 1
+    jinja: 1
+
+  Swift-Qwen3.8-27B-IQ4_XS_ukisai_64k:
+    file: Swift-1.5-Qwen3.8-27B-IQ4_XS_ukisai.gguf
     ctx_k: 64
     gpu_layers: 99
     cpu_moe: 0
@@ -108,11 +124,11 @@ models:
     ubatch: 256
     spec_type: draft-mtp,ngram-simple
     spec_draft_n_min: 1
-    spec_draft_n_max: 4
+    spec_draft_n_max: 3
     spec_ngram_simple_size_n: 24
     spec_ngram_simple_size_m: 24
     spec_ngram_simple_min_hits: 1
-    jinja: 0
+    jinja: 1
 
   Qwen3.8-27B-abliterated-UD-IQ4_XS_huihui_64k:
     file: Qwen3.8-27B-abliterated-UD-IQ4_XS_huihui.gguf

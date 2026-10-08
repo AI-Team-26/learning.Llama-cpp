@@ -5,6 +5,7 @@
 | Qwen3.8-27B-Uncensored-Aggressive-IQ3_M_HauhauCS.gguf      | 12.9 | ? 128k: 25-40 t/s. Good                     |
 | Qwen3.8-27B-UD-Q3_K_XL_unsloth.gguf                        | 12.2 | ✔️ 80k: 20-45 t/s Super smart.              |
 | Qwen3.8-27B-IQ4_XS-3.84bpw_byteshape.gguf                  | 12.1 | ✔️ 64k: 25-45 t/s  Good PR                  |
+| Swift-Qwen3.8-27B-IQ3_XS_ukisai.gguf                       | 12.1 | ✔️ 64k: 25-45 t/s  Good PR                  |
 | Qwen3.8-27B-i1-IQ4_XS-GGUF-Smaller_jrell.gguf              | 12.6 | ✔️ 56k: 15-45 t/s Good                      |
 | Qwen3.8-27B-UD-IQ4_XS_unsloth.gguf                         | 13.2 | ✔️ 64k: 20-40 t/s  80k: 20-30 t/s           |
 | Qwen3.8-27B-Cold-Fusion-GAIN-V1.1-MTP-IQ3_M_davidau.gguf   | 13.5 | ✔️ 64k: 15-30 t/s Short reasoning           |
@@ -22,8 +23,9 @@
 | Qwen3.8-27B.i1-IQ4_KT-attn_qkv-IQ4_KS-MTP_chunter789.gguf  | 13.9 | ❌ attn_qkv- does not work                  |
 | Qwen3.8-27B-UD-Q2_K_XL_unsloth.gguf                        |  9.2 | ❌ It changed the CHANGELOG for the test PR |
 | Qwen3.8-27B-Q3_K_S_unsloth.gguf                            | 11.7 | ❌ It changed the CHANGELOG for the test PR |
-| Qwen3.8-27B-UD-IQ3_S_unsloth.gguf                          | 11.2 |                          |
-| Swift-Qwen3.8-27B-IQ3_XS_ukisai.gguf                       | 12.1 |                          |
+| Qwen3.8-27B-UD-IQ3_S_unsloth.gguf                          | 11.2 |                            |
+| Swift-1.5-Qwen3.8-27B-IQ3_M_ukisai.gguf                    | 13.8 | ❌ Max 56K.                                 |
+| Swift-1.5-Qwen3.8-27B-IQ4_XS_ukisai.gguf                   | 14.4 | ❌ Max 32K.                                 |
 | Swift-Qwen3.8-27b-IQ3_M_bartowski.gguf                     | 13.8 | ❌ Max 32K.                                 |
 | Swift-Qwen3.8-27b-i1-IQ4_XS-Smaller_ahmeddelkilami01.gguf  | 12.6 | ✔️   ❌Loop when ubatch is 512    |
 | Qwen3.8-27B-IQ3_S-3.23bpw_byteshape.gguf                   | 10.2 |      |
@@ -44,18 +46,31 @@ Qwen3.8-27B-GSQ-RCO-IQ3_S-mtp_ista.gguf                         11.2 GB
 https://huggingface.co/ISTA-DASLab/Qwen3.8-27B-GSQ-RCO-GGUF
 mmproj:
 
-# IQ4_XS (byteshape)
+# ✔️ IQ4_XS (byteshape)
 Qwen3.8-27B-IQ4_XS-3.84bpw_byteshape.gguf                       12.1 GB
 https://huggingface.co/byteshape/Qwen3.8-27B-GGUF
 
 # ✔️ IQ3_S (byteshape)
-Qwen3.8-27B-IQ3_S-3.23bpw_byteshape.gguf                      10.2 GB
+Qwen3.8-27B-IQ3_S-3.23bpw_byteshape.gguf                      ..10.2 GB
 https://huggingface.co/byteshape/Qwen3.8-27B-GGUF
 
 
-## Swift IQ3_XS (ukisai)                            
+##
+Swift-1.5-Qwen3.8-27B-GSQ-RCO-IQ3_S-mtp_ukisai.gguf              11.2 GB
+
+## ✔️ Swift IQ3_XS (ukisai)                            
 Swift-Qwen3.8-27B-IQ3_XS_ukisai.gguf                             12.1 GB
 https://huggingface.co/ukisai/Swift-Qwen3.8-27B-GGUF
+
+## ❌ Swift 1.5 IQ3_M (ukisai)  [DELETED]
+Swift-1.5-Qwen3.8-27B-IQ3_M_ukisai.gguf                          13.8 GB
+Too big. max 56k
+XX Producedd rubbish instead of a good MD table at Q4_0
+
+## ❌ Swift 1.5 IQ4_XS (ukisai)  [DELETED]
+Swift-1.5-Qwen3.8-27B-IQ4_XS_ukisai.gguf                         14.4 GB
+Too big. max 32k
+
 
 ##
 Swift-Qwen3.8-27b-i1-IQ4_XS-Smaller_ahmeddelkilami01.gguf       12.6 GB
@@ -354,19 +369,80 @@ _test_model
 |  42 t/s |  36 k |   0 | 66/66 | 15.3 | 13.2/0.1  | q4_0 (q4_0) |    528 |  13s | MTP        min=1 max=4 p_min=0.20 (90%) |  1024/512 |                   |
 
 
+model=Swift-1.5-Qwen3.8-27B-GSQ-RCO-IQ3_S-mtp_ukisai.gguf
+ctx_k=64
+gpu_layers=99
+cpu_moe=0
+quant=q8_0/q4_0
+spec=draft-mtp,ngram-simple
+draft_model=none
+predict_token=1/5
+ngram_values=16/16
+jinja=1
+batch=1024
+ubatch=512
+_test_model
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                       | Batch/Ub. | Note              |
+| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | -------------------------------------------- | --------- |------------------ |
+|  36 t/s |  64 k |   0 | 66/66 | 15.1 | 10.9/0.1  | q8_0 (q4_0) |    557 |  15s | 82% = MTP 1/5 (96%) N-gram 16/16/1 (100%)    |  1024/512 |                   |
+|  37 t/s |  64 k |   0 | 66/66 | 15.0 | 10.9/0.1  | q8_0 (q4_0) |    557 |  15s | 78% = MTP 1/4 (97%) N-gram 16/16/1 (100%)    |  1024/512 |                   |
+|  37 t/s |  64 k |   0 | 66/66 | 14.8 | 10.9/0.1  | q8_0 (q4_0) |    555 |  14s | 85% = MTP 1/3 (98%) N-gram 16/16/1 (100%)    |  1024/512 |                   |
+|  35 t/s |  64 k |   0 | 66/66 | 14.7 | 10.9/0.1  | q8_0 (q4_0) |    555 |  16s | 96% = MTP 1/2 (97%) N-gram 24/24/1 (---)     |  1024/512 |                   |
+|  32 t/s |  64 k |   0 | 66/66 | 14.7 | 10.9/0.1  | q8_0 (q4_0) |    555 |  17s | 84% = MTP 1/2 (98%) N-gram 16/16/1 (100%)    |  1024/512 |                   |
+
+
+|  45 t/s |  64 k |   0 | 66/66 | 13.8 | 10.9/0.0  | q4_0 (q4_0) |    586 |  13s | 92% = MTP 1/4 (98%) N-gram 24/24/1 (---)     |  1024/256 |                   |
+|  41 t/s |  64 k |   0 | 66/66 | 13.8 | 10.9/0.0  | q4_0 (q4_0) |    586 |  14s | 83% = MTP 1/4 (98%) N-gram 16/16/1 (100%)    |  1024/256 |                   |
+|  33 t/s |  64 k |   0 | 66/66 | 13.5 | 10.9/0.0  | q4_0 (q4_0) |    586 |  18s | 88% = MTP 1/2 (99%) N-gram 16/16/1 (100%)    |  1024/256 |                   |
+
+
+
+model=Swift-1.5-Qwen3.8-27B-IQ3_M_ukisai.gguf
+ctx_k=60
+gpu_layers=99
+cpu_moe=0
+quant=q4_0
+spec=draft-mtp,ngram-simple
+draft_model=none
+predict_token=1/2
+ngram_values=16/16
+jinja=1
+batch=1024
+ubatch=256
+_test_model
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                       | Batch/Ub. | Note              |
+| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | -------------------------------------------- | --------- |------------------ |
+|  31 t/s |  56 k |   0 | 66/66 | 15.4 | 13.2/0.0  | q4_0 (q4_0) |    576 |  18s | 90% = MTP 1/2 (98%) N-gram 16/16/1 (100%)    |   512/256 |                   |
+|  31 t/s |  48 k |   0 | 66/66 | 15.2 | 13.2/0.0  | q4_0 (q4_0) |    576 |  19s | 90% = MTP 1/2 (98%) N-gram 16/16/1 (100%)    |   512/256 |                   |
+|  17 t/s |  48 k |   0 | 66/66 | 15.7 | 13.2/0.0  | q8_0 (q4_0) |    558 |  32s | 89% = MTP 1/3 (98%) N-gram 16/16/1 (100%)    |  1024/256 |                   |
+|  34 t/s |  32 k |   0 | 66/66 | 15.5 | 13.2/0.0  | q8_0 (q4_0) |    558 |  17s | 79% = MTP 1/4 (97%) N-gram 12/12/1 (100%)    |  1024/256 |                   |
+
+
+
+
+
 model=Swift-Qwen3.8-27B-IQ3_XS_ukisai.gguf
 ctx_k=68
 gpu_layers=99
 cpu_moe=0
-quant=q8_0
-spec=draft-mtp
+quant=q8_0/q4_0
+spec=draft-mtp,ngram-simple
 draft_model=none
 predict_token=1/4
-ngram_values=12/8
-jinja=0
+ngram_values=12/12
+jinja=1
 batch=1024
-ubatch=1024
+ubatch=256
 _test_model
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                       | Batch/Ub. | Note              |
+| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | -------------------------------------------- | --------- |------------------ |
+|  37 t/s |  68 k |   0 | 66/66 | 15.7 | 11.4/0.2  | q8_0 (q8_0) |    568 |  15s | 91% = MTP 1/4 (97%)                          | 1024/1024 |                   |
+|  31 t/s |  68 k |   0 | 66/66 | 15.4 | 11.4/0.0  | q8_0 (q8_0) |    533 |  18s | 70% = MTP 1/4 (95%) N-gram 12/12/1 (100%)    |  1024/256 |                   |
+
+
 
 | Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                  | Batch/Ub. | Note              |
 | ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | --------------------------------------- | --------- |------------------ |
@@ -377,6 +453,32 @@ _test_model
 |  39 t/s |  64 k |   0 | 66/66 | 15.2 | 11.4/0.1  | q8_0 (q4_0) |    568 |  15s | MTP        min=1 max=3 p_min=0.20 (93%) |  1024/512 | R: medium         |
 |  39 t/s |  64 k |   0 | 66/66 | 15.3 | 11.4/0.1  | q8_0 (q8_0) |    568 |  15s | MTP        min=1 max=3 p_min=0.20 (92%) |  1024/512 | R: medium         | + ngram
 |  39 t/s |  64 k |   0 | 66/66 | 15.2 | 11.4/0.1  | q8_0 (q4_0) |    568 |  14s | MTP        min=1 max=3 p_min=0.20 (93%) |  1024/512 | R: medium         |
+
+
+model=Swift-1.5-Qwen3.8-27B-IQ4_XS_ukisai.gguf
+ctx_k=48
+gpu_layers=99
+cpu_moe=0
+quant=q4_0/q4_0
+spec=draft-mtp,ngram-simple
+draft_model=none
+predict_token=1/2
+ngram_values=16/16
+jinja=1
+batch=1024
+ubatch=256
+_test_model
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                       | Batch/Ub. | Note              |
+| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | -------------------------------------------- | --------- |------------------ |
+|  15 t/s |  56 k |   0 | 66/66 | 15.7 | 13.8/0.0  | q4_0 (q4_0) |    554 |  37s | 87% = MTP 1/2 (98%) N-gram 16/16/1 (100%)    |  1024/256 |                   |
+|  29 t/s |  32 k |   0 | 66/66 | 15.5 | 13.8/0.0  | q4_0 (q4_0) |    554 |  19s | 73% = MTP 1/3 (97%) N-gram 12/12/1 (100%)    |  1024/256 |                   |
+|  26 t/s |  32 k |   0 | 66/66 | 15.4 | 13.8/0.0  | q4_0 (q4_0) |    554 |  21s | 73% = MTP 1/2 (98%) N-gram 12/12/1 (100%)    |  1024/256 |                   |
+
+|  25 t/s |  16 k |   0 | 66/66 | 15.3 | 13.8/0.0  | q8_0 (q4_0) |    585 |  24s | 70% = MTP 1/2 (98%) N-gram 12/12/1 (100%)    |  1024/512 |                   |
+
+
+
 
 model=Qwen3.8-27B-Uncensored-IQ3_M_orcarouter.gguf
 ctx_k=64
