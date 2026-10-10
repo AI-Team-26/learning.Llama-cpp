@@ -3,21 +3,18 @@
 Step 1: download the latest llama.cpp Windows x64 CUDA 12 build and the matching
 CUDA runtime (cudart) DLLs from https://github.com/ggml-org/llama.cpp/releases
 
-Files downloaded (example for tag b11060):
-  llama-b11060-bin-win-cuda-12.4-x64.zip
-  cudart-llama-bin-win-cuda-12.4-x64.zip
+Files downloaded (pattern for tag bNNNNN, CUDA 12.x):
+  llama-bNNNNN-bin-win-cuda-12.x-x64.zip
+  cudart-llama-bin-win-cuda-12.x-x64.zip
 
 Usage:
     python download_llama_cpp.py                     # -> D:/Downloads
     python download_llama_cpp.py --dest E:/Somewhere
     python download_llama_cpp.py --dry-run           # only show what would be downloaded
-
-Optional: set GITHUB_TOKEN to avoid GitHub API rate limits.
 """
 import argparse
 import hashlib
 import json
-import os
 import re
 import sys
 import urllib.error
@@ -29,15 +26,11 @@ API_URL = f"https://api.github.com/repos/{REPO}/releases?per_page=30"
 FEED_URL = f"https://github.com/{REPO}/releases.atom"
 TAG_RE = re.compile(r"^b(\d+)$")  # llama.cpp build tags, e.g. b11060
 DEFAULT_DEST = "D:/Downloads"
-FALLBACK_CUDA = "12.4"  # only used if the GitHub API is unavailable
-
+CUDA_MAJOR = "12"  # CUDA major version of the Windows builds we want (any minor)
 
 
 def http_open(url, accept="*/*", method="GET"):
     headers = {"User-Agent": "llama-cpp-downloader", "Accept": accept}
-    token = os.environ.get("GITHUB_TOKEN")
-    if token and "api.github.com" in url:
-        headers["Authorization"] = f"Bearer {token}"
     return urllib.request.urlopen(urllib.request.Request(url, headers=headers, method=method))
 
 
@@ -46,8 +39,8 @@ def version_key(v):
 
 
 def cuda12_version(name, prefix):
-    """'llama-b11060-bin-win-cuda-12.4-x64.zip' -> '12.4'. None if not a Windows CUDA 12 x64 zip."""
-    if name.startswith(prefix) and "-bin-win-cuda-12" in name and name.endswith("-x64.zip"):
+    """'llama-b11060-bin-win-cuda-12.9-x64.zip' -> '12.9'. None if not a Windows CUDA 12 x64 zip."""
+    if name.startswith(prefix) and f"-bin-win-cuda-{CUDA_MAJOR}" in name and name.endswith("-x64.zip"):
         return name.split("-bin-win-cuda-")[1].removesuffix("-x64.zip")
 
 
@@ -87,7 +80,8 @@ def latest_release_via_api():
 
 
 def latest_release_via_feed():
-    """No-API fallback: read the newest bNNNNN tag from the releases Atom feed."""
+    """No-API fallback: read the newest bNNNNN tag from the releases Atom feed,
+    then list that release's Windows CUDA assets from its HTML page."""
     with http_open(FEED_URL) as resp:
         feed = resp.read().decode("utf-8", "replace")
     tags = [int(m) for m in re.findall(r"/releases/tag/b(\d+)", feed)]
@@ -95,11 +89,15 @@ def latest_release_via_feed():
         sys.exit("Could not determine the latest tag from the releases feed.")
     tag = f"b{max(tags)}"
     base = f"https://github.com/{REPO}/releases/download/{tag}"
-    names = [
-        f"llama-{tag}-bin-win-cuda-{FALLBACK_CUDA}-x64.zip",
-        f"cudart-llama-bin-win-cuda-{FALLBACK_CUDA}-x64.zip",
-    ]
-    return tag, [{"name": n, "size": None, "digest": None, "browser_download_url": f"{base}/{n}"} for n in names]
+    with http_open(f"https://github.com/{REPO}/releases/tag/{tag}") as resp:
+        page = resp.read().decode("utf-8", "replace")
+    # Asset names carry the exact CUDA minor version (e.g. cuda-12.9); match any of them.
+    names = sorted(set(re.findall(rf"{base}/([^\"']+bin-win-cuda-{CUDA_MAJOR}\.\d+-x64\.zip)", page)))
+    if not names:
+        sys.exit(f"No Windows CUDA {CUDA_MAJOR}.x assets found on the {tag} release page.")
+    assets = [{"name": n, "size": None, "digest": None, "browser_download_url": f"{base}/{n}"} for n in names]
+    main, cudart = pick_assets(assets)
+    return tag, [a for a in (main, cudart) if a]
 
 
 def get_latest_release():
