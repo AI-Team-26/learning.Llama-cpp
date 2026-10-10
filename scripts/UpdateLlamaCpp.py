@@ -11,13 +11,10 @@ Usage:
     python download_llama_cpp.py                     # -> D:/Downloads
     python download_llama_cpp.py --dest E:/Somewhere
     python download_llama_cpp.py --dry-run           # only show what would be downloaded
-
-Optional: set GITHUB_TOKEN to avoid GitHub API rate limits.
 """
 import argparse
 import hashlib
 import json
-import os
 import re
 import sys
 import urllib.error
@@ -29,15 +26,12 @@ API_URL = f"https://api.github.com/repos/{REPO}/releases?per_page=30"
 FEED_URL = f"https://github.com/{REPO}/releases.atom"
 TAG_RE = re.compile(r"^b(\d+)$")  # llama.cpp build tags, e.g. b11060
 DEFAULT_DEST = "D:/Downloads"
-FALLBACK_CUDA = "12.4"  # only used if the GitHub API is unavailable
+CUDA_VERSION = "12"  # major CUDA line; assets are named e.g. cuda-12.4
 
 
 
 def http_open(url, accept="*/*", method="GET"):
     headers = {"User-Agent": "llama-cpp-downloader", "Accept": accept}
-    token = os.environ.get("GITHUB_TOKEN")
-    if token and "api.github.com" in url:
-        headers["Authorization"] = f"Bearer {token}"
     return urllib.request.urlopen(urllib.request.Request(url, headers=headers, method=method))
 
 
@@ -95,11 +89,17 @@ def latest_release_via_feed():
         sys.exit("Could not determine the latest tag from the releases feed.")
     tag = f"b{max(tags)}"
     base = f"https://github.com/{REPO}/releases/download/{tag}"
-    names = [
-        f"llama-{tag}-bin-win-cuda-{FALLBACK_CUDA}-x64.zip",
-        f"cudart-llama-bin-win-cuda-{FALLBACK_CUDA}-x64.zip",
-    ]
-    return tag, [{"name": n, "size": None, "digest": None, "browser_download_url": f"{base}/{n}"} for n in names]
+    # The Atom feed carries no asset list and we only know the CUDA major
+    # version, so scrape the release page for the exact Windows x64 zip names.
+    with http_open(f"https://github.com/{REPO}/releases/tag/{tag}") as resp:
+        html = resp.read().decode("utf-8", "replace")
+    names = set(re.findall(rf"{re.escape(base)}/([A-Za-z0-9._-]+-bin-win-cuda-{CUDA_VERSION}\.\d+-x64\.zip)", html))
+    assets = [{"name": n, "size": None, "digest": None, "browser_download_url": f"{base}/{n}"} for n in names]
+    try:
+        main, cudart = pick_assets(assets)
+    except SystemExit:
+        sys.exit(f"No Windows CUDA {CUDA_VERSION} llama.cpp asset found on the {tag} release page.")
+    return tag, [a for a in (main, cudart) if a]
 
 
 def get_latest_release():
