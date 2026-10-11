@@ -13,6 +13,7 @@ PARALLEL=1
 TEMPERATURE=0.3
 TOP_K=20
 TOP_P=0.85
+MIN_P=0.02
 DRAFT_P_MIN=0.2
 
 QWEN_REASONING_EFFORT_MEDIUM=1
@@ -186,7 +187,7 @@ start_server() {
         --temperature $TEMPERATURE \
         --top-k $TOP_K \
         --top-p $TOP_P \
-        --min-p 0.02 \
+        --min-p $MIN_P \
         --repeat-penalty 1.10 \
         --repeat-last-n 512 \
 

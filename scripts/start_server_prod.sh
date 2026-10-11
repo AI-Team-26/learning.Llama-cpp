@@ -63,7 +63,7 @@ args=(
     --temperature $TEMPERATURE \
     --top-k $TOP_K \
     --top-p $TOP_P \
-    --min-p 0.02 \
+    --min-p $MIN_P \
     --repeat-penalty 1.10 \
     --repeat-last-n 512 \
 
@@ -278,11 +278,12 @@ start_server() {
     [[ "$spec_type" != "none" ]] && args+=(--spec-type "$spec_type")
 
     # Disable RAM "cache" if no MoE or GPU offloading
-    if [[ "$cpu_moe" != "0" || "$gpu_layers" != "99" ]]; then
-        args+=(--cache-ram 4096) 
-    else
-        args+=(--cache-ram 0) 
-    fi
+    #if [[ "$cpu_moe" != "0" || "$gpu_layers" != "99" ]]; then
+    #    args+=(--cache-ram 4096) 
+    #else
+    #    args+=(--cache-ram 0) 
+    #fi
+    --cache-ram 4096
 
     if [[ "$spec_type" == *draft-simple* ]]; then
         require_arg spec_draft_n_min     --spec-draft-n-min || return 1
