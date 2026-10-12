@@ -11,33 +11,24 @@ Usage:
     python download_llama_cpp.py                     # -> D:/Downloads
     python download_llama_cpp.py --dest E:/Somewhere
     python download_llama_cpp.py --dry-run           # only show what would be downloaded
-
-Optional: set GITHUB_TOKEN to avoid GitHub API rate limits.
 """
 import argparse
 import hashlib
 import json
-import os
 import re
 import sys
-import urllib.error
 import urllib.request
 from pathlib import Path
 
 REPO = "ggml-org/llama.cpp"
 API_URL = f"https://api.github.com/repos/{REPO}/releases?per_page=30"
-FEED_URL = f"https://github.com/{REPO}/releases.atom"
 TAG_RE = re.compile(r"^b(\d+)$")  # llama.cpp build tags, e.g. b11060
 DEFAULT_DEST = "D:/Downloads"
-FALLBACK_CUDA = "12.4"  # only used if the GitHub API is unavailable
 
 
 
 def http_open(url, accept="*/*", method="GET"):
     headers = {"User-Agent": "llama-cpp-downloader", "Accept": accept}
-    token = os.environ.get("GITHUB_TOKEN")
-    if token and "api.github.com" in url:
-        headers["Authorization"] = f"Bearer {token}"
     return urllib.request.urlopen(urllib.request.Request(url, headers=headers, method=method))
 
 
@@ -86,28 +77,7 @@ def latest_release_via_api():
     sys.exit("No recent llama.cpp release with Windows CUDA 12 assets found.")
 
 
-def latest_release_via_feed():
-    """No-API fallback: read the newest bNNNNN tag from the releases Atom feed."""
-    with http_open(FEED_URL) as resp:
-        feed = resp.read().decode("utf-8", "replace")
-    tags = [int(m) for m in re.findall(r"/releases/tag/b(\d+)", feed)]
-    if not tags:
-        sys.exit("Could not determine the latest tag from the releases feed.")
-    tag = f"b{max(tags)}"
-    base = f"https://github.com/{REPO}/releases/download/{tag}"
-    names = [
-        f"llama-{tag}-bin-win-cuda-{FALLBACK_CUDA}-x64.zip",
-        f"cudart-llama-bin-win-cuda-{FALLBACK_CUDA}-x64.zip",
-    ]
-    return tag, [{"name": n, "size": None, "digest": None, "browser_download_url": f"{base}/{n}"} for n in names]
 
-
-def get_latest_release():
-    try:
-        return latest_release_via_api()
-    except urllib.error.HTTPError as e:
-        print(f"GitHub API unavailable (HTTP {e.code}); falling back to the releases feed.")
-        return latest_release_via_feed()
 
 
 def sha256_of(path):
@@ -155,7 +125,7 @@ def main():
     ap.add_argument("--dry-run", action="store_true", help="show what would be downloaded and exit")
     args = ap.parse_args()
 
-    tag, assets = get_latest_release()
+    tag, assets = latest_release_via_api()
     print(f"**Latest release:** {tag}")
     for a in assets:
         print(f"  {a['name']}\n    {a['browser_download_url']}")
