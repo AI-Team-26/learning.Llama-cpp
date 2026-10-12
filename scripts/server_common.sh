@@ -10,11 +10,20 @@ source common.sh
 
 # sampling config
 PARALLEL=1
-TEMPERATURE=0.3
-TOP_K=20
-TOP_P=0.85
+TEMPERATURE=0.3    # 0.3
+TOP_K=20    #  20
+TOP_P=0.85  # 0.85
 MIN_P=0.02
 DRAFT_P_MIN=0.2
+REPEATED_PENALTY=1.10
+
+## Swift model values
+#TEMPERATURE=1
+#TOP_K=20
+#TOP_P=0.95
+#MIN_P=0
+#DRAFT_P_MIN=0.0
+#REPEATED_PENALTY=1.0
 
 QWEN_REASONING_EFFORT_MEDIUM=1
 
@@ -170,7 +179,8 @@ start_server() {
         --ubatch-size $ubatch \
 
         # EXPERIMENTAL for 80k of Qwen3.8 27B
-        --ctx-checkpoints 4 --checkpoint-min-step 16384
+        #--ctx-checkpoints 4 --checkpoint-min-step 16384
+        --ctx-checkpoints 2 --checkpoint-min-step 8192 \
 
         #--hip-fa-force-vec on \
 
@@ -179,7 +189,7 @@ start_server() {
         #--spec-mtp-cr-depth 1 \
         #--spec-draft-adaptive \
 
-        # --cache-ram 16384
+        # --cache-ram 16384    # it use RAM that can be used for bigger context
 
         #--metrics \
         #--perf \
@@ -188,7 +198,7 @@ start_server() {
         --top-k $TOP_K \
         --top-p $TOP_P \
         --min-p $MIN_P \
-        --repeat-penalty 1.10 \
+        --repeat-penalty $REPEATED_PENALTY \
         --repeat-last-n 512 \
 
         --samplers "penalties;dry;top_k;top_p;min_p;temperature"

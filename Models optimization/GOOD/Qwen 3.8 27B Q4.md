@@ -1,5 +1,8 @@
 # Qwen 3.8 27B - Q4
 
+
+Ubatch set to 256 makes the model dumb !!
+
 | File                                                       | GB   | Result                                               |
 |------------------------------------------------------------| ---- |------------------------------------------------------|
 | Qwen3.8-27B-UD-IQ4_XS_unsloth.gguf                         | 13.2 | ✔️ 64k: 20-40 t/s ✔️ Q8 80k: 20-30 t/s              |
@@ -16,13 +19,15 @@
 | Qwen3.8-27B.i1-IQ4_KT-attn_qkv-IQ4_KS-MTP_chunter789.gguf  | 13.9 | ❌ attn_qkv- does not work                  |
 | Qwen3.8-27B-ASCII-Condensed-IQ4_XS-3.84bpw_troed.gguf      | 11.4 |      |
 | Swift-1.5-Qwen3.8-27B-MiniPlus-V3_isvalorum.gguf           | 13.1 | ❌ Too slow. Missed update TODO                       | 
-| Qwen3.8-27B-YMQ-M_zerodigest.gguf                          | 13.6 | ❌ Rubbish                                  |
+| Swift-1.5-Qwen3.8-27b.i1-IQ4_XS_mrradermacher.gguf         | 14.2 | ❌ Too big. Too slow.                                 |
+| Qwen3.8-27B-YMQ-M_zerodigest.gguf                          | 13.6 | ❌ Rubbish                                            |
 
 
 
-
-## ✔️ i1-IQ4_XS (ahmeddelkilami01)
+## ✔️ Swift i1-IQ4_XS (ahmeddelkilami01)
 Swift-Qwen3.8-27b-i1-IQ4_XS-Smaller_ahmeddelkilami01.gguf       12.6 GB
+https://huggingface.co/ahmedelkilani01/Swift-Qwen3.8-27B-i1-IQ4_XS-Smaller-GGUF
+Based on UkisAI's Swift-Qwen3.8-27B and tensor from jrell/Qwen3.8-27B-i1-IQ4_XS-GGUF-Smaller, 
 
 ## ✔️ IQ4_XS (byteshape)
 Qwen3.8-27B-IQ4_XS-3.84bpw_byteshape.gguf                       12.1 GB
@@ -262,6 +267,25 @@ _test_model
 |  43 t/s |  60 k |   0 | 66/66 | 15.7 | 12.0/0.1  | q8_0 (q4_0) |    551 |  13s | MTP        min=1 max=4 p_min=0.20 (92%) |  1024/512 |                   |
 |  32 t/s |  60 k |   0 | 66/66 | 15.7 | 12.0/0.2  | q8_0 (q4_0) |    557 |  17s | MTP        min=1 max=3 p_min=0.20 (93%) | 1024/1024 |                   |
 |  44 t/s |  56 k |   0 | 66/66 | 15.5 | 12.0/0.1  | q8_0 (q4_0) |    551 |  13s | MTP        min=1 max=4 p_min=0.20 (92%) |   768/512 |                   |
+
+
+model=Swift-1.5-Qwen3.8-27b.i1-IQ4_XS_mrradermacher.gguf
+ctx_k=48
+gpu_layers=64
+cpu_moe=0
+quant=q4_0/q4_0
+spec=draft-mtp
+draft_model=none
+predict_token=1/2
+jinja=1
+batch=1024
+ubatch=256
+_test_model
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                       | Batch/Ub. | Note              |
+| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | -------------------------------------------- | --------- |------------------ |
+|  12 t/s |  48 k |   0 | 64/66 | 15.3 | 13.2/0.1  | q4_0 (q4_0) |    570 |  48s | 98% = MTP 1/2 (99%)                          |  1024/256 |                   |
+
 
 
 model=Swift-1.5-Qwen3.8-27B-IQ4_XS_ukisai.gguf

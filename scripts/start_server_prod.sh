@@ -39,7 +39,8 @@ args=(
     --cache-reuse 64 \
 
     # EXPERIMENTAL for 80k of Qwen3.8 27B
-    --ctx-checkpoints 4 --checkpoint-min-step 16384 \
+    #--ctx-checkpoints 4 --checkpoint-min-step 16384 \
+    --ctx-checkpoints 2 --checkpoint-min-step 8192 \
 
     #--hip-fa-force-vec on \
 
@@ -64,7 +65,7 @@ args=(
     --top-k $TOP_K \
     --top-p $TOP_P \
     --min-p $MIN_P \
-    --repeat-penalty 1.10 \
+    --repeat-penalty $REPEATED_PENALTY \
     --repeat-last-n 512 \
 
     # I have the impression this one cause loops also on model that never loop before (Gemma-4-26B)
@@ -283,7 +284,7 @@ start_server() {
     #else
     #    args+=(--cache-ram 0) 
     #fi
-    --cache-ram 4096
+    #--cache-ram 2048   # it use RAM that can be used for bigger context
 
     if [[ "$spec_type" == *draft-simple* ]]; then
         require_arg spec_draft_n_min     --spec-draft-n-min || return 1
