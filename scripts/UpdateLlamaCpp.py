@@ -27,7 +27,7 @@ API_URL = f"https://api.github.com/repos/{REPO}/releases?per_page=30"
 FEED_URL = f"https://github.com/{REPO}/releases.atom"
 TAG_RE = re.compile(r"^b(\d+)$")  # llama.cpp build tags, e.g. b11060
 DEFAULT_DEST = "D:/Downloads"
-FALLBACK_CUDA = "12"  # only used if the GitHub API is unavailable
+CUDA_MAJOR = "12"
 
 
 
@@ -91,8 +91,8 @@ def latest_release_via_feed():
     tag = f"b{max(tags)}"
     base = f"https://github.com/{REPO}/releases/download/{tag}"
     names = [
-        f"llama-{tag}-bin-win-cuda-{FALLBACK_CUDA}-x64.zip",
-        f"cudart-llama-bin-win-cuda-{FALLBACK_CUDA}-x64.zip",
+        f"llama-{tag}-bin-win-cuda-{CUDA_MAJOR}-x64.zip",
+        f"cudart-llama-bin-win-cuda-{CUDA_MAJOR}-x64.zip",
     ]
     return tag, [{"name": n, "size": None, "digest": None, "browser_download_url": f"{base}/{n}"} for n in names]
 
