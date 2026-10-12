@@ -36,6 +36,7 @@ args=(
     --no-mmproj \
     --agent \
 
+    --repeat-last-n 512 \
     --cache-reuse 64 \
 
     # EXPERIMENTAL for 80k of Qwen3.8 27B
@@ -44,7 +45,7 @@ args=(
 
     #--hip-fa-force-vec on \
 
-    --spec-draft-p-min $DRAFT_P_MIN \
+    #--spec-draft-p-min $DRAFT_P_MIN \
     #--spec-mtp-cr-depth 1 \
     #--spec-draft-adaptive \
 
@@ -59,14 +60,6 @@ args=(
     # Order is important!
     # (By putting temperature last, you ensure that min_p cuts out the garbage tokens first, preventing the model from picking wrong numbers.)
     --samplers "penalties;dry;top_k;top_p;min_p;temperature" \
-
-    ## strict for large capable models
-    --temperature $TEMPERATURE \
-    --top-k $TOP_K \
-    --top-p $TOP_P \
-    --min-p $MIN_P \
-    --repeat-penalty $REPEATED_PENALTY \
-    --repeat-last-n 512 \
 
     # I have the impression this one cause loops also on model that never loop before (Gemma-4-26B)
     #--temperature 0.3 \
@@ -220,6 +213,25 @@ start_server() {
         # (Alternative): Using printf to avoid quoting issues if val has spaces
         # declare "$(printf '%s=%s' "$key" "$val")"
     done
+
+    # set specific model values
+    if [[ "$model_id" == *Swift* ]]; then
+        debug "Apply SWIFT models values"
+        args+=(--temperature "$SWIFT_TEMPERATURE")
+        args+=(--top-k "$SWIFT_TOP_K")
+        args+=(--top-p "$SWIFT_TOP_P")
+        args+=(--min-p "$SWIFT_MIN_P")
+        args+=(--spec-draft-p-min "$SWIFT_DRAFT_P_MIN")
+        args+=(--repeat-penalty "$SWIFT_REPEAT_PENALTY")
+    else
+        debug "Apply general models values"
+        args+=(--temperature "$TEMPERATURE")
+        args+=(--top-k "$TOP_K")
+        args+=(--top-p "$TOP_P")
+        args+=(--min-p "$MIN_P")
+        args+=(--spec-draft-p-min "$DRAFT_P_MIN")
+        args+=(--repeat-penalty "$REPEAT_PENALTY")
+    fi
 
     # stop running server
     stop_server >&2

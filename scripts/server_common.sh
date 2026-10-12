@@ -15,15 +15,15 @@ TOP_K=20    #  20
 TOP_P=0.85  # 0.85
 MIN_P=0.02
 DRAFT_P_MIN=0.2
-REPEATED_PENALTY=1.10
+REPEAT_PENALTY=1.10
 
 ## Swift model values
-#TEMPERATURE=1
-#TOP_K=20
-#TOP_P=0.95
-#MIN_P=0
-#DRAFT_P_MIN=0.0
-#REPEATED_PENALTY=1.0
+SWIFT_TEMPERATURE=1
+SWIFT_TOP_K=20
+SWIFT_TOP_P=0.95
+SWIFT_MIN_P=0
+SWIFT_DRAFT_P_MIN=0.0
+SWIFT_REPEAT_PENALTY=1.0
 
 QWEN_REASONING_EFFORT_MEDIUM=1
 
@@ -185,7 +185,7 @@ start_server() {
         #--hip-fa-force-vec on \
 
         #--draft-p-min 0.7 \   ### old parameter
-        --spec-draft-p-min $DRAFT_P_MIN \
+        #--spec-draft-p-min $DRAFT_P_MIN \
         #--spec-mtp-cr-depth 1 \
         #--spec-draft-adaptive \
 
@@ -194,11 +194,11 @@ start_server() {
         #--metrics \
         #--perf \
 
-        --temperature $TEMPERATURE \
-        --top-k $TOP_K \
-        --top-p $TOP_P \
-        --min-p $MIN_P \
-        --repeat-penalty $REPEATED_PENALTY \
+        #--temperature $TEMPERATURE \
+        #--top-k $TOP_K \
+        #--top-p $TOP_P \
+        #--min-p $MIN_P \
+        #--repeat-penalty $REPEAT_PENALTY \
         --repeat-last-n 512 \
 
         --samplers "penalties;dry;top_k;top_p;min_p;temperature"
@@ -217,7 +217,26 @@ start_server() {
 
     [[ "$jinja" == "1" ]] && args+=(--jinja)
 
+    # set specific model values
     [[ "$QWEN_REASONING_EFFORT_MEDIUM" == "1" ]] && args+=(--chat-template-kwargs '{"reasoning_effort":"medium"}')
+
+    if [[ "$model_id" == *Swift* ]]; then
+        debug "Apply SWIFT models values"
+        args+=(--temperature "$SWIFT_TEMPERATURE")
+        args+=(--top-k "$SWIFT_TOP_K")
+        args+=(--top-p "$SWIFT_TOP_P")
+        args+=(--min-p "$SWIFT_MIN_P")
+        args+=(--spec-draft-p-min "$SWIFT_DRAFT_P_MIN")
+        args+=(--repeat-penalty "$SWIFT_REPEAT_PENALTY")
+    else
+        debug "Apply general models values"
+        args+=(--temperature "$TEMPERATURE")
+        args+=(--top-k "$TOP_K")
+        args+=(--top-p "$TOP_P")
+        args+=(--min-p "$MIN_P")
+        args+=(--spec-draft-p-min "$DRAFT_P_MIN")
+        args+=(--repeat-penalty "$REPEAT_PENALTY")
+    fi
 
     # Logging settings
     args+=(--log-verbosity 4) # default is 3, we need this level to print out the GPU layers

@@ -1,5 +1,51 @@
 models:
 
+  Qwen3.5-9B-Claude-Code-Q5_K_M_[emperoai]_64k:
+    file: Qwen3.5-9B-Claude-Code-Q5_K_M_emperoai.gguf
+    ctx_k: 64
+    gpu_layers: 99
+    cpu_moe: 0
+    quant: q8_0/q4_0
+    batch: 2048
+    ubatch: 1024
+    spec_type: ngram-simple
+    spec_ngram_simple_size_n: 24
+    spec_ngram_simple_size_m: 24
+    spec_ngram_simple_min_hits: 1
+    jinja: 1
+
+  RVN-IQ4_XS_[observerx]_64k:
+    note: "Uncensored"
+    file: RVN-IQ4_XS-multilingual_observerx.gguf
+    ctx_k: 64
+    gpu_layers: 99
+    cpu_moe: 0
+    quant: q8_0/q4_0
+    batch: 1024
+    ubatch: 512
+    spec_type: ngram-simple
+    spec_ngram_simple_size_n: 16
+    spec_ngram_simple_size_m: 16
+    spec_ngram_simple_min_hits: 1
+    jinja: 1
+
+  Gemma-4-26B-A4B-it-uncensored_MOE_[noctrex]_80k:
+    note: "Uncensored"
+    file: Gemma-4-26B-A4B-it-uncensored_MOE_noctrex.gguf
+    _draft_model: mtp-gemma-4-26B-A4B-it-Q8_0_unsloth.gguf
+    ctx_k: 80
+    gpu_layers: 99
+    cpu_moe: 0
+    quant: q8_0/q4_0
+    batch: 1024
+    ubatch: 512
+    spec_type: none
+    spec_ngram_simple_size_n: 24
+    spec_ngram_simple_size_m: 24
+    spec_ngram_simple_min_hits: 1
+    jinja: 1
+
+
 ### Qwen 3.8 27B | Q4 ###
 
   Qwen3.8_27B_UD-IQ4_XS_[Unsloth]_[52k]:
@@ -111,7 +157,7 @@ models:
     spec_ngram_simple_min_hits: 1
     jinja: 1
 
-  Qwen3.8-27B-IQ4_XS_(byteshape)_[64k]:
+  Qwen3.8-27B-IQ4_XS_[byteshape]_[64k]:
     file: Qwen3.8-27B-IQ4_XS-3.84bpw_byteshape.gguf
     ctx_k: 64
     gpu_layers: 99
@@ -127,17 +173,17 @@ models:
     spec_ngram_simple_min_hits: 1
     jinja: 1
 
-  Qwen3.8-27B-IQ4_XS_(byteshape)_[56k]:
+  Qwen3.8-27B-IQ4_XS_[byteshape]_[56k]:
     file: Qwen3.8-27B-IQ4_XS-3.84bpw_byteshape.gguf
     ctx_k: 56
     gpu_layers: 99
     cpu_moe: 0
     quant: q8_0/q4_0
     batch: 1024
-    ubatch: 256
+    ubatch: 512
     spec_type: draft-mtp,ngram-simple
     spec_draft_n_min: 1
-    spec_draft_n_max: 5
+    spec_draft_n_max: 3
     spec_ngram_simple_size_n: 24
     spec_ngram_simple_size_m: 24
     spec_ngram_simple_min_hits: 1
@@ -707,13 +753,13 @@ models:
             "reasoning": true
         },
  
-  Gemma-4-26B-UD-IQ4_XS_(unsloth)_104k:
+  Gemma-4-26B-UD-IQ4_XS_[unsloth]_96k:
     speed: "70 t/s"
     file: Gemma-4-26B-A4B-it-UD-IQ4_XS_unsloth.gguf
     draft_model: mtp-gemma-4-26B-A4B-it-Q8_0_unsloth.gguf
     ctx_k: 96
     gpu_layers: 99
-    quant: q8_0
+    quant: q8_0/q4_0
     cpu_moe: 0
     batch: 1024
     ubatch: 512
