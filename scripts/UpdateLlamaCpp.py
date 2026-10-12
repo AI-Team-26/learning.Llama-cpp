@@ -11,8 +11,9 @@ Usage:
     python download_llama_cpp.py                     # -> D:/Downloads
     python download_llama_cpp.py --dest E:/Somewhere
     python download_llama_cpp.py --dry-run           # only show what would be downloaded
+    python download_llama_cpp.py --token <token>     # avoid GitHub API rate limits
 
-Optional: set GITHUB_TOKEN to avoid GitHub API rate limits.
+Optional: provide --token to avoid GitHub API rate limits.
 """
 import argparse
 import hashlib
@@ -29,13 +30,12 @@ API_URL = f"https://api.github.com/repos/{REPO}/releases?per_page=30"
 FEED_URL = f"https://github.com/{REPO}/releases.atom"
 TAG_RE = re.compile(r"^b(\d+)$")  # llama.cpp build tags, e.g. b11060
 DEFAULT_DEST = "D:/Downloads"
-FALLBACK_CUDA = "12.4"  # only used if the GitHub API is unavailable
+FALLBACK_CUDA = "12"  # only used if the GitHub API is unavailable
 
 
 
-def http_open(url, accept="*/*", method="GET"):
+def http_open(url, accept="*/*", method="GET", token=None):
     headers = {"User-Agent": "llama-cpp-downloader", "Accept": accept}
-    token = os.environ.get("GITHUB_TOKEN")
     if token and "api.github.com" in url:
         headers["Authorization"] = f"Bearer {token}"
     return urllib.request.urlopen(urllib.request.Request(url, headers=headers, method=method))
@@ -66,13 +66,13 @@ def pick_assets(assets):
     return main, cudart
 
 
-def latest_release_via_api():
+def latest_release_via_api(token=None):
     """Newest bNNNNN release that has the Windows CUDA 12 assets.
 
     Note: GitHub's /releases/latest is NOT usable here - the bNNNNN builds are
     published as pre-releases, so 'latest' points at an unrelated release.
     """
-    with http_open(API_URL, accept="application/vnd.github+json") as resp:
+    with http_open(API_URL, accept="application/vnd.github+json", token=token) as resp:
         releases = json.load(resp)
     # Look at several releases, not just the newest: it may be incomplete (still uploading),
     # and the list can contain non-build releases such as "v0.4.1".
@@ -86,9 +86,9 @@ def latest_release_via_api():
     sys.exit("No recent llama.cpp release with Windows CUDA 12 assets found.")
 
 
-def latest_release_via_feed():
+def latest_release_via_feed(token=None):
     """No-API fallback: read the newest bNNNNN tag from the releases Atom feed."""
-    with http_open(FEED_URL) as resp:
+    with http_open(FEED_URL, token=token) as resp:
         feed = resp.read().decode("utf-8", "replace")
     tags = [int(m) for m in re.findall(r"/releases/tag/b(\d+)", feed)]
     if not tags:
@@ -102,12 +102,12 @@ def latest_release_via_feed():
     return tag, [{"name": n, "size": None, "digest": None, "browser_download_url": f"{base}/{n}"} for n in names]
 
 
-def get_latest_release():
+def get_latest_release(token=None):
     try:
-        return latest_release_via_api()
+        return latest_release_via_api(token=token)
     except urllib.error.HTTPError as e:
         print(f"GitHub API unavailable (HTTP {e.code}); falling back to the releases feed.")
-        return latest_release_via_feed()
+        return latest_release_via_feed(token=token)
 
 
 def sha256_of(path):
@@ -153,9 +153,10 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--dest", default=DEFAULT_DEST, help=f"download folder (default: {DEFAULT_DEST})")
     ap.add_argument("--dry-run", action="store_true", help="show what would be downloaded and exit")
+    ap.add_argument("--token", help="GitHub token to avoid rate limits")
     args = ap.parse_args()
 
-    tag, assets = get_latest_release()
+    tag, assets = get_latest_release(token=args.token)
     print(f"**Latest release:** {tag}")
     for a in assets:
         print(f"  {a['name']}\n    {a['browser_download_url']}")
