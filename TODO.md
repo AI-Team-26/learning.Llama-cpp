@@ -40,10 +40,6 @@
 - Feature 13: Add bash syntax check (shellcheck) in CI workflow for shell scripts
   Run shellcheck on all .sh files in scripts/ directory
 
-- Bug 14 | UpdateLlamaCpp.py
-  - avoid use GITHUB_TOKEN
-  - USE a const for CUDA version WITHOUT minor version (set to "12", nt "12.4").
-
 - Feature 6 [feat/06_sharpyaml] | Llama Server UI: Replace YamlDotNet with SharpYaml (PropertyNamingPolicy=SnakeCaseLower); drop [YamlMember] aliases except [JsonPropertyName("ubatch")] on UBatch — TODO notes already in ModelsConfigLoader.cs/ModelConfig.cs
 - Feature 8 | Unify the llama-server call of test and prod calls
 
@@ -55,3 +51,4 @@
 - **[feat/07_1_compact_pred_info]** Feature 7.1 — print spec prediction info compactly in test_call output
 - **[feat/07_2_dflash_accepted_rate]** Feature 7.2 — extract per-type accepted speculative rate from server log statistics
 - **[feat/10_manage_server_start_failure]** Feature 10 — capture and display specific model-loading error messages from server log
+- **[fix/15_update_llamacpp_bug14]** Bug 14 — remove GITHUB_TOKEN dependency; use CUDA major version const
