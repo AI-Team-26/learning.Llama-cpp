@@ -14,7 +14,7 @@ TEMPERATURE=0.3    # 0.3
 TOP_K=20    #  20
 TOP_P=0.85  # 0.85
 MIN_P=0.02
-DRAFT_P_MIN=0.2
+DRAFT_P_MIN=0.4  # 0.20
 REPEAT_PENALTY=1.10
 
 ## Swift model values
@@ -24,6 +24,14 @@ SWIFT_TOP_P=0.95
 SWIFT_MIN_P=0
 SWIFT_DRAFT_P_MIN=0.0
 SWIFT_REPEAT_PENALTY=1.0
+
+## Swift model values
+LIQUID_TEMPERATURE=0.1
+LIQUID_TOP_K=50
+LIQUID_TOP_P=0.85
+LIQUID_MIN_P=0.02
+LIQUID_DRAFT_P_MIN=0.2
+LIQUID_REPEAT_PENALTY=1.05
 
 QWEN_REASONING_EFFORT_MEDIUM=1
 
@@ -70,7 +78,7 @@ get_current_model() {
 #   batch: batch and ubatch size
 start_server() {
     debug_function "start_server"
-    local model="$1"
+    local model_file="$1"
     local ctx_k="$2"
     local gpu_layers="$3"
     local cpu_moe="$4"
@@ -118,7 +126,7 @@ start_server() {
     echo "CONTEXT: ${yellow}$ctx_k k${reset}" >&2
     echo "=========================================================" >&2
     
-    local model_path="$GGUF_FOLDER/$model"
+    local model_path="$GGUF_FOLDER/$model_file"
 
     if [ ! -f "$model_path" ]; then
         echo "‼️ File not found: \"$model_path\"" >&2
@@ -180,7 +188,10 @@ start_server() {
 
         # EXPERIMENTAL for 80k of Qwen3.8 27B
         #--ctx-checkpoints 4 --checkpoint-min-step 16384
-        --ctx-checkpoints 2 --checkpoint-min-step 8192 \
+        #--ctx-checkpoints 2 --checkpoint-min-step 8192 \
+        #--ctx-checkpoints 16 --checkpoint-min-step 256 \
+        #--ctx-checkpoints 8 --checkpoint-min-step 2048 \
+        --ctx-checkpoints 2 --checkpoint-min-step 2048 \
 
         #--hip-fa-force-vec on \
 
@@ -190,6 +201,7 @@ start_server() {
         #--spec-draft-adaptive \
 
         # --cache-ram 16384    # it use RAM that can be used for bigger context
+        --cache-ram 2048 \
 
         #--metrics \
         #--perf \
@@ -220,7 +232,7 @@ start_server() {
     # set specific model values
     [[ "$QWEN_REASONING_EFFORT_MEDIUM" == "1" ]] && args+=(--chat-template-kwargs '{"reasoning_effort":"medium"}')
 
-    if [[ "$model_id" == *Swift* ]]; then
+    if [[ "$model_file" == *Swift* ]]; then
         debug "Apply SWIFT models values"
         args+=(--temperature "$SWIFT_TEMPERATURE")
         args+=(--top-k "$SWIFT_TOP_K")
@@ -228,6 +240,14 @@ start_server() {
         args+=(--min-p "$SWIFT_MIN_P")
         args+=(--spec-draft-p-min "$SWIFT_DRAFT_P_MIN")
         args+=(--repeat-penalty "$SWIFT_REPEAT_PENALTY")
+    elif [[ "$model_file" == *LFM* ]]; then
+        debug "Apply Liquid models values"
+        args+=(--temperature "$LIQUID_TEMPERATURE")
+        args+=(--top-k "$LIQUID_TOP_K")
+        args+=(--top-p "$LIQUID_TOP_P")
+        args+=(--min-p "$LIQUID_MIN_P")
+        args+=(--spec-draft-p-min "$LIQUID_DRAFT_P_MIN")
+        args+=(--repeat-penalty "$LIQUID_REPEAT_PENALTY")
     else
         debug "Apply general models values"
         args+=(--temperature "$TEMPERATURE")

@@ -137,28 +137,6 @@ _test_model
 
 
 
-model=Qwen3.8-27B-GSQ-RCO-IQ3_S-mtp_ista.gguf
-ctx_k=60
-gpu_layers=99
-cpu_moe=0
-quant=q8_0/q4_0
-spec=draft-mtp,ngram-simple
-draft_model=none
-predict_token=1/4
-ngram_values=32/24/1
-jinja=1
-batch=1024
-ubatch=512
-_test_model
-
-| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                  | Batch/Ub. | Note              |
-| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | --------------------------------------- | --------- |------------------ |
-|  44 t/s |  64 k |   0 | 66/66 | 15.1 | 10.9/0.1  | q8_0 (q8_0) |    551 |  13s | MTP        min=1 max=4 p_min=0.20 (89%) |  1024/512 | R: medium         |
-|  43 t/s |  60 k |   0 | 66/66 | 14.9 | 10.9/0.1  | q8_0 (q8_0) |    551 |  13s | MTP        min=1 max=4 p_min=0.20 (89%) |  1024/512 | R: medium         |
-|  42 t/s |  68 k |   0 | 66/66 | 15.2 | 10.9/0.1  | q8_0 (q8_0) |    551 |  13s | MTP        min=1 max=4 p_min=0.20 (87%) |  1024/512 | R: medium         |
-
-
-
 model=Swift-1.5-Qwen3.8-27B-MiniPlus-V3_isvalorum.gguf
 ctx_k=48
 gpu_layers=99
@@ -180,22 +158,23 @@ _test_model
 
 
 model=Qwen3.8-27B-IQ4_XS-3.84bpw_byteshape.gguf
-ctx_k=72
+ctx_k=68
 gpu_layers=99
 cpu_moe=0
-quant=q8_0/q8_0
+quant=q8_0/q4_0
 spec=draft-mtp,ngram-simple
 draft_model=none
 predict_token=1/6
-ngram_values=32/24
+ngram_values=24/24
 jinja=1
-batch=512
-ubatch=256
+batch=1024
+ubatch=512
 _test_model
 
 
 | Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                       | Batch/Ub. | Note              |
 | ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | -------------------------------------------- | --------- |------------------ |
+|  41 t/s |  72 k |   0 | 66/66 | 15.7 | 11.5/0.0  | q8_0 (q8_0) |    601 |  15s | 76% = MTP 1/6 (95%) N-gram 32/24/1 (---)     |   512/256 | R: medium         |
 |  43 t/s |  72 k |   0 | 66/66 | 15.7 | 11.5/0.0  | q8_0 (q8_0) |    601 |  14s | 76% = MTP 1/6 (95%) N-gram 24/24/1 (---)     |   512/256 | R: medium         |
 |  42 t/s |  72 k |   0 | 66/66 | 15.7 | 11.5/0.0  | q8_0 (q8_0) |    601 |  14s | 76% = MTP 1/6 (95%) N-gram 24/24/1 (---)     |  1024/256 | R: medium         |
 |  43 t/s |  72 k |   0 | 66/66 | 15.6 | 11.5/0.0  | q8_0 (q4_0) |    601 |  14s | 87% = MTP 1/4 (96%)                          |   512/256 | R: medium         |

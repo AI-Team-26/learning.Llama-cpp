@@ -41,7 +41,9 @@ args=(
 
     # EXPERIMENTAL for 80k of Qwen3.8 27B
     #--ctx-checkpoints 4 --checkpoint-min-step 16384 \
-    --ctx-checkpoints 2 --checkpoint-min-step 8192 \
+    #--ctx-checkpoints 2 --checkpoint-min-step 8192 \
+    #--ctx-checkpoints 8 --checkpoint-min-step 2048 \
+    --ctx-checkpoints 2 --checkpoint-min-step 2048 \
 
     #--hip-fa-force-vec on \
 
@@ -223,6 +225,14 @@ start_server() {
         args+=(--min-p "$SWIFT_MIN_P")
         args+=(--spec-draft-p-min "$SWIFT_DRAFT_P_MIN")
         args+=(--repeat-penalty "$SWIFT_REPEAT_PENALTY")
+    elif [[ "$model_id" == *LFM* ]]; then
+        debug "Apply Liquid models values"
+        args+=(--temperature "$LIQUID_TEMPERATURE")
+        args+=(--top-k "$LIQUID_TOP_K")
+        args+=(--top-p "$LIQUID_TOP_P")
+        args+=(--min-p "$LIQUID_MIN_P")
+        args+=(--spec-draft-p-min "$LIQUID_DRAFT_P_MIN")
+        args+=(--repeat-penalty "$LIQUID_REPEAT_PENALTY")
     else
         debug "Apply general models values"
         args+=(--temperature "$TEMPERATURE")
@@ -297,6 +307,7 @@ start_server() {
     #    args+=(--cache-ram 0) 
     #fi
     #--cache-ram 2048   # it use RAM that can be used for bigger context
+    #args+=(--cache-ram 2048) 
 
     if [[ "$spec_type" == *draft-simple* ]]; then
         require_arg spec_draft_n_min     --spec-draft-n-min || return 1

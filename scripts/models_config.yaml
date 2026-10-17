@@ -1,5 +1,21 @@
 models:
 
+### Liquid
+
+  LFM2.5-24B-A2B-UD-Q4_K_XL_[Unsloth]_Q8Q8_96k_ngram:
+    file: LFM2.5-24B-A2B-UD-Q4_K_XL_unsloth.gguf
+    ctx_k: 96
+    gpu_layers: 99
+    cpu_moe: 0
+    quant: q8_0/q8_0
+    batch: 2048
+    ubatch: 1024
+    spec_type: ngram-simple
+    spec_ngram_simple_size_n: 16
+    spec_ngram_simple_size_m: 16
+    spec_ngram_simple_min_hits: 1
+    jinja: 1
+
   Qwen3.5-9B-Claude-Code-Q5_K_M_[emperoai]_64k:
     file: Qwen3.5-9B-Claude-Code-Q5_K_M_emperoai.gguf
     ctx_k: 64
@@ -23,7 +39,9 @@ models:
     quant: q8_0/q4_0
     batch: 1024
     ubatch: 512
-    spec_type: ngram-simple
+    spec_type: draft-mtp,ngram-simple
+    spec_draft_n_min: 1
+    spec_draft_n_max: 3
     spec_ngram_simple_size_n: 16
     spec_ngram_simple_size_m: 16
     spec_ngram_simple_min_hits: 1
@@ -62,18 +80,18 @@ models:
     spec_draft_n_max: 2
     jinja: 0
 
-  Qwen3.8_27B_UD-IQ4_XS_[Unsloth]_[52k]_ngram:
+  Qwen3.8_27B_UD-IQ4_XS_[Unsloth]_[48k]_ngram:
     note: "🥇"
     file: Qwen3.8-27B-UD-IQ4_XS_unsloth.gguf
-    ctx_k: 52
+    ctx_k: 48
     gpu_layers: 99
     cpu_moe: 0
     quant: q8_0/q4_0
     batch: 1024
-    ubatch: 512
+    ubatch: 256
     spec_type: draft-mtp,ngram-simple
     spec_draft_n_min: 1
-    spec_draft_n_max: 2
+    spec_draft_n_max: 3
     spec_ngram_simple_size_n: 24
     spec_ngram_simple_size_m: 24
     spec_ngram_simple_min_hits: 1
@@ -121,7 +139,7 @@ models:
     ubatch: 512
     spec_type: draft-mtp,ngram-simple
     spec_draft_n_min: 1
-    spec_draft_n_max: 5
+    spec_draft_n_max: 3
     spec_ngram_simple_size_n: 24
     spec_ngram_simple_size_m: 24
     spec_ngram_simple_min_hits: 1
@@ -189,9 +207,9 @@ models:
     spec_ngram_simple_min_hits: 1
     jinja: 1
 
-  Qwen3.8-27B-abliterated-UD-IQ4_XS_(huihui)_[64k]:
+  Qwen3.8-27B-abliterated-UD-IQ4_XS_(huihui)_[56k]:
     file: Qwen3.8-27B-abliterated-UD-IQ4_XS_huihui.gguf
-    ctx_k: 64
+    ctx_k: 56
     gpu_layers: 99
     cpu_moe: 0
     quant: q4_0
@@ -199,8 +217,8 @@ models:
     ubatch: 256
     spec_type: draft-mtp,ngram-simple
     spec_draft_n_min: 1
-    spec_draft_n_max: 4
-    spec_ngram_simple_size_n: 24
+    spec_draft_n_max: 3
+    spec_ngram_simple_size_n: 16
     spec_ngram_simple_size_m: 16
     spec_ngram_simple_min_hits: 1
     jinja: 0
@@ -275,7 +293,7 @@ models:
 
   Qwen3.8-27B-IQ3_S_[ista]_[64k]:
     file: Qwen3.8-27B-GSQ-RCO-IQ3_S-mtp_ista.gguf
-    ctx_k: 68
+    ctx_k: 64
     gpu_layers: 99
     cpu_moe: 0
     quant: q8_0/q4_0
@@ -288,16 +306,16 @@ models:
 
   Qwen3.8-27B-IQ3_S_[ista]_[64k]_ngram:
     file: Qwen3.8-27B-GSQ-RCO-IQ3_S-mtp_ista.gguf
-    ctx_k: 68
+    ctx_k: 64
     gpu_layers: 99
     cpu_moe: 0
     quant: q8_0/q4_0
     batch: 1024
-    ubatch: 256
+    ubatch: 512
     spec_type: draft-mtp,ngram-simple
     spec_draft_n_min: 1
     spec_draft_n_max: 4
-    spec_ngram_simple_size_n: 32
+    spec_ngram_simple_size_n: 24
     spec_ngram_simple_size_m: 24
     spec_ngram_simple_min_hits: 1
     jinja: 1

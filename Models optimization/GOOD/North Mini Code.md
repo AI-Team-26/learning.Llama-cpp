@@ -7,14 +7,11 @@ MTP: No
 | North-Mini-Code-1.0-UD-IQ4_XS_unsloth.gguf                 | 14.1 | ✔️ 64k: 45 t/s  Good PR                     |
 
 
-
-## 
-https://huggingface.co/unsloth/North-Mini-Code-1.0-GGUF
-
+## ✔️ UD-IQ4_XS (Unsloth)
+https://huggingface.co/unsloth/North-Mini-Code-1.0-GGUF            14.1 GB
 
 
 ```bash
-
 
 model=North-Mini-Code-1.0-UD-IQ4_XS_unsloth.gguf
 ctx_k=64

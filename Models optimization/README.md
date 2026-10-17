@@ -103,11 +103,11 @@ source test_models_common.sh && print_test_call
 
 # call example:
 model=GPT-OSS-20b-UD-Q8_K_XL_unsloth.gguf
-ctx_k=128
+ctx_k=64
 gpu_layers=99
-cpu_moe=2
+cpu_moe=0
 quant=q8_0/q4_0
-spec=0
+spec=none / draft-mtp,ngram-simple 
 draft_model=none
 predict_token=0/0
 jinja=0

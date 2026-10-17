@@ -92,24 +92,29 @@ It changed the CHANGELOG for the test PR
 ```bash
 
 model=Qwen3.8-27B-GSQ-RCO-IQ3_S-mtp_ista.gguf
-ctx_k=60
+ctx_k=68
 gpu_layers=99
 cpu_moe=0
-quant=q8_0/q4_0
+quant=q8_0/q8_0
 spec=draft-mtp,ngram-simple
 draft_model=none
 predict_token=1/4
-ngram_values=32/24/1
+ngram_values=24/24/1
 jinja=1
 batch=1024
 ubatch=512
 _test_model
 
-| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                  | Batch/Ub. | Note              |
-| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | --------------------------------------- | --------- |------------------ |
-|  44 t/s |  64 k |   0 | 66/66 | 15.1 | 10.9/0.1  | q8_0 (q8_0) |    551 |  13s | MTP        min=1 max=4 p_min=0.20 (89%) |  1024/512 | R: medium         |
-|  43 t/s |  60 k |   0 | 66/66 | 14.9 | 10.9/0.1  | q8_0 (q8_0) |    551 |  13s | MTP        min=1 max=4 p_min=0.20 (89%) |  1024/512 | R: medium         |
-|  42 t/s |  68 k |   0 | 66/66 | 15.2 | 10.9/0.1  | q8_0 (q8_0) |    551 |  13s | MTP        min=1 max=4 p_min=0.20 (87%) |  1024/512 | R: medium         |
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                       | Batch/Ub. | Note              |
+| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | -------------------------------------------- | --------- |------------------ |
+|  44 t/s |  68 k |   0 | 66/66 | 15.2 | 10.9/0.1  | q8_0 (q8_0) |    551 |  12s | 89% = MTP 1/4 (95%) N-gram 24/24/1 (---)     |  1024/512 | R: medium         |
+
+|  45 t/s |  68 k |   0 | 66/66 | 15.3 | 10.9/0.1  | q8_0 (q4_0) |    551 |  12s | 85% = MTP 1/5 (95%) N-gram 24/24/1 (---)     |  1024/512 | R: medium         |
+|  44 t/s |  68 k |   0 | 66/66 | 15.2 | 10.9/0.1  | q8_0 (q4_0) |    551 |  12s | 89% = MTP 1/4 (95%) N-gram 32/24/1 (---)     |  1024/512 | R: medium         |
+|  43 t/s |  64 k |   0 | 66/66 | 15.0 | 10.9/0.1  | q8_0 (q4_0) |    551 |  13s | 89% = MTP 1/4 (95%) N-gram 24/24/1 (---)     |  1024/512 | R: medium         |
+|  43 t/s |  60 k |   0 | 66/66 | 14.8 | 10.9/0.1  | q8_0 (q4_0) |    551 |  13s | 89% = MTP 1/4 (95%) N-gram 32/24/1 (---)     |  1024/512 | R: medium         |
+
+
 
 
 model=Qwen3.8-27B-IQ3_S-3.23bpw_byteshape.gguf

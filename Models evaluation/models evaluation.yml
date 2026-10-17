@@ -1,0 +1,10 @@
+# Models evaluation
+
+
+? cohere/north-mini-code:
+  Feature 999: Ok
+  Note: ...
+
+? Openrouter/nvidia/nemotron-3.5-lightning:
+  Feature 99: Ok
+
