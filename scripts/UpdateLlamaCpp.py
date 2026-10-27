@@ -11,13 +11,10 @@ Usage:
     python download_llama_cpp.py                     # -> D:/Downloads
     python download_llama_cpp.py --dest E:/Somewhere
     python download_llama_cpp.py --dry-run           # only show what would be downloaded
-
-Optional: set GITHUB_TOKEN to avoid GitHub API rate limits.
 """
 import argparse
 import hashlib
 import json
-import os
 import re
 import sys
 import urllib.error
@@ -29,15 +26,11 @@ API_URL = f"https://api.github.com/repos/{REPO}/releases?per_page=30"
 FEED_URL = f"https://github.com/{REPO}/releases.atom"
 TAG_RE = re.compile(r"^b(\d+)$")  # llama.cpp build tags, e.g. b11060
 DEFAULT_DEST = "D:/Downloads"
-FALLBACK_CUDA = "12.4"  # only used if the GitHub API is unavailable
-
+CUDA_VERSION = "12"  # major version only; asset names carry the minor (e.g. cuda-12.4)
 
 
 def http_open(url, accept="*/*", method="GET"):
     headers = {"User-Agent": "llama-cpp-downloader", "Accept": accept}
-    token = os.environ.get("GITHUB_TOKEN")
-    if token and "api.github.com" in url:
-        headers["Authorization"] = f"Bearer {token}"
     return urllib.request.urlopen(urllib.request.Request(url, headers=headers, method=method))
 
 
@@ -45,18 +38,18 @@ def version_key(v):
     return tuple(int(x) for x in v.split("."))
 
 
-def cuda12_version(name, prefix):
-    """'llama-b11060-bin-win-cuda-12.4-x64.zip' -> '12.4'. None if not a Windows CUDA 12 x64 zip."""
-    if name.startswith(prefix) and "-bin-win-cuda-12" in name and name.endswith("-x64.zip"):
+def win_cuda_version(name, prefix):
+    """'llama-b11060-bin-win-cuda-12.4-x64.zip' -> '12.4'. None if not a Windows CUDA <major> x64 zip."""
+    if name.startswith(prefix) and f"-bin-win-cuda-{CUDA_VERSION}" in name and name.endswith("-x64.zip"):
         return name.split("-bin-win-cuda-")[1].removesuffix("-x64.zip")
 
 
 def pick_assets(assets):
     """Return (main_zip, cudart_zip), preferring the same, highest CUDA 12.x version."""
-    mains = {v: a for a in assets if (v := cuda12_version(a["name"], "llama-"))}
-    cudarts = {v: a for a in assets if (v := cuda12_version(a["name"], "cudart-"))}
+    mains = {v: a for a in assets if (v := win_cuda_version(a["name"], "llama-"))}
+    cudarts = {v: a for a in assets if (v := win_cuda_version(a["name"], "cudart-"))}
     if not mains:
-        sys.exit("No Windows CUDA 12 llama.cpp asset found in the latest release.")
+        sys.exit(f"No Windows CUDA {CUDA_VERSION} llama.cpp asset found in the latest release.")
     common = sorted(set(mains) & set(cudarts), key=version_key)
     if common:
         return mains[common[-1]], cudarts[common[-1]]
@@ -87,19 +80,25 @@ def latest_release_via_api():
 
 
 def latest_release_via_feed():
-    """No-API fallback: read the newest bNNNNN tag from the releases Atom feed."""
+    """No-API fallback: newest bNNNNN tag from the Atom feed + real asset names from its page."""
     with http_open(FEED_URL) as resp:
         feed = resp.read().decode("utf-8", "replace")
     tags = [int(m) for m in re.findall(r"/releases/tag/b(\d+)", feed)]
     if not tags:
         sys.exit("Could not determine the latest tag from the releases feed.")
     tag = f"b{max(tags)}"
-    base = f"https://github.com/{REPO}/releases/download/{tag}"
-    names = [
-        f"llama-{tag}-bin-win-cuda-{FALLBACK_CUDA}-x64.zip",
-        f"cudart-llama-bin-win-cuda-{FALLBACK_CUDA}-x64.zip",
+    # The feed only carries the tag; resolve the actual asset filenames (which include
+    # the CUDA minor version) from the release page HTML.
+    with http_open(f"https://github.com/{REPO}/releases/tag/{tag}") as resp:
+        html = resp.read().decode("utf-8", "replace")
+    pattern = rf"(?:llama|cudart)-[^\"]*?-bin-win-cuda-{CUDA_VERSION}\.\d+-x64\.zip"
+    assets = [
+        {"name": n, "size": None, "digest": None,
+         "browser_download_url": f"https://github.com/{REPO}/releases/download/{tag}/{n}"}
+        for n in sorted(set(re.findall(pattern, html)))
     ]
-    return tag, [{"name": n, "size": None, "digest": None, "browser_download_url": f"{base}/{n}"} for n in names]
+    main, cudart = pick_assets(assets)
+    return tag, [a for a in (main, cudart) if a]
 
 
 def get_latest_release():
