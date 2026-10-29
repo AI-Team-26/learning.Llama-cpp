@@ -1,5 +1,11 @@
 # Liquid
 
+❌ Super fast but completely wrong.  
+Neither able to find the TODO.  
+Completely out of scope action... and many many actions...  
+It said it has to create a branch and never created it.  
+Totally uncapable to implement a simple feature that required to add ESlint and prettier to the repo of a Chrome extension.  
+
 
 ## LFM2.5 24B A2B Base
 LFM2.5-24B-A2B-UD-Q4_K_XL_unsloth.gguf          13.8 GB

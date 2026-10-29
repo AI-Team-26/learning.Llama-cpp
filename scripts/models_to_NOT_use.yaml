@@ -867,6 +867,22 @@
           "input": [ "text" ]
       },
 
+# Liquid
+  LFM2.5-24B-A2B-UD-Q4_K_XL_[Unsloth]_Q8Q8_96k_ngram:
+    file: LFM2.5-24B-A2B-UD-Q4_K_XL_unsloth.gguf
+    ctx_k: 96
+    gpu_layers: 99
+    cpu_moe: 0
+    quant: q8_0/q4_0
+    batch: 1024
+    ubatch: 512
+    spec_type: ngram-simple
+    spec_ngram_simple_size_n: 16
+    spec_ngram_simple_size_m: 16
+    spec_ngram_simple_min_hits: 1
+    jinja: 1
+
+
 
 # Nemotron 3.5 Lightning
   Nemotron-3.5-Lightning-30B-A3B-IQ4_NL_bartowski:

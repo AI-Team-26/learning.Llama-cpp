@@ -1,20 +1,7 @@
 models:
 
-### Liquid
+### Extra
 
-  LFM2.5-24B-A2B-UD-Q4_K_XL_[Unsloth]_Q8Q8_96k_ngram:
-    file: LFM2.5-24B-A2B-UD-Q4_K_XL_unsloth.gguf
-    ctx_k: 96
-    gpu_layers: 99
-    cpu_moe: 0
-    quant: q8_0/q8_0
-    batch: 2048
-    ubatch: 1024
-    spec_type: ngram-simple
-    spec_ngram_simple_size_n: 16
-    spec_ngram_simple_size_m: 16
-    spec_ngram_simple_min_hits: 1
-    jinja: 1
 
   Qwen3.5-9B-Claude-Code-Q5_K_M_[emperoai]_64k:
     file: Qwen3.5-9B-Claude-Code-Q5_K_M_emperoai.gguf
@@ -44,22 +31,6 @@ models:
     spec_draft_n_max: 3
     spec_ngram_simple_size_n: 16
     spec_ngram_simple_size_m: 16
-    spec_ngram_simple_min_hits: 1
-    jinja: 1
-
-  Gemma-4-26B-A4B-it-uncensored_MOE_[noctrex]_80k:
-    note: "Uncensored"
-    file: Gemma-4-26B-A4B-it-uncensored_MOE_noctrex.gguf
-    _draft_model: mtp-gemma-4-26B-A4B-it-Q8_0_unsloth.gguf
-    ctx_k: 80
-    gpu_layers: 99
-    cpu_moe: 0
-    quant: q8_0/q4_0
-    batch: 1024
-    ubatch: 512
-    spec_type: none
-    spec_ngram_simple_size_n: 24
-    spec_ngram_simple_size_m: 24
     spec_ngram_simple_min_hits: 1
     jinja: 1
 
@@ -236,6 +207,19 @@ models:
     spec_draft_n_max: 5
     jinja: 0
 
+  Qwen3.8-27B-YMQ-M_(zerodigest)_[56k]:
+    file: Qwen3.8-27B-YMQ-M_zerodigest.gguf
+    ctx_k: 56
+    gpu_layers: 99
+    cpu_moe: 0
+    quant: q4_0
+    batch: 1024
+    ubatch: 512
+    spec_type: draft-mtp
+    spec_draft_n_min: 1
+    spec_draft_n_max: 2
+    jinja: 1
+
   Qwen3.8-27B-Abliterated-IQ4-MIX-MTP_[finex666]_[48k]:
     file: Qwen3.8-27B-Abliterated-IQ4-MIX-MTP_finex666.gguf
     ctx_k: 48
@@ -351,7 +335,6 @@ models:
 
 
 ### Swift | Q4 ###
-
 
   Swift-1.5-Qwen3.8-27b.i1-IQ4_XS_[mrradermacher]_Q4_[48k]:
     note: super fast but much less intelligent
@@ -787,4 +770,21 @@ models:
     spec_ngram_simple_size_m: 48
     spec_ngram_simple_size_n: 32
     spec_ngram_simple_min_hits: 1
+
+  Gemma-4-26B-A4B-it-uncensored_MOE_[noctrex]_80k:
+    note: "Uncensored"
+    speed: "40 t/s"
+    file: Gemma-4-26B-A4B-it-uncensored_MOE_noctrex.gguf
+    _draft_model: mtp-gemma-4-26B-A4B-it-Q8_0_unsloth.gguf
+    ctx_k: 80
+    gpu_layers: 99
+    cpu_moe: 0
+    quant: q8_0/q4_0
+    batch: 1024
+    ubatch: 512
+    spec_type: none
+    spec_ngram_simple_size_n: 24
+    spec_ngram_simple_size_m: 24
+    spec_ngram_simple_min_hits: 1
+    jinja: 1
   
