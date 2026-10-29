@@ -31,7 +31,7 @@ detect_os_2() {
 }
 
 # ---------------------------------------------------------------------------
-fail() { echo "❌ $*" >&2; exit 1; }
+fail() { echo -e "❌ $*" >&2; exit 1; }
 
 
 echo "Set an environment variable"
@@ -45,9 +45,8 @@ read -rsp "Secret: " VALUE
 
 OS=$(detect_os)
 
-if [[ "$OS" == "windows" ]]; then
 case "$OS" in
-    Windows)
+    windows)
         (( ${#VALUE} <= 1024 )) || fail "setx cannot store values longer than 1024 chars"
         setx "$KEY" "$VALUE" >/dev/null || fail "setx failed"
         export "$KEY=$VALUE"   # also make it visible in this Git Bash session
@@ -74,4 +73,4 @@ case "$OS" in
         ;;
 esac
 
-echo "✔️ Environment variable \"${KEY}\" set successfully"
+echo -e "✔️ Environment variable ${KEY} set successfully"

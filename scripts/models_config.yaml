@@ -771,12 +771,12 @@ models:
     spec_ngram_simple_size_n: 32
     spec_ngram_simple_min_hits: 1
 
-  Gemma-4-26B-A4B-it-uncensored_MOE_[noctrex]_80k:
+  Gemma-4-26B-A4B-it-uncensored_MOE_[noctrex]_72k:
     note: "Uncensored"
     speed: "40 t/s"
     file: Gemma-4-26B-A4B-it-uncensored_MOE_noctrex.gguf
     _draft_model: mtp-gemma-4-26B-A4B-it-Q8_0_unsloth.gguf
-    ctx_k: 80
+    ctx_k: 72
     gpu_layers: 99
     cpu_moe: 0
     quant: q8_0/q4_0
