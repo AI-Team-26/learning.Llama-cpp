@@ -401,6 +401,16 @@ start_server() {
             break
         fi
 
+        # Fail fast if llama-server exited due to an invalid argument
+        local arg_err=$(check_arg_error "$SERVER_LOG")
+        if [[ -n "$arg_err" ]]; then
+            echo "" >&2
+            echo -e "❌ Can't start the server. Error: ${gray_light}${arg_err}${reset}" >&2
+            set_title "🦙 🔴 error $model_id"
+            printf 'error=%s\n' "$arg_err"
+            return 1
+        fi
+
         if [[ $i -eq 60 ]] ; then
             echo " not ready after 180 seconds" >&2
             local err_msg=$(check_load_model_fail "$SERVER_LOG")
