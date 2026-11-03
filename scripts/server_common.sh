@@ -667,7 +667,7 @@ get_spec_acceptance_rate() {
 
     local gen acc
     read -r gen acc <<< \
-        "$(echo "$stats_line" | sed -E 's/.*#gen drafts *= *([0-9]+), *#acc drafts *= *([0-9]+).*/\1 \2/')"
+        $(echo "$stats_line" | sed -E 's/.*#gen drafts *= *([0-9]+), *#acc drafts *= *([0-9]+).*/\1 \2/')
     (( gen > 0 )) || return 0
 
     awk -v g="$gen" -v a="$acc" 'BEGIN{printf "%.0f", (a/g)*100}'
@@ -693,12 +693,12 @@ get_prediction_info() {
         if [[ -n "$spec_line" ]]; then
             # p_min (min acceptance probability) is intentionally not extracted: compact cell shows only <n_min>/<n_max>
             read -r n_max n_min <<< \
-                "$(echo "$spec_line" | awk '
+                $(echo "$spec_line" | awk '
                     /.*/ {
                         split($0, a, /,|n_max=|n_min=|p_min=/)
                         print a[2], a[4]
                     }
-                ')"
+                ')
             pred_types+=("DFlash")
             pred_infos+=("$n_min/$n_max")
             local rate=$(get_spec_acceptance_rate "draft-dflash")
