@@ -162,7 +162,7 @@ start_server() {
         # Create an array for the select loop
         local -a choices
         while IFS= read -r model_id; do
-            local file=$(yq -e ".models[\"$model_id\"].file" "$models_config_file")
+            local file; file=$(yq -e ".models[\"$model_id\"].file" "$models_config_file")
             if [[ -f  "$GGUF_FOLDER/$file" ]]; then exist="🟢"; else exist="🔴"; fi
             #choices+=("$exist $model_id")  # concatenate
             choices+=("$model_id $exist")  # concatenate
@@ -295,8 +295,8 @@ start_server() {
     args+=(--n-gpu-layers "$gpu_layers")
     args+=(--n-cpu-moe "$cpu_moe")
 
-    args+=(--batch-size $batch)
-    args+=(--ubatch-size $ubatch)
+    args+=(--batch-size "$batch")
+    args+=(--ubatch-size "$ubatch")
 
     [[ "$spec_type" != "none" ]] && args+=(--spec-type "$spec_type")
 
