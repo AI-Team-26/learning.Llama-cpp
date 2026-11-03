@@ -291,7 +291,7 @@ start_server() {
     else
         args+=(--alias "$model_id")
     fi
-    args+=(--ctx-size "$(($ctx_k * 1024))")
+    args+=(--ctx-size "$((ctx_k * 1024))")
     args+=(--n-gpu-layers "$gpu_layers")
     args+=(--n-cpu-moe "$cpu_moe")
 
@@ -309,6 +309,7 @@ start_server() {
     #--cache-ram 2048   # it use RAM that can be used for bigger context
     #args+=(--cache-ram 2048) 
 
+    local spec_draft_n_min; local spec_draft_n_max
     if [[ "$spec_type" == *draft-simple* ]]; then
         require_arg spec_draft_n_min     --spec-draft-n-min || return 1
         require_arg spec_draft_n_max     --spec-draft-n-max || return 1
