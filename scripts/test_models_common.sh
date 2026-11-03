@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 source common.sh
 source server_common.sh
 
@@ -55,13 +56,13 @@ print_test_call() {
         return 1
     fi
     
-    local call_output="$(test_call $@)"
+    local call_output="$(test_call "$@")"
 
     declare_output_values "$call_output" 0
     if_error && return 1
 
     local tool_flag="❌"
-    [[ $has_tools = "1" ]] && tool_flag="✔️"
+    [[ "$has_tools" == "1" ]] && tool_flag="✔️"
 
     #printf "------------ ------------ ------------ ------------ ------------ ------------ ------------" >&2    
     #printf "------------ ------------ ------------ ------------ ------------ ------------ ------------\n"   
@@ -99,10 +100,10 @@ print_test_call() {
             local ap="(---)"
             if [[ "${accepted[$i]:--}" != "-" ]]; then
                 ap="(${accepted[$i]}%)"
-            elif ((${#names[@]} == 1)) && [[ "$accepted_pct" != "" ]]; then
+            elif (( ${#names[@]} == 1 )) && [[ "$accepted_pct" != "" ]]; then
                 ap="($(printf "%.0f" "$accepted_pct")%)"
             fi
-            [[ -n $spec_cell ]] && spec_cell+=" "
+            [[ -n "$spec_cell" ]] && spec_cell+=" "
             # :-? makes a future names/infos desync visible instead of rendering empty params
             spec_cell+="${names[$i]} ${infos[$i]:-?} $ap"
         done
@@ -151,7 +152,7 @@ llamacpp_run() {
     local max_tokens=2048
     #local max_tokens=4096  # allow more reasoning
 
-    json_payload=$(jq -n \
+    local json_payload=$(jq -n \
         --arg code "$prompt" \
         --arg temperature "$temperature" \
         --arg max_tokens "$max_tokens" \
@@ -202,7 +203,7 @@ llamacpp_run() {
 
     # Run curl in the background so we can monitor logs simultaneously
     #echo "" > $SERVER_LOG
-    echo "" > $response_log
+    echo "" > "$response_log"
     curl -s http://localhost:$SERVER_PORT/v1/chat/completions -d "$json_payload" > "$response_log"  &
     local curl_pid=$!
 
@@ -288,14 +289,14 @@ llamacpp_run() {
         .')
 
     local response_log_text="logs/llama_api_response.txt"
-    echo "" > $response_log_text
-    echo "=== REASONING ===" >> $response_log_text
-    echo "$reasoning" >> $response_log_text
-    echo "" >> $response_log_text
-    echo "=== ANSWER ===" >> $response_log_text
-    echo "$content" >> $response_log_text
-    echo "=== TOOL CALLS ===" >> $response_log_text
-    echo "$tool_calls" >> $response_log_text
+    echo "" > "$response_log_text"
+    echo "=== REASONING ===" >> "$response_log_text"
+    echo "$reasoning" >> "$response_log_text"
+    echo "" >> "$response_log_text"
+    echo "=== ANSWER ===" >> "$response_log_text"
+    echo "$content" >> "$response_log_text"
+    echo "=== TOOL CALLS ===" >> "$response_log_text"
+    echo "$tool_calls" >> "$response_log_text"
 
     # last lines in llama_api_response.log
     # data: {"choices":[{"finish_reason":"tool_calls","index":0,"delta":{}}],"created":1779349198,"id":"chatcmpl-nFCxRKKHfmmnVXEHbeKtPcEqHXBZvQCr","model":"Qwen3.5-9B-Q4_K_M.gguf","system_fingerprint":"b9251-e2b129e1b","object":"chat.completion.chunk"}
@@ -373,7 +374,7 @@ llamacpp_run() {
 
         local tool_code=$(jq -r '.code // empty' <<< "$tool_chunks" 2>/dev/null) # set to empty means NOT set it
 
-        if [[ ! -n tool_code ]]; then
+        if [[ -z "$tool_code" ]]; then
             echo "❌ ERROR: Failed to extract .code from API response" >&2
             printf "error=FAild to extract .code\n"
             return 1
