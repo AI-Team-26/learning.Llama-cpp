@@ -415,13 +415,7 @@ start_server() {
         fi
 
         # fail fast if llama-server exited due to an invalid argument
-        local arg_err=$(check_arg_error "$SERVER_LOG")
-        if [[ -n "$arg_err" ]]; then
-            echo "" >&2
-            echo -e "❌ ERROR: $arg_err" >&2
-            printf "error=$arg_err\n"
-            return 1
-        fi
+        fail_on_arg_error "$SERVER_LOG" "$model_id" || return 1
 
         if [[ $i -eq 60 ]] ; then
             echo " not ready after 180 seconds" >&2
@@ -437,6 +431,24 @@ start_server() {
             sleep 3
         fi
     done
+}
+
+
+## Helper to check for fatal argument errors and exit early.
+# Prints message, sets terminal title 🔴, and returns 1.
+# Uses printf to safely handle potential % in $err_msg and prevent escape interpretation.
+fail_on_arg_error() {
+    local log="$1"
+    local model_id="${2:-unknown}"
+    local err_msg=$(check_arg_error "$log")
+    if [[ -n "$err_msg" ]]; then
+        echo "" >&2
+        printf '❌ ERROR: %s%s%s\n' "${gray_light}" "$err_msg" "${reset}" >&2
+        set_title "🦙 🔴 error $model_id"
+        printf 'error=%s\n' "$err_msg"
+        return 1
+    fi
+    return 0
 }
 
 

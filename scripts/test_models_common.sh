@@ -19,13 +19,7 @@ test_call() {
         fi
 
         # fail fast if llama-server exited due to an invalid argument
-        local arg_err=$(check_arg_error "$SERVER_LOG")
-        if [[ -n "$arg_err" ]]; then
-            echo "" >&2
-            echo -e "❌ ERROR: $arg_err" >&2
-            printf "error=$arg_err\n"
-            return 1
-        fi
+        fail_on_arg_error "$SERVER_LOG" "test-model" || return 1
 
         if [[ $i -eq 60 ]] ; then
             echo " not ready after 180 seconds" >&2
