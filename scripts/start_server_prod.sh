@@ -25,7 +25,7 @@ args=(
     --host 127.0.0.1 \
     --port "$SERVER_PORT" \
     #--seed 1
-    --parallel $PARALLEL \
+    --parallel "$PARALLEL" \
     --prio 3 \
     --n-cpu-ffn 0 \
     --flash-attn on \
@@ -139,7 +139,7 @@ start_server() {
         echo "Select a model:"
         # Extract keys from YAML
         local models_list
-        local win_path=$(cygpath -w "$models_config_file") # yq is a .exe
+        local win_path; win_path=$(cygpath -w "$models_config_file") # yq is a .exe
         models_list=$(yq '.models | keys | .[]' "$win_path")
        
         # Check if list is empty
@@ -149,15 +149,15 @@ start_server() {
         fi
 
         # Create a dictionary indicating if file exists
-        local -A file_exists
-        files=$(yq '.models[].file' "$win_path")
-        for file in "$files"; do
-            if [[ -f "$file" ]]; then
-                file_exists["$file"]=1
-            else
-                file_exists["$file"]=0
-            fi
-        done
+        #local -A file_exists
+        #files=$(yq '.models[].file' "$win_path")
+        #for file in $files ; do
+        #    if [[ -f "$file" ]]; then
+        #        file_exists["$file"]=1
+        #    else
+        #        file_exists["$file"]=0
+        #    fi
+        #done
 
         # Create an array for the select loop
         local -a choices
