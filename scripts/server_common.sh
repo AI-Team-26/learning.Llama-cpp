@@ -60,9 +60,9 @@ get_current_model() {
     fi
     local model_path=$(echo "$command" | grep -- '--model' | awk '{print $2}')
     local model_file=$(basename "$model_path")    
-    local model_alias=$(echo "$command" | grep -- '--alias' | awk '{print $2}')
+    local alias=$(echo "$command" | grep -- '--alias' | awk '{print $2}')
 
-    echo "model=$model_file alias=$model_alias"
+    echo "model=$model_file alias=$alias"
 }
 
 
