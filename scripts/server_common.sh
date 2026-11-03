@@ -95,7 +95,7 @@ start_server() {
     # stop running server
     stop_server >&2
 
-    if [[ -z "$model_file" ]]; then
+    if [ -z "$model" ]; then
         echo "‼️ start_server was called with empty model" >&2
         return 1
     fi
@@ -164,6 +164,7 @@ start_server() {
         --port "$SERVER_PORT" \
         --seed "1" \
         --model "$model_path" \
+        #--alias 'unsloth/Qwen3.6-27B-MTP-GGUF' \
         --ctx-size "$context" \
         --parallel "$PARALLEL" \
         --prio 3 \
@@ -186,16 +187,40 @@ start_server() {
         --batch-size "$batch" \
         --ubatch-size "$ubatch" \
 
+        # EXPERIMENTAL for 80k of Qwen3.8 27B
+        #--ctx-checkpoints 4 --checkpoint-min-step 16384
+        #--ctx-checkpoints 2 --checkpoint-min-step 8192 \
+        #--ctx-checkpoints 16 --checkpoint-min-step 256 \
+        #--ctx-checkpoints 8 --checkpoint-min-step 2048 \
         --ctx-checkpoints 2 --checkpoint-min-step 2048 \
 
+        #--hip-fa-force-vec on \
+
+        #--draft-p-min 0.7 \   ### old parameter
+        #--spec-draft-p-min $DRAFT_P_MIN \
+        #--spec-mtp-cr-depth 1 \
+        #--spec-draft-adaptive \
+
+        # --cache-ram 16384    # it use RAM that can be used for bigger context
         --cache-ram 2048 \
 
+        #--metrics \
+        #--perf \
+
+        #--temperature $TEMPERATURE \
+        #--top-k $TOP_K \
+        #--top-p $TOP_P \
+        #--min-p $MIN_P \
+        #--repeat-penalty $REPEAT_PENALTY \
         --repeat-last-n 512 \
 
         --samplers "penalties;dry;top_k;top_p;min_p;temperature"
 
+        #--dry_multiplier 0.05 \
+
         --cache-reuse "$cache_reuse" \
 
+        #--context-shift \  not supported by Qwen3.8 27B
         --reasoning-preserve \
 
         --reasoning on \
@@ -430,22 +455,23 @@ fail_on_arg_error() {
 
 stop_server() {
     debug_function "stop_server"
-    local target_pid=$(tasklist | grep "llama-server" | awk '{print $2}' | head -n 1)
+    local PID
+    PID=$(tasklist | grep "llama-server" | awk '{print $2}' | head -n 1)
 
-    if [[ -n "$target_pid" ]]; then
+    if [[ -n "$PID" ]]; then
 
-        taskkill /F /PID "$target_pid" > /dev/null     
-        #wait "$target_pid" > /dev/null   
+        taskkill /F /PID "$PID" > /dev/null     
+        #wait "$PID" > /dev/null   
 
         # Loop and wait for the process to actually disappear
         # (We cannot use 'wait' because it's not a child of this shell)
         local count=0
-        while ps -p "$target_pid" > /dev/null 2>&1; do
+        while ps -p "$PID" > /dev/null 2>&1; do
             sleep 0.5
             count=$((count + 1))
             # Safety timeout (e.g., 5 seconds) to avoid infinite loop
             if [[ $count -ge 25 ]]; then
-                echo "Warning: Process $target_pid did not terminate gracefully." >&2
+                echo "Warning: Process $PID did not terminate gracefully." >&2
                 break
             fi
         done
