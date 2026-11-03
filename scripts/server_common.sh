@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 source common.sh
 
 ## This is called by specific models, look at their specific .md file.
@@ -36,7 +37,7 @@ LIQUID_REPEAT_PENALTY=1.05
 QWEN_REASONING_EFFORT_MEDIUM=1
 
 is_server_started() {
-    PROCESS_NAME="llama-server"   # Define the exact name of the executable to look for
+    local PROCESS_NAME="llama-server"   # Define the exact name of the executable to look for
     # -a is required to treat it as text
     if ps -ef | grep -av grep | grep -a "$PROCESS_NAME" > /dev/null; then
         return 0
@@ -59,9 +60,9 @@ get_current_model() {
     fi
     local model_path=$(echo "$command" | grep -- '--model' | awk '{print $2}')
     local model_file=$(basename "$model_path")    
-    local alias=$(echo "$command" | grep -- '--alias' | awk '{print $2}')
+    local model_alias=$(echo "$command" | grep -- '--alias' | awk '{print $2}')
 
-    echo "model=$model_file alias=$alias"
+    echo "model=$model_file alias=$model_alias"
 }
 
 
@@ -94,7 +95,7 @@ start_server() {
     # stop running server
     stop_server >&2
 
-    if [ -z "$model" ]; then
+    if [[ -z "$model_file" ]]; then
         echo "‼️ start_server was called with empty model" >&2
         return 1
     fi
@@ -163,19 +164,18 @@ start_server() {
         --port "$SERVER_PORT" \
         --seed "1" \
         --model "$model_path" \
-        #--alias 'unsloth/Qwen3.6-27B-MTP-GGUF' \
         --ctx-size "$context" \
-        --parallel $PARALLEL \
+        --parallel "$PARALLEL" \
         --prio 3 \
         --flash-attn on \
-        --n-gpu-layers $gpu_layers \
-        --n-cpu-moe $cpu_moe \
+        --n-gpu-layers "$gpu_layers" \
+        --n-cpu-moe "$cpu_moe" \
         --n-cpu-ffn 0 \
         --kv-unified \
-        --cache-type-k $cache_type_k  \
-        --cache-type-v $cache_type_v \
-        --cache-type-k-draft $cache_type_draft_k \
-        --cache-type-v-draft $cache_type_draft_v \
+        --cache-type-k "$cache_type_k"  \
+        --cache-type-v "$cache_type_v" \
+        --cache-type-k-draft "$cache_type_draft_k" \
+        --cache-type-v-draft "$cache_type_draft_v" \
 
         --load-mode mmap \
         --fit off \
@@ -183,43 +183,19 @@ start_server() {
         --no-mmproj \
         --agent \
 
-        --batch-size $batch \
-        --ubatch-size $ubatch \
+        --batch-size "$batch" \
+        --ubatch-size "$ubatch" \
 
-        # EXPERIMENTAL for 80k of Qwen3.8 27B
-        #--ctx-checkpoints 4 --checkpoint-min-step 16384
-        #--ctx-checkpoints 2 --checkpoint-min-step 8192 \
-        #--ctx-checkpoints 16 --checkpoint-min-step 256 \
-        #--ctx-checkpoints 8 --checkpoint-min-step 2048 \
         --ctx-checkpoints 2 --checkpoint-min-step 2048 \
 
-        #--hip-fa-force-vec on \
-
-        #--draft-p-min 0.7 \   ### old parameter
-        #--spec-draft-p-min $DRAFT_P_MIN \
-        #--spec-mtp-cr-depth 1 \
-        #--spec-draft-adaptive \
-
-        # --cache-ram 16384    # it use RAM that can be used for bigger context
         --cache-ram 2048 \
 
-        #--metrics \
-        #--perf \
-
-        #--temperature $TEMPERATURE \
-        #--top-k $TOP_K \
-        #--top-p $TOP_P \
-        #--min-p $MIN_P \
-        #--repeat-penalty $REPEAT_PENALTY \
         --repeat-last-n 512 \
 
         --samplers "penalties;dry;top_k;top_p;min_p;temperature"
 
-        #--dry_multiplier 0.05 \
+        --cache-reuse "$cache_reuse" \
 
-        --cache-reuse $cache_reuse \
-
-        #--context-shift \  not supported by Qwen3.8 27B
         --reasoning-preserve \
 
         --reasoning on \
@@ -454,22 +430,22 @@ fail_on_arg_error() {
 
 stop_server() {
     debug_function "stop_server"
-    local PID=$(tasklist | grep "llama-server" | awk '{print $2}' | head -n 1)
+    local target_pid=$(tasklist | grep "llama-server" | awk '{print $2}' | head -n 1)
 
-    if [ -n "$PID" ]; then
+    if [[ -n "$target_pid" ]]; then
 
-        taskkill /F /PID "$PID" > /dev/null     
-        #wait "$PID" > /dev/null   
+        taskkill /F /PID "$target_pid" > /dev/null     
+        #wait "$target_pid" > /dev/null   
 
         # Loop and wait for the process to actually disappear
         # (We cannot use 'wait' because it's not a child of this shell)
         local count=0
-        while ps -p "$PID" > /dev/null 2>&1; do
+        while ps -p "$target_pid" > /dev/null 2>&1; do
             sleep 0.5
             count=$((count + 1))
             # Safety timeout (e.g., 5 seconds) to avoid infinite loop
-            if [ $count -ge 25 ]; then
-                echo "Warning: Process $PID did not terminate gracefully." >&2
+            if [[ $count -ge 25 ]]; then
+                echo "Warning: Process $target_pid did not terminate gracefully." >&2
                 break
             fi
         done
@@ -661,11 +637,11 @@ extract_info_from_server_log() {
 get_spec_acceptance_rate() {
     local spec_name="$1"
     local stats_line=$(grep -E "statistics +${spec_name}:.*#gen drafts *= *[0-9]+, *#acc drafts *= *[0-9]+" "$log" | tail -n 1)
-    [[ -z $stats_line ]] && return 0
+    [[ -z "$stats_line" ]] && return 0
 
     local gen acc
     read -r gen acc <<< \
-        $(echo "$stats_line" | sed -E 's/.*#gen drafts *= *([0-9]+), *#acc drafts *= *([0-9]+).*/\1 \2/')
+        "$(echo "$stats_line" | sed -E 's/.*#gen drafts *= *([0-9]+), *#acc drafts *= *([0-9]+).*/\1 \2/')"
     (( gen > 0 )) || return 0
 
     awk -v g="$gen" -v a="$acc" 'BEGIN{printf "%.0f", (a/g)*100}'
@@ -685,18 +661,18 @@ get_prediction_info() {
     
     local draft_dflash=$(grep -E "I common_speculative_impl_draft_dflash: adding speculative implementation 'draft-dflash'" "$log" | tail -n 1)
     
-    if [[ -n $draft_dflash ]]; then
+    if [[ -n "$draft_dflash" ]]; then
         #0.12.004.484 I common_speculative_impl_draft_dflash: - n_max=4, n_min=1, p_min=0.20
         local spec_line=$(grep -E 'common_speculative_impl_draft_dflash:.*n_max=.*n_min=.*p_min=.*' "$log" | tail -n 1)
-        if [[ -n $spec_line ]]; then
+        if [[ -n "$spec_line" ]]; then
             # p_min (min acceptance probability) is intentionally not extracted: compact cell shows only <n_min>/<n_max>
             read -r n_max n_min <<< \
-                $(echo "$spec_line" | awk '
+                "$(echo "$spec_line" | awk '
                     /.*/ {
                         split($0, a, /,|n_max=|n_min=|p_min=/)
                         print a[2], a[4]
                     }
-                ')
+                ')"
             pred_types+=("DFlash")
             pred_infos+=("$n_min/$n_max")
             local rate=$(get_spec_acceptance_rate "draft-dflash")
