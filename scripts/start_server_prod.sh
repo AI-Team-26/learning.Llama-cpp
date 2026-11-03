@@ -407,7 +407,7 @@ start_server() {
 
         if [[ $i -eq 60 ]] ; then
             echo " not ready after 180 seconds" >&2
-            local err_msg=$(check_load_model_fail "$SERVER_LOG")
+            local err_msg; err_msg=$(check_load_model_fail "$SERVER_LOG")
             if [[ -n "$err_msg" ]]; then
                 echo -e "❌ Can't start the server. Error: ${gray_light}${err_msg}${reset}" >&2
                 set_title "🦙 🔴 error $model_id"

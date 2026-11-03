@@ -48,19 +48,19 @@ is_server_started() {
 
 
 server_info() {
-    local command=$(ps -ef | grep -a llama-server | sed 's/ -/\n-/g' | sed 's/^.*\llama-b/"llama-b/')
+    local command; command=$(ps -ef | grep -a llama-server | sed 's/ -/\n-/g' | sed 's/^.*\llama-b/"llama-b/')
     echo "$command"
 }
 
 get_current_model() {
-    local command=$(server_info)
+    local command; command=$(server_info)
     if [[ -z "$command" ]]; then
         echo "model= alia="
         return
     fi
-    local model_path=$(echo "$command" | grep -- '--model' | awk '{print $2}')
-    local model_file=$(basename "$model_path")    
-    local alias=$(echo "$command" | grep -- '--alias' | awk '{print $2}')
+    local model_path; model_path=$(echo "$command" | grep -- '--model' | awk '{print $2}')
+    local model_file; model_file=$(basename "$model_path")    
+    local alias; alias=$(echo "$command" | grep -- '--alias' | awk '{print $2}')
 
     echo "model=$model_file alias=$alias"
 }
@@ -88,7 +88,7 @@ start_server() {
     local draft_model="$7"
     local predict_token="$8"
     local ngram_values="$9"
-    local jinja="$10"
+    local jinja="${10}"
     local batch="${11}"
     local ubatch="${12}"
         
@@ -134,7 +134,7 @@ start_server() {
         return 1
     fi
 
-    local context=$(($ctx_k * 1024))
+    local context=$((ctx_k * 1024))
 
     # estrapolate Quantization parameters
     local cache_type_kv="${quant%%/*}"  # everyhing before the "/"
@@ -532,7 +532,7 @@ check_load_model_fail() {
     fi
 
     # 2) Exact server-exit line
-    local exit_line=$(grep -a 'srv  llama_server: exiting due to model loading error' "$log" | tail -n 1)
+    local exit_line; exit_line=$(grep -a 'srv  llama_server: exiting due to model loading error' "$log" | tail -n 1)
     if [[ -n "$exit_line" ]]; then
         printf '%s\n' "$(echo "$exit_line" | sed -E 's/^ *[0-9.]+ *E srv +//')"
         return 0
@@ -549,7 +549,7 @@ extract_info_from_server_log() {
     #0.01.849.268 I llama_model_loader: - kv   6:                       general.quantized_by str              = Unsloth  
     
     # Extract context from server log   
-    local ctx=$(grep "llama_context: n_ctx" "$log" | head -1 | awk -F'=' '{print $2}' | xargs)
+    local ctx; ctx=$(grep "llama_context: n_ctx" "$log" | head -1 | awk -F'=' '{print $2}' | xargs)
     if [ "$ctx" -eq "0" ]; then
         echo "❌ ERROR: Failed to extract context size from server log" >&2
         printf "error=FAild to extract context size \n"
@@ -557,20 +557,20 @@ extract_info_from_server_log() {
     fi
 
     # Extracts the number after "n_ctx_train"
-    local ctx_train=$(grep "n_ctx_train" "$log" | head -1 | awk -F'=' '{print $2}' | xargs)
+    local ctx_train; ctx_train=$(grep "n_ctx_train" "$log" | head -1 | awk -F'=' '{print $2}' | xargs)
     if [ $ctx -gt $ctx_train ]; then
         echo "WARNING: Context (${ctx}) is greater than training context (${ctx_train})." >&2
     fi
 
-    local ctx_k=$(($ctx / 1024))
-    local ctx_train_k=$(($ctx_train / 1024))
+    local ctx_k; ctx_k=$((ctx / 1024))
+    local ctx_train_k; ctx_train_k=$((ctx_train / 1024))
 
     return_value "ctx_k" "$ctx_k"
     return_value "ctx_train_k" "$ctx_train_k"
 
 
     # Extracts graphic card info
-    local gpu_info=$(grep -E "CUDA0.*:" "$log" | sed -E 's/.*:\s+(.*)\s+\(.*/\1/' | head -1)
+    local gpu_info; gpu_info=$(grep -E "CUDA0.*:" "$log" | sed -E 's/.*:\s+(.*)\s+\(.*/\1/' | head -1)
     
     # MOE 9 GPU 40
     # 0.03.187.029 I load_tensors: offloading 39 repeating layers to GPU
@@ -582,16 +582,16 @@ extract_info_from_server_log() {
 
 
     # Extracts layers: GPU_offload/total ("41/41")
-    local layers_info=$(grep -oE "offloaded [0-9]+/[0-9]+" "$log" | awk '{print $2}' | head -1)
+    local layers_info; layers_info=$(grep -oE "offloaded [0-9]+/[0-9]+" "$log" | awk '{print $2}' | head -1)
 
     # Calculates offload %
-    local layers_match=$(grep -oE "offloaded\s+[0-9]+/[0-9]+" "$log" | head -1)
+    local layers_match; layers_match=$(grep -oE "offloaded\s+[0-9]+/[0-9]+" "$log" | head -1)
     if [ -n "$layers_match" ]; then
         layers_info=$(echo "$layers_match" | awk '{print $2}')
     else
         # Fallback for explicit layer counting lines
-        local num_offloaded=$(grep -oE "offloading [0-9]+ repeating layers" "$log" | head -1 | awk '{print $2}')
-        local total_layers=$(grep -oE "n_layer = [0-9]+" "$log" | head -1 | awk '{print $3}')
+        local num_offloaded; num_offloaded=$(grep -oE "offloading [0-9]+ repeating layers" "$log" | head -1 | awk '{print $2}')
+        local total_layers; total_layers=$(grep -oE "n_layer = [0-9]+" "$log" | head -1 | awk '{print $3}')
         if [ -n "$num_offloaded" ] && [ -n "$total_layers" ]; then
             layers_info="${num_offloaded}/${total_layers}"
         else
@@ -613,8 +613,8 @@ extract_info_from_server_log() {
     fi
 
     #  Extract exact static buffers (Useful to calculate KV cache overhead later)
-    local cuda_vram=$(grep "CUDA0 model buffer size" "$log" | head -1 | awk -F'=' '{print $2}' | awk '{print $1}' )
-    local host_ram=$(grep -E "CUDA_Host (model|compute) buffer size" "$log"  | head -1 | awk -F'=' '{print $2}' | awk '{print $1}')
+    local cuda_vram; cuda_vram=$(grep "CUDA0 model buffer size" "$log" | head -1 | awk -F'=' '{print $2}' | awk '{print $1}' )
+    local host_ram; host_ram=$(grep -E "CUDA_Host (model|compute) buffer size" "$log"  | head -1 | awk -F'=' '{print $2}' | awk '{print $1}')
     #[[ -z "$cuda_vram" ]] && local cuda_vram_gb=$(awk "BEGIN{printf \"%.1f\", $cuda_vram/1024}"); return_value "cuda_vram_gb" "$cuda_vram_gb"    
     #[[ -z "$host_ram" ]] && local host_ram_gb=$(awk "BEGIN{printf \"%.1f\", $host_ram/1024}"); return_value "host_ram_gb" "$host_ram_gb"   
 
@@ -624,8 +624,8 @@ extract_info_from_server_log() {
     # Extract Batch and UBatch parameters
     # 0.15.035.996 I llama_context: n_batch       = 2048
     # 0.15.035.996 I llama_context: n_ubatch      = 1024
-    local batch=$(grep "llama_context: n_batch" "$log" | head -1 | sed -E 's/.*n_batch\s*=\s*([0-9]+).*/\1/')
-    local ubatch=$(grep "llama_context: n_ubatch" "$log" | head -1 | sed -E 's/.*n_ubatch\s*=\s*([0-9]+).*/\1/')
+    local batch; batch=$(grep "llama_context: n_batch" "$log" | head -1 | sed -E 's/.*n_batch\s*=\s*([0-9]+).*/\1/')
+    local ubatch; ubatch=$(grep "llama_context: n_ubatch" "$log" | head -1 | sed -E 's/.*n_ubatch\s*=\s*([0-9]+).*/\1/')
 
     return_value "batch" "$batch"
     return_value "ubatch" "$ubatch"
@@ -643,12 +643,12 @@ extract_info_from_server_log() {
     # NOTE. Capture only K, assume V = K
 
     # produces q4_0 16 and q5_1 1   # sort by layer, n=treat as number r=reverse
-    local cache_rows=$(grep -E "llama_kv_cache:.*size.*layers.*K \(" "$log" \
+    local cache_rows; cache_rows=$(grep -E "llama_kv_cache:.*size.*layers.*K \(" "$log" \
         | sed -E 's/.*size *= *[0-9.]+ MiB \( *[0-9]+ cells, *([0-9]+) layers.*K \(([^)]+)\).*/\2 \1/' \
         | sort -k2,2 -nr) 
 
-    local cache_kv=$(echo "$cache_rows" | sed -n '1p' | awk '{print $1}')
-    local cache_kv_draft=$(echo "$cache_rows" | sed -n '2p' | awk '{print $1}')
+    local cache_kv; cache_kv=$(echo "$cache_rows" | sed -n '1p' | awk '{print $1}')
+    local cache_kv_draft; cache_kv_draft=$(echo "$cache_rows" | sed -n '2p' | awk '{print $1}')
     [[ -z "$cache_kv_draft" ]] && cache_kv_draft="none"  # if empty set default value
     return_value "cache_kv" "$cache_kv"
     return_value "cache_kv_draft" "$cache_kv_draft"
@@ -662,7 +662,7 @@ extract_info_from_server_log() {
 # Prints an integer percentage, or nothing when no usable stats are found.
 get_spec_acceptance_rate() {
     local spec_name="$1"
-    local stats_line=$(grep -E "statistics +${spec_name}:.*#gen drafts *= *[0-9]+, *#acc drafts *= *[0-9]+" "$log" | tail -n 1)
+    local stats_line; stats_line=$(grep -E "statistics +${spec_name}:.*#gen drafts *= *[0-9]+, *#acc drafts *= *[0-9]+" "$log" | tail -n 1)
     [[ -z "$stats_line" ]] && return 0
 
     local gen acc
@@ -689,7 +689,7 @@ get_prediction_info() {
     
     if [[ -n "$draft_dflash" ]]; then
         #0.12.004.484 I common_speculative_impl_draft_dflash: - n_max=4, n_min=1, p_min=0.20
-        local spec_line=$(grep -E 'common_speculative_impl_draft_dflash:.*n_max=.*n_min=.*p_min=.*' "$log" | tail -n 1)
+        local spec_line; spec_line=$(grep -E 'common_speculative_impl_draft_dflash:.*n_max=.*n_min=.*p_min=.*' "$log" | tail -n 1)
         if [[ -n "$spec_line" ]]; then
             # p_min (min acceptance probability) is intentionally not extracted: compact cell shows only <n_min>/<n_max>
             read -r n_max n_min <<< \
@@ -701,7 +701,7 @@ get_prediction_info() {
                 ')
             pred_types+=("DFlash")
             pred_infos+=("$n_min/$n_max")
-            local rate=$(get_spec_acceptance_rate "draft-dflash")
+            local rate; rate=$(get_spec_acceptance_rate "draft-dflash")
             pred_accepted+=("${rate:--}")
         else
             return_value "error" "found spec type 'DFlash' but failed to find its parameters'"
@@ -713,14 +713,14 @@ get_prediction_info() {
     ### draft-mtp
     # b9856
     # 0.57.644.917 I spec common_specu: adding speculative implementation 'draft-mtp'
-    local draft_mtp=$(grep -E "I spec common_specu: adding speculative implementation 'draft-mtp'" "$log" | tail -n 1)
+    local draft_mtp; draft_mtp=$(grep -E "I spec common_specu: adding speculative implementation 'draft-mtp'" "$log" | tail -n 1)
     
     if [[ -n $draft_mtp ]]; then
         # b10456
         # I spec common_specu: - n_max=4, n_min=2, p_min=0.70, n_embd=2688, backend_sampling=1
         # I spec common_specu: - gpu_layers=-1, cache_k=f16, cache_v=f16, ctx_tgt=yes, ctx_dft=yes, devices=[default]        
 
-        local spec_line=$(grep -E 'common_specu:.*n_max=.*n_min=.*p_min=.*' "$log" | tail -n 1)
+        local spec_line; spec_line=$(grep -E 'common_specu:.*n_max=.*n_min=.*p_min=.*' "$log" | tail -n 1)
 
         if [[ -n $spec_line ]]; then
             # p_min (min acceptance probability) is intentionally not extracted: compact cell shows only <n_min>/<n_max>
@@ -733,7 +733,7 @@ get_prediction_info() {
                 ')
             pred_types+=("MTP")
             pred_infos+=("$n_min/$n_max")
-            local rate=$(get_spec_acceptance_rate "draft-mtp")
+            local rate; rate=$(get_spec_acceptance_rate "draft-mtp")
             pred_accepted+=("${rate:--}")
         else
             return_value "error" "found spec type 'MTP' but failed to find its parameters'"
@@ -745,12 +745,12 @@ get_prediction_info() {
     ### ngram-simple
     # 0.32.990.479 I statistics     statistics #calls(b,g,a) =    1   1263      0, #gen drafts =      0, #acc drafts =     0, #gen tokens =      0, #acc tokens =     0, dur(b,g,a) = 0.003, 2.524, 0.000 ms
     # 0.14.367.078 I spec common_specu: adding speculative implementation 'ngram-simple'
-    local ngram_simple=$(grep -E "I spec common_specu: adding speculative implementation 'ngram-simple'" "$log" | tail -n 1)
+    local ngram_simple; ngram_simple=$(grep -E "I spec common_specu: adding speculative implementation 'ngram-simple'" "$log" | tail -n 1)
     
     if [[ -n $ngram_simple ]]; then
         #b9937
         # I spec common_specu: - size_n=12, size_m=24, min_hits=1
-        local spec_line=$(grep -E 'common_specu:.*size_n=.*size_m=.*min_hits=.*' "$log" | tail -n 1)
+        local spec_line; spec_line=$(grep -E 'common_specu:.*size_n=.*size_m=.*min_hits=.*' "$log" | tail -n 1)
         if [[ -n $spec_line ]]; then
             read -r size_n size_m min_hits <<< \
                 $(echo "$spec_line" | awk '
@@ -761,7 +761,7 @@ get_prediction_info() {
                 ')
             pred_types+=("N-gram")
             pred_infos+=("$size_n/$size_m/$min_hits")
-            local rate=$(get_spec_acceptance_rate "ngram-simple")
+            local rate; rate=$(get_spec_acceptance_rate "ngram-simple")
             pred_accepted+=("${rate:--}")
 
         else

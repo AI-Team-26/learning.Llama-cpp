@@ -75,7 +75,7 @@ declare_output_values() {
     while IFS='=' read -r key value; do
         if [[ -z "$value" ]]; then
             echo -e "❌ ERROR: the value for \"$key\" is empty. (#declare_output_values) (provided values: $values)" >&2
-            printf "error=the value for key \"${key}\" is empty (#declare_output_values) (provided values: $values)\n"
+            printf "error=the value for key \"%s\" is empty (#declare_output_values) (provided values: %s)\n" "$key" "$values"
             return 1
         fi
 
@@ -117,7 +117,7 @@ return_output_values() {
     while IFS='=' read -r key value; do
         if [[ -z "$value" ]]; then
             echo -e "❌ ERROR: the value for \"$key\" is empty. (#return_output_values) (provided values: $values)." >&2
-            printf "error=the value for key \"${key}\" is empty (#return_output_values) (provided values: $values)\n"
+            printf "error=the value for key \"%s\" is empty (#return_output_values) (provided values: %s)\n" "$key" "$values"
             return 1
         fi
 
@@ -150,7 +150,7 @@ from_nano() {
     # echo $(echo "scale=9; $1 / 1000000000" | bc)  ## requires bc
     local seconds=$(($1/ 1000000000))
     local nanoseconds=$(($1 % 1000000000))
-    printf "%.9f\n" $((seconds)).$(printf "%09d" $((nanoseconds)))
+    printf "%.9f\n" "$((seconds)).$(printf "%09d" $((nanoseconds)))"
 }
 
 # returns seconds (float) from milliseconds
@@ -196,8 +196,8 @@ get_readable_VRAM_usage() {
     eval "$(get_memory_info)"
 
     # Convert to GiB (scale 1 for "14.5" format)
-    local used_gib=$(float_div "$used" 1024 1)
-    local total_gib=$(float_div "$total" 1024 1)
+    local used_gib; used_gib=$(float_div "$used" 1024 1)
+    local total_gib; total_gib=$(float_div "$total" 1024 1)
 
     printf "%s/%s" "$used_gib" "$total_gib"
 }
