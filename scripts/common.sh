@@ -1,4 +1,4 @@
-## source "scripts.sh"
+# shellcheck disable=SC2034
 
 source debug.sh
 
