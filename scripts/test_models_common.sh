@@ -18,6 +18,9 @@ test_call() {
             echo -n "Waiting for llama-server to load model..." >&2
         fi
 
+        # fail fast if llama-server exited due to an invalid argument
+        fail_on_arg_error "$SERVER_LOG" "test-model" || return 1
+
         if [[ $i -eq 60 ]] ; then
             echo " not ready after 180 seconds" >&2
             echo "❌ ERROR: Server is not ready" >&2

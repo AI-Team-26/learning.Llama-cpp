@@ -414,6 +414,9 @@ start_server() {
             return 1
         fi
 
+        # fail fast if llama-server exited due to an invalid argument
+        fail_on_arg_error "$SERVER_LOG" "$model_id" || return 1
+
         if [[ $i -eq 60 ]] ; then
             echo " not ready after 180 seconds" >&2
             local err_msg=$(check_load_model_fail "$SERVER_LOG")
@@ -428,6 +431,24 @@ start_server() {
             sleep 3
         fi
     done
+}
+
+
+## Helper to check for fatal argument errors and exit early.
+# Prints message, sets terminal title 🔴, and returns 1.
+# Uses printf to safely handle potential % in $err_msg and prevent escape interpretation.
+fail_on_arg_error() {
+    local log="$1"
+    local model_id="${2:-unknown}"
+    local err_msg=$(check_arg_error "$log")
+    if [[ -n "$err_msg" ]]; then
+        echo "" >&2
+        printf '❌ ERROR: %s%s%s\n' "${gray_light}" "$err_msg" "${reset}" >&2
+        set_title "🦙 🔴 error $model_id"
+        printf 'error=%s\n' "$err_msg"
+        return 1
+    fi
+    return 0
 }
 
 
@@ -473,6 +494,24 @@ set_cache_for_model() {
     # Default case
     echo "q8_0"
 }
+
+## Check for fatal argument-handling errors in the server log.
+# llama-server exits immediately when an invalid argument is passed, printing:
+#   error while handling argument "--spec-type": unknown speculative type: ...
+# so the /health endpoint never comes up and callers would wait forever.
+# TODO: extend with other fatal startup patterns as they are discovered.
+# Prints the offending line (timestamp/level prefix stripped) when detected;
+# prints nothing otherwise. Always returns 0 (callers check non-empty output).
+check_arg_error() {
+    local log="$1"
+    [[ -f "$log" ]] || return 0
+
+    local err_line=$(grep -a 'error while handling argument' "$log" | head -n 1)
+    if [[ -n "$err_line" ]]; then
+        printf '%s\n' "$(echo "$err_line" | sed -E 's/^[[:space:]]*([0-9]+(\.[0-9]+)+[[:space:]]+[A-Z][[:space:]]+)?//')"
+    fi
+}
+
 
 ## Check for model-loading failure messages in the server log.
 # Prints the specific model-loading error message to stdout when one is

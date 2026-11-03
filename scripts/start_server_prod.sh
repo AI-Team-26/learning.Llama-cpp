@@ -401,6 +401,9 @@ start_server() {
             break
         fi
 
+        # Fail fast if llama-server exited due to an invalid argument
+        fail_on_arg_error "$SERVER_LOG" "$model_id" || return 1
+
         if [[ $i -eq 60 ]] ; then
             echo " not ready after 180 seconds" >&2
             local err_msg=$(check_load_model_fail "$SERVER_LOG")
