@@ -15,8 +15,6 @@
 | Don't fix the bug | **3** (#59, #87 still use `GITHUB_TOKEN`; #88 deletes the fallback entirely) |
 | **Chosen** | **#32** — `fix/14h_update_llama_cpp` ⭐⭐⭐⭐⭐ |
 
-> Agent attribution is taken from the `agent: …` PR label, falling back to the commit author for the 4 PRs (#31, #37, #50, #84) that had no label.
-
 ## The bug
 
 From the backlog:
@@ -64,7 +62,7 @@ Every candidate was checked mechanically, not by reading the description:
 4. **Replay `latest_release_via_feed()`** with the Atom feed stubbed to a real build tag and the release-page request stubbed to the **real HTML** (downloaded from `github.com/ggml-org/llama.cpp/releases/tag/b11060`), then assert the returned asset names exist.
 5. For the finalists: live `python3 UpdateLlamaCpp.py --dry-run` against the GitHub API.
 
-Check 4 is the one that separates 14 PRs from 62.
+Check 4 is the one that separates 15 PRs from 61.
 
 ## Rating rubric
 
@@ -76,50 +74,49 @@ Check 4 is the one that separates 14 PRs from 62.
 | ⭐ | Introduces a regression: broken fallback URL, broken scrape, or a crash |
 | ⛔ | Does not fix the bug |
 
-## Results by agent
+## Results
 
-| Agent | PRs | Correct | Broken / no fix | Success rate |
-|---|---|---|---|---|
-| 🍋 Pi Lemon | 55 | 11 | 44 | 20 % |
-| 🥝 Pi Kiwi | 18 | 4 | 14 | 22 % |
-| 🍊 Pi Orange | 3 | 0 | 3 | 0 % |
-| **Total** | **76** | **15** | **61** | **20 %** |
+| Verdict | Count | Notes |
+|---|---|---|
+| ✅ Correct | 15 | Merge candidates — #32 chosen |
+| ⭐ Regression | 58 | 56 build a 404 URL; #42 and #50 break the scrape |
+| ⛔ No fix | 3 | Token still used (#59, #87) or fallback deleted (#88) |
 
-All three agents fell into the same trap with the same frequency — this is a task-comprehension failure, not a per-model weakness. The requirement ("const without minor") is satisfied literally by every candidate and still produces a broken script; nothing in the TODO text says *"and keep the fallback URL valid"*. Note that 🍋 produced the single best PR and the majority of the noise (55 of 76).
+The distribution is very flat: the failure is not about effort or diff size but about the missing constraint. The requirement ("const without minor") is satisfied literally by every candidate and still produces a broken script — nothing in the TODO text says *"and keep the fallback URL valid"*. The two smallest patches (#77, 7 lines; #38, 8 lines) are among the worst results, while the best one is only 28 lines.
 
 ## Finalists — good and bad
 
-### ⭐⭐⭐⭐⭐ #32 — 🍋 Pi Lemon · +13/−15 · `fix/14h_update_llama_cpp` — **CHOSEN**
+### ⭐⭐⭐⭐⭐ #32 — +13/−15 · `fix/14h_update_llama_cpp` — **CHOSEN**
 
 - **Good:** token fully removed (code + docstring + `import os`); `CUDA_VERSION = "12"` used only for matching, no `12.4` literal anywhere; fallback scrapes the release page for exact filenames and reuses `pick_assets()`; smallest *complete* fix (28 lines); verified live (`b12072` + `cuda-12.4` assets) and against real release HTML.
 - **Bad:** none functionally. Leaves one stray blank line where the Bug 14 block was removed from `TODO.md`.
 
-### ⭐⭐⭐⭐ #94 — 🥝 Pi Kiwi · +18/−20
+### ⭐⭐⭐⭐ #94 — +18/−20
 
 - **Good:** `CUDA_MAJOR = "12"`, no minor literal, scrapes real names, reuses `pick_assets()`, widest safety of the scrapers.
 - **Bad:** larger diff; exits immediately if the newest release page has no CUDA asset (doesn't try the next build down, unlike the API path which already loops releases).
 
-### ⭐⭐⭐⭐ #33 — 🥝 Pi Kiwi · +15/−21
+### ⭐⭐⭐⭐ #33 — +15/−21
 
 - **Good:** `CUDA_MAJOR = "12"`, clean docstring explaining *why* the minor can't be constructed, tight scrape regex.
 - **Bad:** 36 lines of change for a 2-line requirement; second regex next to `cuda12_version()`.
 
-### ⭐⭐⭐⭐ #95 — 🥝 Pi Kiwi · +23/−20
+### ⭐⭐⭐⭐ #95 — +23/−20
 
 - **Good:** most resilient — retries up to 10 recent builds, mirroring the API path's behaviour for half-uploaded releases; no minor literal.
 - **Bad:** biggest diff of the correct ones; up to 10 HTML fetches in the worst case; duplicates the asset-matching logic instead of reusing `pick_assets()`.
 
-### ⭐⭐⭐⭐ #60 / #51 / #71 / #85 — 🍋 Pi Lemon · 31–39 lines
+### ⭐⭐⭐⭐ #60 / #51 / #71 / #85 — 31–39 lines
 
 - **Good:** all functionally correct, scrape-based fallback.
-- **Bad:** `#60` uses a lowercase `cuda_version` constant (breaks the module-level constant convention); the rest add redundant regex/matching code for the same result.
+- **Bad:** `#60` uses a lowercase `cuda_version` constant (breaks the module-level constant convention); the rest add redundant regex/matching code for the same result. `#71` and `#85` are the same branch content pushed twice.
 
-### ⭐⭐⭐ #69 — 🍋 Pi Lemon · 49 lines — different idea, works
+### ⭐⭐⭐ #69 — 49 lines — different idea, works
 
 - **Good:** no HTML scraping at all — probes `…-cuda-12.N-x64.zip` with `HEAD` requests for N = 9…0 and builds the URLs from the answer; also retries 5 recent tags. Verified to return the exact real names (7 HTTP calls).
 - **Bad:** chatty (up to 10 probes × 5 tags when a build is young), assumes the minor is ≤ 9, and assumes cudart uses the same minor as the main zip. Most complex correct solution.
 
-### ⭐⭐⭐ #55 — 🍋 Pi Lemon · +6/−11 — smallest diff overall
+### ⭐⭐⭐ #55 — +6/−11 — smallest diff overall
 
 - **Good:** 17 lines, no scraping, no new network behaviour, `CUDA_VERSION = "12"` used for matching.
 - **Bad:** keeps `FALLBACK_CUDA = "12.4"`, so the requirement "no minor version" is only half met — and it silently breaks again at the next CUDA minor bump.
@@ -128,23 +125,23 @@ All three agents fell into the same trap with the same frequency — this is a t
 
 Sorted by rating, then diff size.
 
-| Rating | PR | Agent | ±lines | Good | Bad |
-|---|---|---|---|---|---|
-| ⭐⭐⭐⭐⭐ | [#32](https://github.com/AI-Team-26/learning.Llama-cpp/pull/32) | 🍋 Pi Lemon | 28 | no `GITHUB_TOKEN`; major-only const; fallback resolves real names | — |
-| ⭐⭐⭐⭐ | [#60](https://github.com/AI-Team-26/learning.Llama-cpp/pull/60) | 🍋 Pi Lemon | 31 | no `GITHUB_TOKEN`; major-only const; fallback resolves real names | lowercase const name |
-| ⭐⭐⭐⭐ | [#33](https://github.com/AI-Team-26/learning.Llama-cpp/pull/33) | 🥝 Pi Kiwi | 36 | no `GITHUB_TOKEN`; major-only const; fallback resolves real names | — |
-| ⭐⭐⭐⭐ | [#51](https://github.com/AI-Team-26/learning.Llama-cpp/pull/51) | 🍋 Pi Lemon | 38 | no `GITHUB_TOKEN`; major-only const; fallback resolves real names | — |
-| ⭐⭐⭐⭐ | [#94](https://github.com/AI-Team-26/learning.Llama-cpp/pull/94) | 🥝 Pi Kiwi | 38 | no `GITHUB_TOKEN`; major-only const; fallback resolves real names | — |
-| ⭐⭐⭐⭐ | [#71](https://github.com/AI-Team-26/learning.Llama-cpp/pull/71) | 🍋 Pi Lemon | 39 | no `GITHUB_TOKEN`; major-only const; fallback resolves real names | duplicate of #85 |
-| ⭐⭐⭐⭐ | [#85](https://github.com/AI-Team-26/learning.Llama-cpp/pull/85) | 🍋 Pi Lemon | 39 | no `GITHUB_TOKEN`; major-only const; fallback resolves real names | duplicate of #71 |
-| ⭐⭐⭐⭐ | [#95](https://github.com/AI-Team-26/learning.Llama-cpp/pull/95) | 🥝 Pi Kiwi | 43 | no `GITHUB_TOKEN`; major-only const; fallback resolves real names | 10-tag retry loop |
-| ⭐⭐⭐ | [#55](https://github.com/AI-Team-26/learning.Llama-cpp/pull/55) | 🍋 Pi Lemon | 17 | no `GITHUB_TOKEN`; major-only const; fallback resolves real names | keeps `FALLBACK_CUDA="12.4"` literal |
-| ⭐⭐⭐ | [#25](https://github.com/AI-Team-26/learning.Llama-cpp/pull/25) | 🍋 Pi Lemon | 42 | no `GITHUB_TOKEN`; major-only const; fallback resolves real names | commits a `.pyc` |
-| ⭐⭐⭐ | [#30](https://github.com/AI-Team-26/learning.Llama-cpp/pull/30) | 🥝 Pi Kiwi | 42 | no `GITHUB_TOKEN`; major-only const; fallback resolves real names | touches `.gitignore` |
-| ⭐⭐⭐ | [#46](https://github.com/AI-Team-26/learning.Llama-cpp/pull/46) | 🍋 Pi Lemon | 44 | no `GITHUB_TOKEN`; major-only const; fallback resolves real names | — |
-| ⭐⭐⭐ | [#79](https://github.com/AI-Team-26/learning.Llama-cpp/pull/79) | 🍋 Pi Lemon | 44 | no `GITHUB_TOKEN`; major-only const; fallback resolves real names | touches `.gitignore` |
-| ⭐⭐⭐ | [#41](https://github.com/AI-Team-26/learning.Llama-cpp/pull/41) | 🍋 Pi Lemon | 49 | no `GITHUB_TOKEN`; major-only const; fallback resolves real names | commits a `.pyc` |
-| ⭐⭐⭐ | [#69](https://github.com/AI-Team-26/learning.Llama-cpp/pull/69) | 🍋 Pi Lemon | 49 | no `GITHUB_TOKEN`; major-only const; fallback probes the real filenames | up to 10 `HEAD` probes per tag; assumes minor ≤ 9 |
+| Rating | PR | ±lines | Good | Bad |
+|---|---|---|---|---|
+| ⭐⭐⭐⭐⭐ | [#32](https://github.com/AI-Team-26/learning.Llama-cpp/pull/32) | 28 | no `GITHUB_TOKEN`; major-only const; fallback resolves real names | — |
+| ⭐⭐⭐⭐ | [#60](https://github.com/AI-Team-26/learning.Llama-cpp/pull/60) | 31 | no `GITHUB_TOKEN`; major-only const; fallback resolves real names | lowercase const name |
+| ⭐⭐⭐⭐ | [#33](https://github.com/AI-Team-26/learning.Llama-cpp/pull/33) | 36 | no `GITHUB_TOKEN`; major-only const; fallback resolves real names | — |
+| ⭐⭐⭐⭐ | [#51](https://github.com/AI-Team-26/learning.Llama-cpp/pull/51) | 38 | no `GITHUB_TOKEN`; major-only const; fallback resolves real names | — |
+| ⭐⭐⭐⭐ | [#94](https://github.com/AI-Team-26/learning.Llama-cpp/pull/94) | 38 | no `GITHUB_TOKEN`; major-only const; fallback resolves real names | — |
+| ⭐⭐⭐⭐ | [#71](https://github.com/AI-Team-26/learning.Llama-cpp/pull/71) | 39 | no `GITHUB_TOKEN`; major-only const; fallback resolves real names | duplicate of #85 |
+| ⭐⭐⭐⭐ | [#85](https://github.com/AI-Team-26/learning.Llama-cpp/pull/85) | 39 | no `GITHUB_TOKEN`; major-only const; fallback resolves real names | duplicate of #71 |
+| ⭐⭐⭐⭐ | [#95](https://github.com/AI-Team-26/learning.Llama-cpp/pull/95) | 43 | no `GITHUB_TOKEN`; major-only const; fallback resolves real names | 10-tag retry loop |
+| ⭐⭐⭐ | [#55](https://github.com/AI-Team-26/learning.Llama-cpp/pull/55) | 17 | no `GITHUB_TOKEN`; major-only const; fallback resolves real names | keeps `FALLBACK_CUDA="12.4"` literal |
+| ⭐⭐⭐ | [#25](https://github.com/AI-Team-26/learning.Llama-cpp/pull/25) | 42 | no `GITHUB_TOKEN`; major-only const; fallback resolves real names | commits a `.pyc` |
+| ⭐⭐⭐ | [#30](https://github.com/AI-Team-26/learning.Llama-cpp/pull/30) | 42 | no `GITHUB_TOKEN`; major-only const; fallback resolves real names | touches `.gitignore` |
+| ⭐⭐⭐ | [#46](https://github.com/AI-Team-26/learning.Llama-cpp/pull/46) | 44 | no `GITHUB_TOKEN`; major-only const; fallback resolves real names | — |
+| ⭐⭐⭐ | [#79](https://github.com/AI-Team-26/learning.Llama-cpp/pull/79) | 44 | no `GITHUB_TOKEN`; major-only const; fallback resolves real names | touches `.gitignore` |
+| ⭐⭐⭐ | [#41](https://github.com/AI-Team-26/learning.Llama-cpp/pull/41) | 49 | no `GITHUB_TOKEN`; major-only const; fallback resolves real names | commits a `.pyc` |
+| ⭐⭐⭐ | [#69](https://github.com/AI-Team-26/learning.Llama-cpp/pull/69) | 49 | no `GITHUB_TOKEN`; major-only const; fallback probes the real filenames | up to 10 `HEAD` probes per tag; assumes minor ≤ 9 |
 
 ### Introduces a regression — 56 PRs
 
@@ -156,18 +153,18 @@ Sorted by size, the most tempting ones (#77 = 7 lines, #38 = 8, #96 = 11, #26/#3
 
 ### Other breakage
 
-| PR | Agent | Problem |
-|---|---|---|
-| [#42](https://github.com/AI-Team-26/learning.Llama-cpp/pull/42) | 🥝 Pi Kiwi | Scrape returns **33 assets** (all platforms, all runtimes) — no filtering at all |
-| [#50](https://github.com/AI-Team-26/learning.Llama-cpp/pull/50) | 🍋 Pi Lemon | Fallback drops the `cudart` zip → CUDA runtime DLLs never downloaded |
+| PR | Problem |
+|---|---|
+| [#42](https://github.com/AI-Team-26/learning.Llama-cpp/pull/42) | Scrape returns **33 assets** (all platforms, all runtimes) — no filtering at all |
+| [#50](https://github.com/AI-Team-26/learning.Llama-cpp/pull/50) | Fallback drops the `cudart` zip → CUDA runtime DLLs never downloaded |
 
 ### Do not fix the bug
 
-| PR | Agent | Problem |
-|---|---|---|
-| [#59](https://github.com/AI-Team-26/learning.Llama-cpp/pull/59) | 🍋 Pi Lemon | Still reads `GITHUB_TOKEN` |
-| [#87](https://github.com/AI-Team-26/learning.Llama-cpp/pull/87) | 🍋 Pi Lemon | Still reads `GITHUB_TOKEN` |
-| [#88](https://github.com/AI-Team-26/learning.Llama-cpp/pull/88) | 🍊 Pi Orange | Deletes the no-API fallback entirely (`FEED_URL`, `latest_release_via_feed()`, the `try/except` in `get_latest_release()`) and calls the API directly — the opposite of what removing the token requires |
+| PR | Problem |
+|---|---|
+| [#59](https://github.com/AI-Team-26/learning.Llama-cpp/pull/59) | Still reads `GITHUB_TOKEN` |
+| [#87](https://github.com/AI-Team-26/learning.Llama-cpp/pull/87) | Still reads `GITHUB_TOKEN` |
+| [#88](https://github.com/AI-Team-26/learning.Llama-cpp/pull/88) | Deletes the no-API fallback entirely (`FEED_URL`, `latest_release_via_feed()`, the `try/except` in `get_latest_release()`) and calls the API directly — the opposite of what removing the token requires |
 
 ## Why #32
 
@@ -179,7 +176,7 @@ Sorted by size, the most tempting ones (#77 = 7 lines, #38 = 8, #96 = 11, #26/#3
 ## Process lessons
 
 - **76 PRs for a 28-line change.** The larger cost here was triage, not code. `AGENTS.md` already says "check open PRs before starting"; the step was skipped 76 times.
-- **The requirement was incomplete, and every agent filled the gap differently.** "Set the const to 12" is under-specified once that value ends up in a URL. Worth adding to the backlog entry: *"and keep the no-API fallback able to download a real file"*.
+- **The requirement was incomplete, and every attempt filled the gap differently.** "Set the const to 12" is under-specified once that value ends up in a URL. Worth adding to the backlog entry: *"and keep the no-API fallback able to download a real file"*.
 - **No test covers the fallback.** A 10-line test (stub `http_open`, assert the asset name matches an existing release) would have rejected 58 of these 76 PRs before they were opened. That belongs with Features 13/16 (CI for scripts).
 - **Ratings are not about diff size.** The two smallest patches were the worst two.
 
