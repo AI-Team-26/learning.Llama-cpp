@@ -389,5 +389,11 @@ start_server() {
     #disown
 
     # Wait for the server to come alive (up to SERVER_START_TIMEOUT_S)
-    wait_for_server_ready "$SERVER_LOG" "$model_id"
+    if wait_for_server_ready; then
+        set_title "🦙 🟢 ready $model_id"
+        return 0
+    fi
+
+    set_title "🦙 🔴 failed to start model"
+    return 1
 }

@@ -41,9 +41,6 @@ return_value() {
     printf '%s=%s\n' "$1" "$2"
 }
 
-# Sets the terminal window title. No-op here, scripts owning the terminal override it.
-set_title() { :; }
-
 return_error() { 
     printf 'error=%s\n' "${1:-undefined}"
 }

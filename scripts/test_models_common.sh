@@ -10,9 +10,7 @@ test_call() {
     # TODO... get info from server log and avoid passing this variable
     #local use_prediction="$1"
 
-    if ! wait_for_server_ready "$SERVER_LOG" "test-model"; then
-        return 1
-    fi
+    wait_for_server_ready || return 1
     
     local code_payload; code_payload=$(cat "$test_code_file")
 
