@@ -1,231 +1,247 @@
-# Bug 14 — Evaluation of the 76 open PRs
+# Bug 14 — model evaluation
 
-**Date:** 2026-11-03 · **Corrected:** 2026-11-04 (after live re-verification)
-**Target:** `scripts/UpdateLlamaCpp.py`
-**Scope:** every PR open against `main` for Bug 14 (76 PRs). PR #98 is excluded — different task.
+**Date:** 2026-11-04
+**Task:** backlog Bug 14 — `scripts/UpdateLlamaCpp.py` must stop using `GITHUB_TOKEN` **and** use a CUDA version constant *without* the minor version (`"12"`, not `"12.4"`).
+**Sample:** the 76 PRs opened against that task. Every PR body carries an `AI agent execution report` naming the model that produced the run, so the 76 PRs are **76 independent runs of one task on 31 model configurations**.
 
-> **Correction notice.** The first edition of this document selected **#32** as the best candidate.
-> A live re-verification of the no-API fallback showed that #32 — and 11 other candidates rated
-> "correct" — fail whenever the newest tag in the releases Atom feed has no published release yet.
-> #32 has since been closed. This edition corrects the counts, the ratings and the choice.
-> See [Why not #32](#why-not-32).
+> **What this document rates.** The models, not the pull requests. The PR is only the container the run was delivered in — where this edition disagrees with the first one it is because the two judged different things. The first edition ranked the PRs, picked #32, and was wrong: #32's fallback breaks on the input it exists for. That verdict is not repeated here; the run-level detail survives as [Appendix A](#appendix-a--run-by-run).
 
 ## TL;DR
 
 | | |
 |---|---|
-| PRs reviewed | **76** (75 distinct variants — #39/#91 and #71/#85 are byte-identical) |
-| Correct and safe to merge | **3** — #95, #25, #69 |
-| Break the no-API fallback | **68** — 56 build a 404 URL, 12 give up (or 404) on a tag without a release |
-| Other breakage | **2** — #42 returns 33 assets; #50 drops the cudart zip |
-| Don't fix the bug | **3** — #59, #87 still use `GITHUB_TOKEN`; #88 deletes the fallback entirely |
-| **Chosen design** | multi-tag scrape that reuses `pick_assets()` — best of the 76: **#95**; cleanest implementation: **#106** (`fix/34_bug14_upd_llamacpp_scrape_fallback`) |
+| Runs | **76** (74 name a model; #24 and #48 have no report) |
+| Model configurations | **31**, in 8 families |
+| 🥇 Solved the task | **3 runs / 3 configurations** — 96 % of configurations never produced a working fallback |
+| 🥈 Near miss | **35 runs / 6 configurations** — scraped the release page, but made a *single* attempt |
+| 🥉 Naive | **34 runs / 20 configurations** — pasted the new constant straight into the asset URL → every download 404s |
+| ⛔ Off-target | **2 runs / 2 configurations** — did not change the behaviour at all |
+| Best run | **#95** · `Swift-1.5-Qwen3.8-27B-GSQ-RCO-IQ3_S-mtp (ukisai) [64k]` |
+| Most efficient failure | `z-ai/glm-5.3` — 0.6 min, 9.2 k tokens, still ships a 404 URL |
 
-## The bug
+Best on substance: **#25 and #69** — one run each, one hit each, no regressions. #95 is the best *implementation* but its model solved only 1 of 3 attempts and shipped two regressions.
 
-From the backlog:
+## The task is a trap, and that is the point
 
-> **Bug 14 | UpdateLlamaCpp.py**
-> - avoid use GITHUB_TOKEN
-> - USE a const for CUDA version WITHOUT minor version (set to "12", nt "12.4").
+Both requirements are literal and trivial: delete the token, rename a constant. The trap is the **side effect of requirement 2 on the no-API fallback**, which builds asset URLs from that very constant.
 
-Two requirements, and both are easy on their own. The difficulty is entirely in the side effect of the second one: the script's **no-API fallback path** builds asset URLs from that constant.
-
-## Two traps, not one
-
-The first edition found trap 1 and stopped there. Trap 2 is what collapses the "correct" list from 15 to 3.
-
-### Trap 1 — the filename always carries the CUDA minor (56 PRs)
-
-The real release assets are:
+### Trap 1 — the filename always carries the CUDA minor
 
 ```
-llama-b12072-bin-win-cuda-12.4-x64.zip
-cudart-llama-bin-win-cuda-12.4-x64.zip
+llama-b12072-bin-win-cuda-12.4-x64.zip   -> 302 (exists)
+llama-b12072-bin-win-cuda-12-x64.zip     -> 404
 ```
 
-The filename **always carries the CUDA minor version**. Verified against a live release:
-
-```
-llama-b12072-bin-win-cuda-12.4-x64.zip   -> HTTP 302 (exists)
-llama-b12072-bin-win-cuda-12-x64.zip     -> HTTP 404
-```
-
-and against the release-page HTML (`releases/download/b12072/llama-b12072-bin-win-cuda-12.4-x64.zip`). There is no `-cuda-12-x64.zip`.
-
-So `"12"` is valid as a **matching** constant but invalid as a **URL-building** constant. 56 PRs replaced `FALLBACK_CUDA = "12.4"` with `"12"` and left the fallback building filenames with it — every one of them now 404s on the exact path that exists *because* the token was removed:
-
-- before the fix: token set → API works → fallback rarely runs
-- after the fix: no token → API rate-limiting is likelier → fallback runs more often → and it is now broken
-
-That is why the two smallest diffs (#77 = 7 lines, #38 = 8 lines) are also among the worst.
+No `-cuda-12-x64.zip` asset exists. So `"12"` is a valid **matching** constant and an invalid **URL-building** constant. Any model that obeyed the instruction literally without noticing the URL broke the script — on exactly the path that removing the token makes *more* likely to run.
 
 ### Trap 2 — the newest feed tag is not necessarily a release
 
-The no-API fallback reads the releases **Atom feed**. The highest `bNNNNN` tag in that feed is *not* guaranteed to be a published release: llama.cpp pushes the git tag first and the release (with its 38 assets) is published later — or occasionally never.
-
-On 2026-11-04 the feed's newest tag was `b12109`, while the newest *published* release was `b12102`:
+The fallback reads the releases **Atom feed**. Its newest tag may have no release yet (the tag is pushed first, the assets later — sometimes never). A fallback that reads `max(tags)` and scrapes that single page is therefore wrong by construction: it must iterate the recent tags and take the first with real assets, exactly as the API path does.
 
 ```
-github.com/ggml-org/llama.cpp/releases/tag/b12109  -> HTTP 404 (tag only, 0 assets)
-github.com/ggml-org/llama.cpp/releases/tag/b12102  -> HTTP 200 (38 assets)
+2026-11-04   /releases/tag/b12109  -> 404   (tag only, 0 assets)
+             /releases/tag/b12102  -> 200   (38 assets)
 ```
 
-A fallback that reads only `max(tags)`, scrapes that single page and gives up when it is empty **fails on the very path it was written to fix** — and, as in trap 1, it runs more often precisely because the token was removed. A correct fallback must **iterate the recent tags** and use the first one that actually has Windows CUDA assets, mirroring what the API path already does:
+Neither trap is stated in the backlog entry. Both are inferable from the code, and that is what the sample measures.
+## Scoreboard
+
+Sorted by tier, then by number of runs. `✅` correct · `🥈` single-attempt scrape · `❌` 404 URL · `⚠️` other breakage or no fix.
+
+| Model configuration | Tier | Runs | ✅ | 🥈 | ❌ | ⚠️ | Avg time | Avg tokens |
+|---|:--:|--:|--:|--:|--:|--:|--:|--:|
+| `Swift-1.5-Qwen3.8-27B-GSQ-RCO-IQ3 S-mtp ukisai 64k` | 🥇 solved | 3 | 1 | | 2 | | 7.3m | 21,167 |
+| `Qwen3.8 27B UD-IQ4 XS Unsloth 40k Q8 ngram` | 🥇 solved | 1 | 1 | | | | 9.0m | 23,813 |
+| `Qwen3.8-27B UD-Q3-K-XL Unsloth Q4 80k` | 🥇 solved | 1 | 1 | | | | 11.5m | 29,626 |
+| `Swift-Qwen3.8-27B-IQ4 XS ahmeddelkilami01 64k` | 🥈 near miss | 12 | | 3 | 9 | | 3.9m | 14,275 |
+| `Qwen3.8 27B UD-IQ4 XS Unsloth 56k` | 🥈 near miss | 6 | | 2 | 3 | 1 | 7.9m | 18,292 |
+| `Qwen3.8-27B-IQ4 XS byteshape 56k` | 🥈 near miss | 6 | | 3 | 3 | | 8.0m | 21,154 |
+| `Qwen3.8 27B UD-IQ4 XS Unsloth 52k` | 🥈 near miss | 5 | | 2 | 3 | | 9.4m | 18,025 |
+| `Qwen3.8-27B-IQ3 S ista 64k` | 🥈 near miss | 5 | | 1 | 4 | | 2.8m | 15,711 |
+| `Qwen3.8 27B UD-IQ4 XS Unsloth 48k Q8` | 🥈 near miss | 1 | | 1 | | | 12.6m | 19,729 |
+| `Swift-1.5-Qwen3.8-27B-Uncensored-VAL-APEX-I-MiniPlus-V3 isvalorum` | 🥉 naive | 4 | | | 4 | | 3.2m | 13,762 |
+| `Qwen3.8-27B-IQ3 S ista 64k ngram` | 🥉 naive | 3 | | | 3 | | 5.1m | 20,021 |
+| `Swift-1.5-Qwen3.8-27b.i1-IQ4 XS mrradermacher Q4 48k` | 🥉 naive | 3 | | | 3 | | 4.5m | 14,642 |
+| `Qwen3.8 27B UD-IQ4 XS Unsloth 52k ngram` | 🥉 naive | 2 | | | 2 | | 4.2m | 16,309 |
+| `Qwen3.8 27B UD-IQ4 XS Unsloth Q8 Q8 52k` | 🥉 naive | 2 | | | 2 | | 5.3m | 14,709 |
+| `Qwen3.8 27B UD-IQ4 XS Unsloth Q8Q8 48k` | 🥉 naive | 2 | | | 1 | 1 | 7.1m | 16,646 |
+| `Qwen3.8-27B-Abliterated-IQ4-MIX-MTP finex666 64k` | 🥉 naive | 2 | | | 1 | 1 | 5.0m | 17,864 |
+| `Qwen3.8-27B-IQ4 XS byteshape 64k` | 🥉 naive | 2 | | | 2 | | 4.8m | 17,151 |
+| *(no report in PR body — #24, #48)* | 🥉 naive | 2 | | | 2 | | — | — |
+| `z-ai/glm-5.3` | 🥉 naive | 2 | | | 2 | | 0.6m | 9,182 |
+| `North-Mini-Code-1.0-UD-IQ4 XS unsloth 64` | 🥉 naive | 1 | | | 1 | | 6.7m | 32,114 |
+| `Qwen3.8 27B UD-IQ4 XS Unsloth 48k ngram` | 🥉 naive | 1 | | | 1 | | 4.1m | 13,281 |
+| `Qwen3.8 27B UD-IQ4 XS Unsloth Q4 64k` | 🥉 naive | 1 | | | 1 | | 6.5m | 16,287 |
+| `Qwen3.8-27B-ASCII-Condensed-IQ4 XS-3 troed 64k ngram` | 🥉 naive | 1 | | | 1 | | 2.8m | 14,136 |
+| `Qwen3.8-27B-Abliterated-IQ4-MIX-MTP finex666 Q4 56k` | 🥉 naive | 1 | | | 1 | | 2.3m | 12,851 |
+| `Qwen3.8-27B-abliterated-UD-IQ4 XS huihui 64k` | 🥉 naive | 1 | | | 1 | | 4.3m | 11,608 |
+| `Swift-1.5-Qwen3.8-27B-IQ4 XS ukisai` | 🥉 naive | 1 | | | 1 | | 6.0m | 11,099 |
+| `Swift-1.5-Qwen3.8-27B-MiniPlus-V3 isvalorum` | 🥉 naive | 1 | | | 1 | | 3.8m | 15,007 |
+| `Swift-1.5-Qwen3.8-27B-MiniPlus-V3 isvalorum 48k` | 🥉 naive | 1 | | | 1 | | 5.5m | 12,698 |
+| `minimax-m2.7` | 🥉 naive | 1 | | | 1 | | 1.6m | 11,414 |
+| `Gemma-4-26B-UD-IQ4 XS unsloth 104k` | ⛔ off-target | 1 | | | | 1 | 2.6m | 23,710 |
+| `minimax/minimax-m3` | ⛔ off-target | 1 | | | | 1 | 13.2m | 27,484 |
+## The four tiers
+
+**🥇 Solved — 3 configurations, 5 runs.** Understood both traps: the constant must not reach the URL, and the feed's newest tag may have no release. All three scraped real asset names and looped over recent tags.
+
+- `Swift-1.5-Qwen3.8-27B-GSQ-RCO-IQ3 S-mtp ukisai 64k` — #95 correct; #96 and #97 the naive 404. **Inconsistent**: the same configuration, in the same session shape, produced one good run and two bad ones.
+- `Qwen3.8 27B UD-IQ4 XS Unsloth 40k Q8 ngram` — #25, 1/1.
+- `Qwen3.8-27B UD-Q3-K-XL Unsloth Q4 80k` — #69, 1/1, and the only solution that avoids HTML scraping entirely: it HEAD-probes `...-cuda-12.N-x64.zip` for N = 9…0 and builds the URL from the answer.
+
+**🥈 Near miss — 6 configurations, 35 runs.** These models *did* realise the filename must not be built from the constant — the harder half of the task — and scraped the release page for the real names. They then read `max(tags)` from the feed and gave up on the first tag that had nothing, so on the live feed they exit instead of falling back to `b12102`. Adding one loop around the scrape is all that separates this tier from the top one.
+
+Nine of the twelve single-attempt runs come from `Swift-Qwen3.8-27B-IQ4 XS (ahmeddelkilami01) [64k]`, which produced a single-attempt scraper in 3 of its 12 runs and the naive 404 in the other 9 — the single least consistent configuration in the sample.
+
+**🥉 Naive — 20 configurations, 34 runs.** `FALLBACK_CUDA = "12"` went straight into the download URL. Correct against the literal backlog text, worst possible outcome functionally: the fallback now fails exactly when the token removal makes it run. This is where 45 % of all runs land, and it contains the *smallest* diff (#77, 7 lines) and the *fastest* run (`z-ai/glm-5.3`, 0.6 min). Two of these runs broke something else instead: #42's scrape returns all 33 assets unfiltered, #50's drops the cudart zip.
+
+**⛔ Off-target — 2 configurations, 2 runs.** `Gemma-4-26B` (#87) still reads `GITHUB_TOKEN`; `minimax/m3` (#88) deleted the no-API fallback altogether — the opposite of what removing the token requires.
+
+## Effort correlates with success
+
+| Outcome | Runs | Avg time | Avg tokens |
+|---|--:|--:|--:|
+| ✅ correct | 3 | 10.9 min | 28,946 |
+| 🥈 near miss | 12 | 9.2 min | 20,049 |
+| 🥉 404 URL | 56 | 4.2 min | 15,152 |
+| ⛔ other / no fix | 5 | 8.6 min | 22,424 |
+
+The three correct runs took **2.6× the wall-clock and 1.9× the tokens** of the naive ones. On this task speed is a symptom: the fast runs are the ones that took the requirement at face value, made the two-line edit and stopped. Total spend across the 74 reported runs: **1.26 M tokens**.
+
+## Families
+
+| Family | Runs | 🥇 | 🥈 | 🥉 | ⛔ |
+|---|--:|--:|--:|--:|--:|
+| `Qwen3.8-27B` (incl. abliterated, ASCII-Condensed, byteshape, ista, Unsloth) | 43 | 2 | 9 | 30 | 2 |
+| `Swift-1.5-Qwen3.8-27B` | 13 | 1 | 0 | 12 | 0 |
+| `Swift-Qwen3.8-27B` | 12 | 0 | 3 | 9 | 0 |
+| `z-ai/glm-5.3` | 2 | 0 | 0 | 2 | 0 |
+| `minimax` (m2.7, m3) | 2 | 0 | 0 | 1 | 1 |
+| *(no report)* | 2 | 0 | 0 | 2 | 0 |
+| `North-Mini-Code-1.0` | 1 | 0 | 0 | 1 | 0 |
+| `Gemma-4-26B` | 1 | 0 | 0 | 0 | 1 |
+
+No family solved the task; the three successes are spread across three different families. With 43 of 76 runs from one family, this sample says more about `Qwen3.8-27B` quantisations than about the other families — the two OpenRouter models and `Gemma-4-26B` contribute 5 runs between them, too few to rank.
+## Caveats on the attribution
+
+The model name comes from the PR's own execution report and **cannot be verified** — the repository records the agent shell, not the weights. Three checks on the sample:
+
+1. **Two runs are unattributed.** #24 and #48 predate the execution-report template. They are counted, but in no model's row.
+2. **76 runs contain only 71 distinct implementations.** Eight runs collapse into three groups of identical code across *different* model labels: `{#39, #77, #91, #97}`, `{#71, #85}`, `{#43, #81}`. #71 and #85 additionally carry the same commit timestamp — they look like one run delivered twice.
+3. **All models in this sample but three are Qwen3.8-27B derivatives** driven by the same scaffolding and the same prompt. Converging on a mechanical two-line edit is expected, which is the benign explanation for (2).
+
+Consequences: differences **between close variants of the same base model are noise**, not signal. Treat the tier a configuration lands in as meaningful and its exact run counts as indicative only.
+
+## What the sample does say
+
+- **Every model understood the requirement; almost none modelled the consequence.** The literal instruction is satisfied by 74 of 76 runs. The models that failed did not misread the backlog — they analysed the constant in isolation and never traced it into the URL.
+- **The near-miss tier is the tell.** 12 runs knew the filename must be scraped, and 9 of them still made a single attempt against a feed whose newest entry may have no release. Understanding the trap is not the same as being robust to it.
+- **Correct runs are not repeatable.** The only configuration with several runs — `GSQ-RCO-IQ3 S-mtp ukisai` — went 1 for 3. Nothing here supports ranking models by a single run.
+- **Effort is not wasted.** The models that spent 2–3× the time and tokens on reading the fallback are the only ones that found the trap. On this evidence, time spent re-reading the code before editing is the single best predictor of success.
+
+## Why #32 was the wrong pick
+
+The first edition ranked PRs and selected #32 (28 lines). It is a *near miss* in the table above — its model read the release page and reused `pick_assets()`, but took a single attempt:
 
 ```python
-for rel in sorted(builds, key=..., reverse=True):
-    try:
-        main, cudart = pick_assets(rel["assets"])
-    except SystemExit:
-        continue          # still uploading -> try the next build
-    return ...
+tag = f"b{max(tags)}"          # single attempt
+...
+sys.exit(f"No Windows CUDA {CUDA_VERSION} llama.cpp asset found on the {tag} release page.")
 ```
 
-Of the 12 candidates that scrape a single tag, **11 abort with `sys.exit(...)`** and **1 (#55) returns URLs that 404**. Only the 3 that loop over several tags survive.
-
-## How the evaluation was done
-
-Every candidate was checked mechanically, not by reading the description:
-
-1. `py_compile` — syntax.
-2. Grep for `GITHUB_TOKEN` / `Authorization` / `Bearer` — requirement 1.
-3. Extract the CUDA constant — requirement 2.
-4. **Replay `latest_release_via_feed()`** with the Atom feed and the release-page request stubbed, then assert that every returned asset name exists:
-   - against a real *published* release page — checks the scrape itself; and
-   - **against the live feed** (`b12109`, tag-only) — checks that the fallback survives its real input. This second form is the check that separates the 3 correct PRs from the 68 broken ones.
-5. Finalists: a live `latest_release_via_feed()` call against the real feed.
-
-A live `--dry-run` was used as evidence in the first edition; it is **not** used here. `--dry-run` only exercises the API path, never the fallback, so it cannot distinguish a working fix from a broken one — it passed for #32 and would pass for all 56 of the 404 PRs.
-
-## Rating rubric
-
-| Rating | Meaning |
-|---|---|
-| ⭐⭐⭐⭐⭐ | Fixes both requirements; no hardcoded minor anywhere; fallback iterates recent tags, resolves real asset names and reuses `pick_assets()`; minimal diff |
-| ⭐⭐⭐⭐ | Same correctness, slightly larger diff, duplicates a little logic, or a style nit |
-| ⭐⭐⭐ | Correct fallback, but leaves a hardcoded minor (partial requirement) or adds significant extra code |
-| ⭐ | Introduces a regression: 404 URL, a fallback that gives up on a tag without a release, a broken scrape, or a crash |
-| ⛔ | Does not fix the bug |
-
-## Results
-
-| Verdict | Count | Notes |
-|---|---|---|
-| ✅ Correct | **3** | #95, #25, #69 — fallback loops over recent tags |
-| ⭐ Regression | **68** | 56 build a 404 URL; 12 give up on a tag without a release (11 exit, #55 404s) |
-| ⚠️ Other breakage | **2** | broken scrape (#42, #50) |
-| ⛔ No fix | **3** | token still used (#59, #87) or fallback deleted (#88) |
-
-The distribution is flat: the failure is not about effort or diff size but about two constraints the requirement never states — *"keep the fallback URL valid"* and *"the newest feed tag may not be a release"*. The requirement itself ("const without minor") is satisfied literally by every candidate and still produces a broken script.
-
-## Finalists — good and bad
-
-### ✅ #95 — 43 lines · `fix/14_pi_kiwi_20261012_150725` — **best of the 76**
-
-- **Good:** reads the 10 newest tags and scrapes each release page (newest first) for the real asset names; skips builds with no Windows CUDA zip; no minor literal. Verified live — skips the tag-only `b12109` and resolves `b12102` + `cuda-12.4`.
-- **Bad:** biggest diff of the correct ones; up to 10 HTML fetches in the worst case; duplicates asset matching instead of reusing `pick_assets()`.
-
-### ✅ #25 — 42 lines · `fix/14c_update_llama_cpp`
-
-- **Good:** loops the 10 newest tags, scrapes each page, breaks on the first with a `llama-*` asset. Verified live → `b12102`.
-- **Bad:** commits a `.pyc` and touches `.gitignore`; keeps its own regex instead of `pick_assets()`.
-
-### ✅ #69 — 49 lines · `fix/14z_update_llama_cpp` — different idea, works
-
-- **Good:** no HTML scraping at all — probes `...-cuda-12.N-x64.zip` with `HEAD` requests for N = 9...0 over the 5 newest tags and builds the URLs from the answer. Verified live → `b12102`.
-- **Bad:** chatty (up to 10 probes × 5 tags when builds are young), assumes the minor is ≤ 9, and assumes cudart uses the same minor as the main zip. Most complex correct solution.
-
-### ❌ #32 — 28 lines · `fix/14h_update_llama_cpp` — the first edition's choice
-
-- **Good:** token fully removed; `CUDA_VERSION = "12"` used only for matching; fallback scrapes the release page for the real filenames and reuses `pick_assets()`.
-- **Bad:** `tag = f"b{max(tags)}"` — **a single attempt**. A live call on 2026-11-04 returned
-  `No Windows CUDA 12 llama.cpp asset found on the b12109 release page.` and the script exited.
-  Functionally identical to the flaw the first edition criticised in #94.
-
-### ❌ #55 — 17 lines — smallest diff overall
-
-- **Good:** 17 lines, no scraping, no new network behaviour, `CUDA_VERSION = "12"` used for matching.
-- **Bad:** keeps `FALLBACK_CUDA = "12.4"`, so the "no minor" requirement is only half met — **and** it is a single attempt: it returns `llama-b12109-bin-win-cuda-12.4-x64.zip` for the tag-only `b12109`, which is a 404.
-
-## Full ranking
-
-Sorted by rating, then diff size. Only 3 of the 76 are correct.
-
-| Rating | PR | ±lines | Good | Bad |
-|---|---|---|---|---|
-| ⭐⭐⭐⭐ | [#95](https://github.com/AI-Team-26/learning.Llama-cpp/pull/95) | 43 | no `GITHUB_TOKEN`; major-only const; fallback loops 10 tags, resolves real names | duplicates `pick_assets()`; up to 10 fetches |
-| ⭐⭐⭐ | [#25](https://github.com/AI-Team-26/learning.Llama-cpp/pull/25) | 42 | no `GITHUB_TOKEN`; major-only const; fallback loops 10 tags, resolves real names | commits a `.pyc`; touches `.gitignore` |
-| ⭐⭐⭐ | [#69](https://github.com/AI-Team-26/learning.Llama-cpp/pull/69) | 49 | no `GITHUB_TOKEN`; major-only const; fallback loops 5 tags | up to 10 `HEAD` probes per tag; assumes minor ≤ 9 |
-| ⭐ | [#55](https://github.com/AI-Team-26/learning.Llama-cpp/pull/55) | 17 | no `GITHUB_TOKEN`; major-only const used for matching | keeps `FALLBACK_CUDA="12.4"`; single attempt → 404 on a tag-only newest tag |
-| ⭐ | [#60](https://github.com/AI-Team-26/learning.Llama-cpp/pull/60) | 31 | no `GITHUB_TOKEN`; major-only const; fallback resolves real names | single attempt; lowercase `cuda_version` const |
-| ⭐ | [#33](https://github.com/AI-Team-26/learning.Llama-cpp/pull/33) | 36 | no `GITHUB_TOKEN`; major-only const; fallback resolves real names | single attempt |
-| ⭐ | [#51](https://github.com/AI-Team-26/learning.Llama-cpp/pull/51) | 38 | no `GITHUB_TOKEN`; major-only const; fallback resolves real names | single attempt |
-| ⭐ | [#94](https://github.com/AI-Team-26/learning.Llama-cpp/pull/94) | 38 | no `GITHUB_TOKEN`; major-only const; fallback resolves real names | single attempt |
-| ⭐ | [#71](https://github.com/AI-Team-26/learning.Llama-cpp/pull/71) | 39 | no `GITHUB_TOKEN`; major-only const; fallback resolves real names | single attempt; duplicate of #85 |
-| ⭐ | [#85](https://github.com/AI-Team-26/learning.Llama-cpp/pull/85) | 39 | no `GITHUB_TOKEN`; major-only const; fallback resolves real names | single attempt; duplicate of #71 |
-| ⭐ | [#30](https://github.com/AI-Team-26/learning.Llama-cpp/pull/30) | 42 | no `GITHUB_TOKEN`; major-only const; fallback resolves real names | single attempt; touches `.gitignore` |
-| ⭐ | [#46](https://github.com/AI-Team-26/learning.Llama-cpp/pull/46) | 44 | no `GITHUB_TOKEN`; major-only const; fallback resolves real names | single attempt |
-| ⭐ | [#79](https://github.com/AI-Team-26/learning.Llama-cpp/pull/79) | 44 | no `GITHUB_TOKEN`; major-only const; fallback resolves real names | single attempt; touches `.gitignore` |
-| ⭐ | [#41](https://github.com/AI-Team-26/learning.Llama-cpp/pull/41) | 49 | no `GITHUB_TOKEN`; major-only const; fallback resolves real names | single attempt; commits a `.pyc` |
-
-### Introduces a regression — 68 PRs
-
-**(a) Fallback builds `...-cuda-12-x64.zip`, which does not exist → 404 on every download (56):**
-
-`#22 #23 #24 #26 #27 #28 #29 #31 #34 #35 #36 #37 #38 #39 #40 #43 #44 #45 #47 #48 #49 #52 #53 #54 #56 #57 #58 #61 #62 #63 #64 #65 #66 #67 #68 #70 #72 #73 #74 #75 #76 #77 #78 #80 #81 #82 #83 #84 #86 #89 #90 #91 #92 #93 #96 #97`
-
-Sorted by size, the most tempting ones (#77 = 7 lines, #38 = 8, #96 = 11, #26/#34/#43 = 12) are exactly the ones that look best in a review and break in production.
-
-**(b) Fallback scrapes a single tag, then gives up (or 404s) because the newest feed tag has no release (12):**
-
-`#30 #32 #33 #41 #46 #51 #55 #60 #71 #79 #85 #94`
-
-All of them except #55 abort with `sys.exit("No Windows CUDA 12 llama.cpp asset found on the b12109 release page.")` on the live 2026-11-04 feed; #55 returns a 404 URL instead. #32 (the first edition's choice) and #94 sit in this group.
-
-### Other breakage
-
-| PR | Problem |
-|---|---|
-| [#42](https://github.com/AI-Team-26/learning.Llama-cpp/pull/42) | Scrape returns **33 assets** (all platforms, all runtimes) — no filtering at all |
-| [#50](https://github.com/AI-Team-26/learning.Llama-cpp/pull/50) | Fallback drops the `cudart` zip → CUDA runtime DLLs never downloaded |
-
-### Do not fix the bug
-
-| PR | Problem |
-|---|---|
-| [#59](https://github.com/AI-Team-26/learning.Llama-cpp/pull/59) | Still reads `GITHUB_TOKEN` |
-| [#87](https://github.com/AI-Team-26/learning.Llama-cpp/pull/87) | Still reads `GITHUB_TOKEN` |
-| [#88](https://github.com/AI-Team-26/learning.Llama-cpp/pull/88) | Deletes the no-API fallback entirely (`FEED_URL`, `latest_release_via_feed()`, the `try/except` in `get_latest_release()`) and calls the API directly — the opposite of what removing the token requires |
-
-## Chosen
-
-The correct fix is a **multi-tag scrape that reuses `pick_assets()`**:
-
-1. read the newest N `bNNNNN` tags from the Atom feed;
-2. scrape each release page for the real asset names (which carry the CUDA minor);
-3. skip the builds that have no Windows CUDA assets yet;
-4. hand the names to `pick_assets()`, so the selection rules stay in one place.
-
-Among the original 76 this is best realised by **#95** (⭐⭐⭐⭐). The cleanest implementation is **#106** (`fix/34_bug14_upd_llamacpp_scrape_fallback`, still open), which factors out `recent_tags_via_feed()` and `assets_from_release_page()` and reuses `pick_assets()`. Verified live: it skips the tag-only `b12109` and resolves `b12102` + both `cuda-12.4` zips.
-
-## Why not #32
-
-1. #32 is **not** simultaneously correct, small and non-duplicative — it is small and non-duplicative, but not correct: `latest_release_via_feed()` reads `max(tags)` from the feed, scrapes that one page and calls `sys.exit()` if the page has no Windows CUDA zip. On the live feed (newest tag `b12109`, tag only) it exits instead of downloading `b12102`.
-2. The first edition verified #32 with a replay in which the feed was stubbed to a **fixed, known-good tag** (`b11060`) and with a `--dry-run`, which only exercises the API path. Neither could ever observe the failure — both are structurally incapable of rejecting a single-attempt fallback.
-3. The first edition had already recorded the same defect for **#94** ("exits immediately if the newest release page has no CUDA asset ... doesn't try the next build down") yet ranked #32 ⭐⭐⭐⭐⭐ with "Bad: none functionally" and #94 ⭐⭐⭐⭐. The two fallbacks are the same shape; only one of them was caught.
-4. #32 has since been **closed** and superseded by #106.
+Verified live on 2026-11-04: the call returns `No Windows CUDA 12 llama.cpp asset found on the b12109 release page.` and the script exits, while `b12102` is published with 38 assets. The first edition rated #32 ⭐⭐⭐⭐⭐ and its sibling #94 ⭐⭐⭐⭐ **for the same defect**, because both were checked with a `--dry-run` (API path only) or against a hand-picked good tag (a feed stub fixed to `b11060`). Neither check can ever reject a single-attempt fallback. #32 is now closed.
 
 ## Process lessons
 
-- **76 PRs for a ~28-line change.** The larger cost was triage, not code. `AGENTS.md` already says "check open PRs before starting"; the step was skipped 76 times.
-- **The requirement was incomplete, and every attempt filled the gap differently.** "Set the const to 12" is under-specified once that value ends up in a URL. The backlog entry should read: *"and keep the no-API fallback able to download a real file, even when the newest feed tag has no release yet"*.
-- **A fallback that makes a single attempt is a fallback that fails on the newest input.** The API path already loops over releases and skips empty ones; the feed fallback must do the same. Any non-looping fallback is suspect by construction.
-- **The verification must feed the fallback its real input.** Replaying against a hand-picked good tag, or a `--dry-run` that never reaches the fallback, proves nothing. A test that stubs the feed with a *tag without a release* followed by a *good release* would have rejected 12 of the "correct" candidates and the first edition's choice.
-- **No test covers the fallback.** A ~10-line test (stub `http_open`, assert the resolved asset name exists) would have rejected 68 of these 76 PRs before they were opened. That belongs with Features 13/16 (CI for scripts), and it should include the tag-without-release case.
-- **Ratings are not about diff size.** The two smallest patches (#77, #38) were among the worst — and the first edition's pick (#32, 28 lines) is broken too.
+- **76 PRs for a ~28-line change.** The cost was triage, not code. `AGENTS.md` already says "check open PRs before starting"; the step was skipped 76 times.
+- **The backlog entry was under-specified.** It should read: *"and keep the no-API fallback able to download a real file, even when the newest feed tag has no release yet"*. Stating the requirement is cheaper than 76 attempts at guessing it.
+- **A single-attempt fallback is a fallback that fails on its newest input.** The API path already loops over releases and skips empty ones; the feed fallback must do the same.
+- **Verification must feed the fallback its real input.** A `--dry-run` never reaches the fallback and a hand-picked good tag cannot fail it. A stub of *tag-without-release followed by a good release* would have rejected 12 runs and the first edition's choice.
+- **No test covers the fallback.** A ~10-line test (stub `http_open`, assert the resolved asset name exists) would have rejected 68 of the 76 runs before they were opened. That belongs with Features 13/16 (CI for scripts), and it must include the tag-without-release case.
+## Appendix A — run by run
 
-## Appendix — reproduce the check
+Model string as reported by each PR's `AI agent execution report` (`Llama.cpp/` prefix stripped; `#24`/`#48` have no report).
+
+| # | Model | Outcome |
+|---:|---|---|
+| #22 | `z-ai/glm-5.3` | ❌ 404 URL |
+| #23 | `Swift-1.5-Qwen3.8-27B-IQ4_XS_ukisai.gguf` | ❌ 404 URL |
+| #24 | *(no report)* | ❌ 404 URL |
+| #25 | `Qwen3.8_27B_UD-IQ4_XS_(Unsloth)_[40k]_Q8_ngram` | ✅ correct |
+| #26 | `Qwen3.8-27B-Abliterated-IQ4-MIX-MTP_finex666_[64k]` | ❌ 404 URL |
+| #27 | `Qwen3.8-27B-abliterated-UD-IQ4_XS_huihui_64k` | ❌ 404 URL |
+| #28 | `Swift-Qwen3.8-27B-IQ4_XS_(ahmeddelkilami01)_64k` | ❌ 404 URL |
+| #29 | `Qwen3.8-27B-IQ4_XS_byteshape_56k` | ❌ 404 URL |
+| #30 | `Qwen3.8-27B-IQ4_XS_byteshape_56k` | 🥈 single-tag |
+| #31 | `North-Mini-Code-1.0-UD-IQ4_XS_(unsloth)_64` | ❌ 404 URL |
+| #32 | `Swift-Qwen3.8-27B-IQ4_XS_(ahmeddelkilami01)_[64k]` | 🥈 single-tag |
+| #33 | `Swift-Qwen3.8-27B-IQ4_XS_(ahmeddelkilami01)_[64k]` | 🥈 single-tag |
+| #34 | `Swift-1.5-Qwen3.8-27B-Uncensored-VAL-APEX-I-MiniPlus-V3_isvalorum.gguf` | ❌ 404 URL |
+| #35 | `Qwen3.8-27B-IQ4_XS_(byteshape)_[64k]` | ❌ 404 URL |
+| #36 | `Swift-1.5-Qwen3.8-27B-Uncensored-VAL-APEX-I-MiniPlus-V3_isvalorum.gguf` | ❌ 404 URL |
+| #37 | `Swift-1.5-Qwen3.8-27B-Uncensored-VAL-APEX-I-MiniPlus-V3_isvalorum.gguf` | ❌ 404 URL |
+| #38 | `Swift-1.5-Qwen3.8-27B-Uncensored-VAL-APEX-I-MiniPlus-V3_isvalorum.gguf` | ❌ 404 URL |
+| #39 | `Qwen3.8-27B-IQ4_XS_(byteshape)_[56k]` | ❌ 404 URL |
+| #40 | `Qwen3.8-27B-IQ4_XS_(byteshape)_[56k]` | ❌ 404 URL |
+| #41 | `Qwen3.8-27B-IQ4_XS_(byteshape)_[56k]` | 🥈 single-tag |
+| #42 | `Qwen3.8-27B-Abliterated-IQ4-MIX-MTP_finex666_[64k]` | ⚠️ scrape returns all 33 assets |
+| #43 | `Swift-1.5-Qwen3.8-27B-MiniPlus-V3_isvalorum.gguf` | ❌ 404 URL |
+| #44 | `Swift-1.5-Qwen3.8-27B-MiniPlus-V3_[isvalorum]_(48k)` | ❌ 404 URL |
+| #45 | `Qwen3.8_27B_UD-IQ4_XS_[Unsloth]_Q4_[64k]` | ❌ 404 URL |
+| #46 | `Qwen3.8_27B_UD-IQ4_XS_[Unsloth]_[48k]_Q8` | 🥈 single-tag |
+| #47 | `Qwen3.8_27B_UD-IQ4_XS_[Unsloth]_[48k]_ngram` | ❌ 404 URL |
+| #48 | *(no report)* | ❌ 404 URL |
+| #49 | `Qwen3.8_27B_UD-IQ4_XS_[Unsloth]_Q8Q8_[48k]` | ❌ 404 URL |
+| #50 | `Qwen3.8_27B_UD-IQ4_XS_[Unsloth]_Q8Q8_[48k]` | ⚠️ cudart zip dropped |
+| #51 | `Qwen3.8_27B_UD-IQ4_XS_[Unsloth]_[56k]` | 🥈 single-tag |
+| #52 | `Swift-Qwen3.8-27B-IQ4_XS_[ahmeddelkilami01]_[64k]` | ❌ 404 URL |
+| #53 | `Swift-Qwen3.8-27B-IQ4_XS_[ahmeddelkilami01]_[64k]` | ❌ 404 URL |
+| #54 | `Swift-Qwen3.8-27B-IQ4_XS_[ahmeddelkilami01]_[64k]` | ❌ 404 URL |
+| #55 | `Swift-Qwen3.8-27B-IQ4_XS_[ahmeddelkilami01]_[64k]` | 🥈 single-tag |
+| #56 | `Swift-Qwen3.8-27B-IQ4_XS_[ahmeddelkilami01]_[64k]` | ❌ 404 URL |
+| #57 | `Swift-Qwen3.8-27B-IQ4_XS_[ahmeddelkilami01]_[64k]` | ❌ 404 URL |
+| #58 | `Swift-Qwen3.8-27B-IQ4_XS_[ahmeddelkilami01]_[64k]` | ❌ 404 URL |
+| #59 | `Qwen3.8_27B_UD-IQ4_XS_[Unsloth]_[56k]` | ⛔ still uses `GITHUB_TOKEN` |
+| #60 | `Qwen3.8_27B_UD-IQ4_XS_[Unsloth]_[56k]` | 🥈 single-tag |
+| #61 | `Qwen3.8_27B_UD-IQ4_XS_[Unsloth]_[56k]` | ❌ 404 URL |
+| #62 | `Qwen3.8_27B_UD-IQ4_XS_[Unsloth]_Q8_Q8_[52k]` | ❌ 404 URL |
+| #63 | `Qwen3.8_27B_UD-IQ4_XS_[Unsloth]_Q8_Q8_[52k]` | ❌ 404 URL |
+| #64 | `Qwen3.8-27B-IQ3_S_[ista]_[64k]` | ❌ 404 URL |
+| #65 | `Qwen3.8-27B-IQ3_S_[ista]_[64k]` | ❌ 404 URL |
+| #66 | `Qwen3.8-27B-IQ3_S_[ista]_[64k]` | ❌ 404 URL |
+| #67 | `Qwen3.8_27B_UD-IQ4_XS_[Unsloth]_[56k]` | ❌ 404 URL |
+| #68 | `Qwen3.8_27B_UD-IQ4_XS_[Unsloth]_[56k]` | ❌ 404 URL |
+| #69 | `Qwen3.8-27B_UD-Q3-K-XL_[Unsloth]_Q4_[80k]` | ✅ correct |
+| #70 | `Qwen3.8_27B_UD-IQ4_XS_[Unsloth]_[52k]` | ❌ 404 URL |
+| #71 | `Qwen3.8_27B_UD-IQ4_XS_[Unsloth]_[52k]` | 🥈 single-tag |
+| #72 | `Qwen3.8_27B_UD-IQ4_XS_[Unsloth]_[52k]` | ❌ 404 URL |
+| #73 | `Swift-Qwen3.8-27B-IQ4_XS_[ahmeddelkilami01]_[64k]` | ❌ 404 URL |
+| #74 | `Swift-Qwen3.8-27B-IQ4_XS_[ahmeddelkilami01]_[64k]` | ❌ 404 URL |
+| #75 | `Swift-1.5-Qwen3.8-27b.i1-IQ4_XS_[mrradermacher]_Q4_[48k]` | ❌ 404 URL |
+| #76 | `Swift-1.5-Qwen3.8-27b.i1-IQ4_XS_[mrradermacher]_Q4_[48k]` | ❌ 404 URL |
+| #77 | `Swift-1.5-Qwen3.8-27b.i1-IQ4_XS_[mrradermacher]_Q4_[48k]` | ❌ 404 URL |
+| #78 | `Qwen3.8-27B-Abliterated-IQ4-MIX-MTP_[finex666]_Q4_[56k]` | ❌ 404 URL |
+| #79 | `Qwen3.8_27B_UD-IQ4_XS_[Unsloth]_[52k]` | 🥈 single-tag |
+| #80 | `Qwen3.8_27B_UD-IQ4_XS_[Unsloth]_[52k]_ngram` | ❌ 404 URL |
+| #81 | `Qwen3.8_27B_UD-IQ4_XS_[Unsloth]_[52k]_ngram` | ❌ 404 URL |
+| #82 | `Qwen3.8_27B_UD-IQ4_XS_[Unsloth]_[52k]` | ❌ 404 URL |
+| #83 | `Qwen3.8-27B-ASCII-Condensed-IQ4_XS-3_[troed]_[64k]_ngram` | ❌ 404 URL |
+| #84 | `Qwen3.8-27B-IQ3_S_[ista]_[64k]` | ❌ 404 URL |
+| #85 | `Qwen3.8-27B-IQ3_S_[ista]_[64k]` | 🥈 single-tag |
+| #86 | `Openrouter minimax /minimax-m2.7` | ❌ 404 URL |
+| #87 | `Gemma-4-26B-UD-IQ4_XS_(unsloth)_104k` | ⛔ still uses `GITHUB_TOKEN` |
+| #88 | `Openrouter/minimax/minimax-m3` | ⛔ deletes the fallback |
+| #89 | `Openrouter/z-ai/glm-5.3` | ❌ 404 URL |
+| #90 | `Qwen3.8-27B-IQ3_S_[ista]_[64k]_ngram` | ❌ 404 URL |
+| #91 | `Qwen3.8-27B-IQ3_S_[ista]_[64k]_ngram` | ❌ 404 URL |
+| #92 | `Qwen3.8-27B-IQ3_S_[ista]_[64k]_ngram` | ❌ 404 URL |
+| #93 | `Qwen3.8-27B-IQ4_XS_(byteshape)_[64k]` | ❌ 404 URL |
+| #94 | `Qwen3.8-27B-IQ4_XS_[byteshape]_[56k]` | 🥈 single-tag |
+| #95 | `Swift-1.5-Qwen3.8-27B-GSQ-RCO-IQ3_S-mtp_[ukisai]_[64k]` | ✅ correct |
+| #96 | `Swift-1.5-Qwen3.8-27B-GSQ-RCO-IQ3_S-mtp_[ukisai]_[64k]` | ❌ 404 URL |
+| #97 | `Swift-1.5-Qwen3.8-27B-GSQ-RCO-IQ3_S-mtp_[ukisai]_[64k]` | ❌ 404 URL |
+
+## Appendix B — reproduce the checks
 
 ```bash
 # 1. real asset names carry the CUDA minor — no "-cuda-12-x64.zip" exists
@@ -238,7 +254,7 @@ curl -s https://github.com/ggml-org/llama.cpp/releases.atom \
 curl -s -o /dev/null -w '%{http_code}\n' \
   https://api.github.com/repos/ggml-org/llama.cpp/releases/tags/b12109        # -> 404 (tag only)
 
-# 3. replay the no-API fallback against the LIVE feed (the real input)
+# 3. replay the no-API fallback against the LIVE feed (its real input)
 python3 - <<'EOF'
 import importlib.util
 spec = importlib.util.spec_from_file_location("m", "scripts/UpdateLlamaCpp.py")
@@ -249,4 +265,7 @@ try:
 except SystemExit as e:
     print("FAILED ->", e)   # e.g. "No Windows CUDA 12 llama.cpp asset found on the b12109 release page."
 EOF
+
+# 4. re-extract the scoreboard data (model / time / tokens per PR)
+gh pr list --state all --limit 300 --json number,body > /tmp/all_prs.json
 ```
