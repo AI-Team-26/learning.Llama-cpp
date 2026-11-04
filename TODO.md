@@ -23,12 +23,11 @@
 - Feature 6 [feat/06_sharpyaml] | Llama Server UI: Replace YamlDotNet with SharpYaml (PropertyNamingPolicy=SnakeCaseLower); drop [YamlMember] aliases except [JsonPropertyName("ubatch")] on UBatch — TODO notes already in ModelsConfigLoader.cs/ModelConfig.cs
 - Feature 8 | Unify the llama-server call of test and prod calls
 
-- Epic 16 | UpdateLlamaCpp.py 
-  - Feature 16.1 | UpdateLlamaCpp.py  implement the extraction
-  - Feature 16.2 | UpdateLlamaCpp.py  implement the copy of DLL into llama.cpp folder
-  - Feature 16.3 | UpdateLlamaCpp.py  implement the copy to destination folder
-  - Feature 16.4 | UpdateLlamaCpp.py  implement the replace of ENV  
-  
+- Epic 25 | UpdateLlamaCpp.py
+  - Feature 25.1 | UpdateLlamaCpp.py implement the extraction
+  - Feature 25.2 | UpdateLlamaCpp.py implement the copy of DLL into llama.cpp folder
+  - Feature 25.3 | UpdateLlamaCpp.py implement the copy to destination folder
+  - Feature 25.4 | UpdateLlamaCpp.py implement the replace of ENV
 
 ### Scripts robustness
 
