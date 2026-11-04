@@ -99,6 +99,8 @@ def assets_from_release_page(tag):
         html = resp.read().decode("utf-8", "replace")
     names = sorted(set(re.findall(rf"/releases/download/{re.escape(tag)}/([^\"'?]+\.zip)", html)))
     base = f"https://github.com/{REPO}/releases/download/{tag}"
+    # The release page exposes neither size nor digest, so these assets are never
+    # skipped as "already downloaded" and never checksum-verified.
     return [{"name": n, "size": None, "digest": None, "browser_download_url": f"{base}/{n}"} for n in names]
 
 
@@ -179,9 +181,9 @@ def main():
         download(a, dest)
     print(f"✔️ Downloaded")
 
-    # TODO: extract teh zip into their folders
+    # TODO: extract the zips into their folders
 
-    # TODO: move cuda dll into the llama.cpp folder and delete the dll folder ant the zip files
+    # TODO: move cuda dll into the llama.cpp folder and delete the dll folder and the zip files
 
     # TODO: copy to destination folder
 

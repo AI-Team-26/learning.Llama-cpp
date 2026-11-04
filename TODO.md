@@ -89,7 +89,7 @@
 
 ## Done
 
-- [fix/34_bug14_update_llamacpp] Bug 14 — UpdateLlamaCpp.py: drop GITHUB_TOKEN, CUDA_VERSION="12" const, no-API fallback scrapes real asset names
+- [fix/34_bug14_upd_llamacpp_scrape_fallback] Bug 14 — UpdateLlamaCpp.py: drop GITHUB_TOKEN, CUDA_VERSION="12" const, no-API fallback scrapes real asset names
 
 - [feat/13_shellcheck] Feature 13 — Add bash syntax check (shellcheck) in CI workflow for shell scripts
 - **[feat/12_shell_title_change]** Feature 12 — change the shell title when a local model is launched
