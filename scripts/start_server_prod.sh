@@ -25,7 +25,7 @@ args=(
     --host 127.0.0.1 \
     --port "$SERVER_PORT" \
     #--seed 1
-    --parallel $PARALLEL \
+    --parallel "$PARALLEL" \
     --prio 3 \
     --n-cpu-ffn 0 \
     --flash-attn on \
@@ -139,7 +139,7 @@ start_server() {
         echo "Select a model:"
         # Extract keys from YAML
         local models_list
-        local win_path=$(cygpath -w "$models_config_file") # yq is a .exe
+        local win_path; win_path=$(cygpath -w "$models_config_file") # yq is a .exe
         models_list=$(yq '.models | keys | .[]' "$win_path")
        
         # Check if list is empty
@@ -149,20 +149,20 @@ start_server() {
         fi
 
         # Create a dictionary indicating if file exists
-        local -A file_exists
-        files=$(yq '.models[].file' "$win_path")
-        for file in "$files"; do
-            if [[ -f "$file" ]]; then
-                file_exists["$file"]=1
-            else
-                file_exists["$file"]=0
-            fi
-        done
+        #local -A file_exists
+        #files=$(yq '.models[].file' "$win_path")
+        #for file in $files ; do
+        #    if [[ -f "$file" ]]; then
+        #        file_exists["$file"]=1
+        #    else
+        #        file_exists["$file"]=0
+        #    fi
+        #done
 
         # Create an array for the select loop
         local -a choices
         while IFS= read -r model_id; do
-            local file=$(yq -e ".models[\"$model_id\"].file" "$models_config_file")
+            local file; file=$(yq -e ".models[\"$model_id\"].file" "$models_config_file")
             if [[ -f  "$GGUF_FOLDER/$file" ]]; then exist="🟢"; else exist="🔴"; fi
             #choices+=("$exist $model_id")  # concatenate
             choices+=("$model_id $exist")  # concatenate
@@ -291,12 +291,12 @@ start_server() {
     else
         args+=(--alias "$model_id")
     fi
-    args+=(--ctx-size "$(($ctx_k * 1024))")
+    args+=(--ctx-size "$((ctx_k * 1024))")
     args+=(--n-gpu-layers "$gpu_layers")
     args+=(--n-cpu-moe "$cpu_moe")
 
-    args+=(--batch-size $batch)
-    args+=(--ubatch-size $ubatch)
+    args+=(--batch-size "$batch")
+    args+=(--ubatch-size "$ubatch")
 
     [[ "$spec_type" != "none" ]] && args+=(--spec-type "$spec_type")
 
@@ -309,6 +309,7 @@ start_server() {
     #--cache-ram 2048   # it use RAM that can be used for bigger context
     #args+=(--cache-ram 2048) 
 
+    local spec_draft_n_min; local spec_draft_n_max
     if [[ "$spec_type" == *draft-simple* ]]; then
         require_arg spec_draft_n_min     --spec-draft-n-min || return 1
         require_arg spec_draft_n_max     --spec-draft-n-max || return 1
@@ -406,7 +407,7 @@ start_server() {
 
         if [[ $i -eq 60 ]] ; then
             echo " not ready after 180 seconds" >&2
-            local err_msg=$(check_load_model_fail "$SERVER_LOG")
+            local err_msg; err_msg=$(check_load_model_fail "$SERVER_LOG")
             if [[ -n "$err_msg" ]]; then
                 echo -e "❌ Can't start the server. Error: ${gray_light}${err_msg}${reset}" >&2
                 set_title "🦙 🔴 error $model_id"

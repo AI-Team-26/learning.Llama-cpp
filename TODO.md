@@ -18,10 +18,7 @@
                                         (env: LLAMA_ARG_SPEC_TYPE)
   
    to show complete usage, run with -h
-   ```
-
-- Feature 13: Add bash syntax check (shellcheck) in CI workflow for shell scripts
-  Run shellcheck on all .sh files in scripts/ directory
+  ```
 
 - Bug 14 | UpdateLlamaCpp.py
   - avoid use GITHUB_TOKEN
@@ -89,6 +86,7 @@
 
 ## Done
 
+- [feat/13_shellcheck] Feature 13 — Add bash syntax check (shellcheck) in CI workflow for shell scripts
 - **[feat/12_shell_title_change]** Feature 12 — change the shell title when a local model is launched
 - **[feat/02_llama_server_ui]** Llama Server UI program initial structure
 - **[feat/07_get_prediction_info_dflash]** Feature 7 — get_prediction_info, dflash extraction
