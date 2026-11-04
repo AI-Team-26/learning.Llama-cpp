@@ -12,6 +12,11 @@ LLAMA_BINS_FOLDER="$LLAMACPP"
 SERVER_PORT=8001
 SERVER_LOG=logs/llama_server.log
 
+## How long to wait for llama-server to become ready before giving up
+SERVER_START_TIMEOUT_S="${SERVER_START_TIMEOUT_S:-180}"
+## Delay between two /health checks while waiting for the server
+SERVER_START_POLL_INTERVAL_S="${SERVER_START_POLL_INTERVAL_S:-3}"
+
 
 # $'' makes the inteprets to be done at assignation time, so it doesn't require "-e" whan used in echo command
 yellow=$'\033[33m'

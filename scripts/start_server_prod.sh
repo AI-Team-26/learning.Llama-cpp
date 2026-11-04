@@ -388,37 +388,12 @@ start_server() {
     #"$LLAMA_BINS_FOLDER/llama-server.exe" "${args[@]}" > $SERVER_LOG 2>&1 &
     #disown
 
-    # Wait for the server to come alive (up to 30 seconds)
-    echo -n "Waiting for llama-server to load model..." >&2
-    for i in {1..60}; do
-        if curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${SERVER_PORT}/health" | grep -q "200"; then
-            echo " Ready! 🚀" >&2
+    # Wait for the server to come alive (up to SERVER_START_TIMEOUT_S)
+    if wait_for_server_ready; then
+        set_title "🦙 🟢 ready $model_id"
+        return 0
+    fi
 
-            set_title "🦙 🟢 ready $model_id"
-
-            #local vram_usage=$(get_readable_VRAM_usage)
-            #echo "VRAM used/total: $vram_usage" >&2
-
-            break
-        fi
-
-        # Fail fast if llama-server exited due to an invalid argument
-        fail_on_arg_error "$SERVER_LOG" "$model_id" || return 1
-
-        if [[ $i -eq 60 ]] ; then
-            echo " not ready after 180 seconds" >&2
-            local err_msg; err_msg=$(check_load_model_fail "$SERVER_LOG")
-            if [[ -n "$err_msg" ]]; then
-                echo -e "❌ Can't start the server. Error: ${gray_light}${err_msg}${reset}" >&2
-                set_title "🦙 🔴 error $model_id"
-                printf 'error=%s\n' "$err_msg"
-                return 1
-            fi
-            set_title "🦙 🔴 error $model_id"
-            return 1
-        else
-            echo -n "." >&2
-            sleep 3
-        fi
-    done
+    set_title "🦙 🔴 failed to start model"
+    return 1
 }
