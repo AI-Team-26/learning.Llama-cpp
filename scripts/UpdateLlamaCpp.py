@@ -26,8 +26,7 @@ API_URL = f"https://api.github.com/repos/{REPO}/releases?per_page=30"
 FEED_URL = f"https://github.com/{REPO}/releases.atom"
 TAG_RE = re.compile(r"^b(\d+)$")  # llama.cpp build tags, e.g. b11060
 DEFAULT_DEST = "D:/Downloads"
-# CUDA major version only. The release filenames always carry the minor
-# (e.g. "-bin-win-cuda-12.4-x64.zip"), so it can be matched but never built.
+# CUDA major version only. The release filenames always carry the minor (e.g. "-bin-win-cuda-12.4-x64.zip"), so it can be matched but never built.
 CUDA_VERSION = "12"
 FEED_TAG_RETRIES = 5  # recent builds the no-API fallback inspects; the newest may still be uploading
 
@@ -180,9 +179,9 @@ def main():
         download(a, dest)
     print(f"✔️ Downloaded")
 
-    # TODO: extract
+    # TODO: extract teh zip into their folders
 
-    # TODO: move duda dll
+    # TODO: move cuda dll into the llama.cpp folder and delete the dll folder ant the zip files
 
     # TODO: copy to destination folder
 
