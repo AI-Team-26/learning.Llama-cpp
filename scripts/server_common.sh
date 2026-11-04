@@ -398,62 +398,85 @@ start_server() {
     # This prevents Bash from printing "[x] Exit 1" when the launcher finishes.
     #disown
 
-    # Wait for the server to come alive (up to 30 seconds)
-    echo -n "Waiting for llama-server to load model..." >&2
-    for i in {1..60}; do
-        if curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${SERVER_PORT}/health" | grep -q "200"; then
-            echo "🚀 Ready!" >&2
-
-            #local vram_usage=$(get_readable_VRAM_usage)
-            #echo "VRAM used/total: $vram_usage" >&2
-
-            break
-        fi
-
-        # check for error
-        #local load_failure=$(grep "failed to load model " "$log") # | head -1 | awk -F'=' '{print $2}' | xargs)
-        #if [ -n "$load_failure" ]; then
-        if grep -q "failed to load model" "$SERVER_LOG"; then
-            echo "❌ ERROR: Failed to load model" >&2
-            printf "error=Failed to load the model"
-            return 1
-        fi
-
-        # fail fast if llama-server exited due to an invalid argument
-        fail_on_arg_error "$SERVER_LOG" "$model_id" || return 1
-
-        if [[ $i -eq 60 ]] ; then
-            echo " not ready after 180 seconds" >&2
-            local err_msg; err_msg=$(check_load_model_fail "$SERVER_LOG")
-            if [[ -n "$err_msg" ]]; then
-                echo -e "❌ Can't start the server. Error: ${err_msg}" >&2
-                printf 'error=%s\n' "$err_msg"
-                return 1
-            fi
-            #return 1
-        else
-            echo -n "." >&2
-            sleep 3
-        fi
-    done
+    # Wait for the server to come alive (up to SERVER_START_TIMEOUT_S)
+    wait_for_server_ready "$SERVER_LOG" "${model_id:-unknown}"
 }
 
 
-## Helper to check for fatal argument errors and exit early.
-# Prints message, sets terminal title 🔴, and returns 1.
-# Uses printf to safely handle potential % in $err_msg and prevent escape interpretation.
-fail_on_arg_error() {
-    local log="$1"
+## Returns 0 when llama-server answers 200 on /health, 1 otherwise.
+is_server_healthy() {
+    curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${SERVER_PORT}/health" | grep -q "200"
+}
+
+
+## Print the fatal startup error found in the server log, if any.
+# Empty output means the server is still loading normally.
+# These patterns are emitted only when llama-server cannot initialise the
+# model or the arguments, so it is safe to react to them while waiting.
+check_startup_error() {
+    local log="${1:-$SERVER_LOG}"
+    [[ -f "$log" ]] || return 0
+
+    local err_msg
+    err_msg=$(check_arg_error "$log")
+    if [[ -z "$err_msg" ]]; then
+        err_msg=$(check_load_model_fail "$log")
+    fi
+    if [[ -z "$err_msg" ]]; then
+        err_msg=$(grep -a 'failed to load model' "$log" | tail -n 1 | sed -E 's/^[[:space:]]*//')
+    fi
+
+    [[ -n "$err_msg" ]] && printf '%s\n' "$err_msg"
+    return 0
+}
+
+
+## Wait until the server answers on /health, polling every SERVER_START_POLL_INTERVAL_S.
+# The server log is inspected on every tick, so a fatal startup error is reported
+# as soon as it appears instead of after the whole timeout.
+# Prints "error=<message>" on stdout and returns 1 when the server cannot start.
+wait_for_server_ready() {
+    debug_function "wait_for_server_ready"
+    local log="${1:-$SERVER_LOG}"
     local model_id="${2:-unknown}"
-    local err_msg; err_msg=$(check_arg_error "$log")
+    local max_ticks=$(( SERVER_START_TIMEOUT_S / SERVER_START_POLL_INTERVAL_S ))
+    local err_msg
+
+    echo -n "Waiting for llama-server to load model..." >&2
+    for (( tick = 1; tick <= max_ticks; tick++ )); do
+        if is_server_healthy; then
+            echo " 🚀 Ready!" >&2
+            set_title "🦙 🟢 ready $model_id"
+            return 0
+        fi
+
+        err_msg=$(check_startup_error "$log")
+        if [[ -n "$err_msg" ]]; then
+            echo "" >&2
+            # printf with '%s' keeps any % in the log line from being interpreted
+            printf '❌ ERROR: %s%s%s\n' "$gray_light" "$err_msg" "$reset" >&2
+            set_title "🦙 🔴 error $model_id"
+            printf 'error=%s\n' "$err_msg"
+            return 1
+        fi
+
+        echo -n "." >&2
+        sleep "$SERVER_START_POLL_INTERVAL_S"
+    done
+
+    echo " not ready after ${SERVER_START_TIMEOUT_S} seconds" >&2
+    err_msg=$(check_load_model_fail "$log")
     if [[ -n "$err_msg" ]]; then
-        echo "" >&2
-        printf '❌ ERROR: %s%s%s\n' "${gray_light}" "$err_msg" "${reset}" >&2
+        printf '❌ ERROR: %s%s%s\n' "$gray_light" "$err_msg" "$reset" >&2
         set_title "🦙 🔴 error $model_id"
         printf 'error=%s\n' "$err_msg"
         return 1
     fi
-    return 0
+
+    echo "❌ ERROR: the server did not become ready" >&2
+    set_title "🦙 🔴 error $model_id"
+    printf 'error=Server not ready after %s seconds\n' "$SERVER_START_TIMEOUT_S"
+    return 1
 }
 
 

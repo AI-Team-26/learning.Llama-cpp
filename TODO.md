@@ -40,13 +40,9 @@
   `logs/llama_server.log` only works when the script is launched from the repo root; check_arg_error / check_load_model_fail then read the wrong file.
   Resolve it once against the script directory, so scripts work from any CWD.
 
-- Bug 17 | Startup timeout hardcoded in 3 wait loops
-  `for i in {1..60}` + `sleep 3` in server_common.sh, start_server_prod.sh, test_models_common.sh, and the real error is inspected only at `i -eq 60`.
-  Introduce a SERVER_START_TIMEOUT_S constant and inspect the last log error on every tick.
-
 - Bug 18 | curl health poll has no timeout
   A server that accepts the connection but hangs blocks the wait loop past the 180 s budget.
-  Add `--max-time 2 --connect-timeout 1`.
+  Add `--max-time 2 --connect-timeout 1` in `is_server_healthy()` (scripts/server_common.sh).
 
 - Bug 19 | start_server() reads `$1` but validates the global `$model`
   scripts/server_common.sh:81 reads `local model_file="$1"` and line 96 validates the global `$model`; it works only because every caller happens to set that global. Align the parameter handling.
@@ -87,6 +83,8 @@
   Tool support is detected but constrained decoding is untested; needed for reliable tool calls and JSON answers.
 
 ## Done
+
+- [fix/35_bug17_startup_timeout] Bug 17 — single `wait_for_server_ready()` with `SERVER_START_TIMEOUT_S`, log inspected on every tick
 
 - [fix/34_bug14_upd_llamacpp_scrape_fallback] Bug 14 — UpdateLlamaCpp.py: drop GITHUB_TOKEN, CUDA_VERSION="12" const, no-API fallback scrapes real asset names
 

@@ -10,28 +10,9 @@ test_call() {
     # TODO... get info from server log and avoid passing this variable
     #local use_prediction="$1"
 
-    for i in {1..60}; do
-        if curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${SERVER_PORT}/health" | grep -q "200"; then
-            break
-        fi
-
-        if [[ $i -eq 1 ]] ; then
-            echo -n "Waiting for llama-server to load model..." >&2
-        fi
-
-        # fail fast if llama-server exited due to an invalid argument
-        fail_on_arg_error "$SERVER_LOG" "test-model" || return 1
-
-        if [[ $i -eq 60 ]] ; then
-            echo " not ready after 180 seconds" >&2
-            echo "❌ ERROR: Server is not ready" >&2
-            printf "error=Server is not ready\n"
-            return 1
-        else
-            echo -n "." >&2
-            sleep 3
-        fi
-    done
+    if ! wait_for_server_ready "$SERVER_LOG" "test-model"; then
+        return 1
+    fi
     
     local code_payload; code_payload=$(cat "$test_code_file")
 
