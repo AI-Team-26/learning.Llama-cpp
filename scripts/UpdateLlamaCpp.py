@@ -10,7 +10,6 @@ Files downloaded (example for tag b11060):
 Usage:
     python download_llama_cpp.py                     # -> D:/Downloads
     python download_llama_cpp.py --dest E:/Somewhere
-    python download_llama_cpp.py --dry-run           # only show what would be downloaded
 
 Optional: set GITHUB_TOKEN to avoid GitHub API rate limits.
 """
@@ -152,15 +151,12 @@ def download(asset, dest_dir):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--dest", default=DEFAULT_DEST, help=f"download folder (default: {DEFAULT_DEST})")
-    ap.add_argument("--dry-run", action="store_true", help="show what would be downloaded and exit")
     args = ap.parse_args()
 
     tag, assets = get_latest_release()
     print(f"**Latest release:** {tag}")
     for a in assets:
         print(f"  {a['name']}\n    {a['browser_download_url']}")
-    if args.dry_run:
-        return
 
     dest = Path(args.dest)
     dest.mkdir(parents=True, exist_ok=True)
