@@ -33,14 +33,14 @@ test_call() {
         fi
     done
     
-    local code_payload=$(cat "$test_code_file")
+    local code_payload; code_payload=$(cat "$test_code_file")
 
-    local run_output=$(run_with_spinner "(llama.cpp RUN)" llamacpp_run "$code_payload")
+    local run_output; run_output=$(run_with_spinner "(llama.cpp RUN)" llamacpp_run "$code_payload")
     #debug "run_output: $run_output"
     return_output_values "$run_output" 1
     if_error && return 1
 
-    local server_output=$(extract_info_from_server_log)
+    local server_output; server_output=$(extract_info_from_server_log)
     #debug "server_output: $server_output"
     return_output_values "$server_output" 1
 }
@@ -56,7 +56,7 @@ print_test_call() {
         return 1
     fi
     
-    local call_output="$(test_call "$@")"
+    local call_output; call_output="$(test_call "$@")"
 
     declare_output_values "$call_output" 0
     if_error && return 1
@@ -70,8 +70,8 @@ print_test_call() {
     print_value "OpenAI tools compatibility"  "$tool_flag"
     
     local vram_used=${vram_usage%%/*}  # %% remove the longhest match from the end of the string, /* matches everything after the first "/"
-    local cuda_vram_gb=$(awk "BEGIN{printf \"%.1f\", $cuda_vram/1024}")
-    local host_ram_gb=$(awk "BEGIN{printf \"%.1f\", $host_ram/1024}")
+    local cuda_vram_gb; cuda_vram_gb=$(awk "BEGIN{printf \"%.1f\", $cuda_vram/1024}")
+    local host_ram_gb; host_ram_gb=$(awk "BEGIN{printf \"%.1f\", $host_ram/1024}")
 
     # normalize (where is the "--" value came from??)
     [[ "$accepted_pct" == "n.a." ]] && accepted_pct=""
@@ -92,7 +92,9 @@ print_test_call() {
         local infos=()
         local accepted=()
         read -ra names <<< "$pred_type"
+        # shellcheck disable=SC2154  # global set by declare_output_values
         read -ra infos <<< "$pred_info"
+        # shellcheck disable=SC2128  # scalar global set by declare_output_values
         read -ra accepted <<< "$pred_accepted"
         spec_cell=""
         for i in "${!names[@]}"; do
@@ -152,7 +154,7 @@ llamacpp_run() {
     local max_tokens=2048
     #local max_tokens=4096  # allow more reasoning
 
-    local json_payload=$(jq -n \
+    local json_payload; json_payload=$(jq -n \
         --arg code "$prompt" \
         --arg temperature "$temperature" \
         --arg max_tokens "$max_tokens" \
@@ -217,7 +219,7 @@ llamacpp_run() {
                     local speed="${BASH_REMATCH[1]}"
                     
                     # Float comparison using awk
-                    local is_slow=$(awk -v s="$speed" -v t="$SPEED_THRESHOLD" 'BEGIN {print (s < t) ? 1 : 0}')
+                    local is_slow; is_slow=$(awk -v s="$speed" -v t="$SPEED_THRESHOLD" 'BEGIN {print (s < t) ? 1 : 0}')
                     if [[ "$is_slow" -eq 1 ]]; then
                         echo -e "\n🛑 [ABORT] Generation speed dropped to ${speed} t/s (Threshold: ${SPEED_THRESHOLD} t/s)." >&2
                         # Write a flag file to drop a persistent signal
@@ -244,10 +246,10 @@ llamacpp_run() {
 
     # If curl_status is 143, it means it was terminated by our monitor code
     if [[ "$curl_status" -eq 143 ]]; then
-        local slow_speed=$(grep -a -oE "tg_3s\s*=\s*[0-9.]+" "$SERVER_LOG" | tail -n 1 | awk '{print $3}')
-        [[ -z "$slow_speed" ]] && slow_speed="<${threshold}"
+        local slow_speed; slow_speed=$(grep -a -oE "tg_3s\s*=\s*[0-9.]+" "$SERVER_LOG" | tail -n 1 | awk '{print $3}')
+        [[ -z "$slow_speed" ]] && slow_speed="<${SPEED_THRESHOLD}"
         
-        local vram_usage=$(get_readable_VRAM_usage)
+        local vram_usage; vram_usage=$(get_readable_VRAM_usage)
         return_value "vram_usage" "$vram_usage"
         return_value "eval_rate" "$slow_speed"
         return_value "error" "Aborted_Low_Speed_Detected_${slow_speed}_ts"
@@ -262,16 +264,16 @@ llamacpp_run() {
 
     # "Compact" the streaming response to a single text
     # Strip the "data: " prefix, drop the terminator line, feed each JSON object to jq
-    local reasoning=$(grep '^data: ' "$response_log" | sed 's/^data: //' | grep -v '^\[DONE\]' \
+    local reasoning; reasoning=$(grep '^data: ' "$response_log" | sed 's/^data: //' | grep -v '^\[DONE\]' \
         | jq -j '.choices[0].delta.reasoning_content // empty')
 
-    local content=$(grep '^data: ' "$response_log" | sed 's/^data: //' | grep -v '^\[DONE\]' \
+    local content; content=$(grep '^data: ' "$response_log" | sed 's/^data: //' | grep -v '^\[DONE\]' \
         | jq -j '.choices[0].delta.content // empty')
     
     #local tool_calls=$(grep '^data: ' "$response_log" | sed 's/^data: //' | grep -v '^\[DONE\]' \
     #    | jq -c '.choices[0].delta.tool_calls // empty')
 
-    local tool_calls=$(grep '^data: ' "$response_log" | sed 's/^data: //' | grep -v '^\[DONE\]' | \
+    local tool_calls; tool_calls=$(grep '^data: ' "$response_log" | sed 's/^data: //' | grep -v '^\[DONE\]' | \
         jq -s '[ .[] | select(.choices[0].delta.tool_calls != null) |
             .choices[0].delta.tool_calls[0] |
             {
@@ -289,14 +291,16 @@ llamacpp_run() {
         .')
 
     local response_log_text="logs/llama_api_response.txt"
-    echo "" > "$response_log_text"
-    echo "=== REASONING ===" >> "$response_log_text"
-    echo "$reasoning" >> "$response_log_text"
-    echo "" >> "$response_log_text"
-    echo "=== ANSWER ===" >> "$response_log_text"
-    echo "$content" >> "$response_log_text"
-    echo "=== TOOL CALLS ===" >> "$response_log_text"
-    echo "$tool_calls" >> "$response_log_text"
+    {
+        echo ""
+        echo "=== REASONING ==="
+        echo "$reasoning"
+        echo ""
+        echo "=== ANSWER ==="
+        echo "$content"
+        echo "=== TOOL CALLS ==="
+        echo "$tool_calls"
+    } > "$response_log_text"
 
     # last lines in llama_api_response.log
     # data: {"choices":[{"finish_reason":"tool_calls","index":0,"delta":{}}],"created":1779349198,"id":"chatcmpl-nFCxRKKHfmmnVXEHbeKtPcEqHXBZvQCr","model":"Qwen3.5-9B-Q4_K_M.gguf","system_fingerprint":"b9251-e2b129e1b","object":"chat.completion.chunk"}
@@ -304,7 +308,7 @@ llamacpp_run() {
     # data: [DONE]
 
     # Robust space-insensitive streaming line cleaner
-    local json_stream=$(echo "$raw" | sed -n 's/^data: *{/{/p')
+    local json_stream; json_stream=$(echo "$raw" | sed -n 's/^data: *{/{/p')
     if [ -z "$json_stream" ]; then
         echo "❌ ERROR: json_stream is empty from API response" >&2
         printf "error=Failed_to_read_json_stream\n"
@@ -312,11 +316,11 @@ llamacpp_run() {
     fi
 
     # Stream Extraction (Handles both normal content and Qwen reasoning_content safely)
-    local text_response=$(echo "$json_stream" | jq -j 'select(.choices[0] != null) | .choices[0].delta.content // .choices[0].delta.reasoning_content // empty' 2>/dev/null)
+    local text_response; text_response=$(echo "$json_stream" | jq -j 'select(.choices[0] != null) | .choices[0].delta.content // .choices[0].delta.reasoning_content // empty' 2>/dev/null)
     
     # last line, containing timings/metrics
     #local final_usage_chunk=$(jq -c 'select(.usage.completion_tokens != null)' <<< "$json_stream" | tail -1)
-    local final_usage_chunk=$(jq -cs '[.[] | select(.usage.completion_tokens != null)][-1]' <<< "$json_stream")
+    local final_usage_chunk; final_usage_chunk=$(jq -cs '[.[] | select(.usage.completion_tokens != null)][-1]' <<< "$json_stream")
 
     if [[ -z "$final_usage_chunk" ]]; then
          echo "❌ ERROR: Failed to extract .usage.completion_tokens from json_stream" >&2
@@ -325,8 +329,8 @@ llamacpp_run() {
     fi
 
     #local first_created=$(jq -r 'select(.created != null) | .created' <<< "$json_stream" | head -1)
-    local first_created=$(jq -rs '[.[] | select(.created != null) | .created][0]' <<< "$json_stream")
-    local last_created=$(jq -r '.created' <<< "$final_usage_chunk")
+    local first_created; first_created=$(jq -rs '[.[] | select(.created != null) | .created][0]' <<< "$json_stream")
+    local last_created; last_created=$(jq -r '.created' <<< "$final_usage_chunk")
     if [[ -z "$first_created" || -z "$last_created" ]]; then
          echo "❌ ERROR: Failed to extract .created from json_stream" >&2
          printf 'error=Failed_to_extract_total_duration\n'
@@ -335,7 +339,7 @@ llamacpp_run() {
     local total_duration_s=$(( last_created - first_created ))    
 
     # Extract completion_tokens with error checking
-    local eval_count=$(jq -r '.usage.completion_tokens' <<< "$final_usage_chunk" 2>/dev/null)
+    local eval_count; eval_count=$(jq -r '.usage.completion_tokens' <<< "$final_usage_chunk" 2>/dev/null)
     if [ -z "$eval_count" ] || [ "$eval_count" = "null" ]; then
         echo "❌ ERROR: Failed to extract .usage.completion_tokens from API response" >&2
         printf "error=Failed_to_extract_completion_tokens\n"
@@ -343,14 +347,14 @@ llamacpp_run() {
     fi
 
     # Extract predicted_ms with error checking
-    local eval_ms=$(jq -r '.timings.predicted_ms' <<< "$final_usage_chunk" 2>/dev/null)
+    local eval_ms; eval_ms=$(jq -r '.timings.predicted_ms' <<< "$final_usage_chunk" 2>/dev/null)
     if [ -z "$eval_ms" ] || [ "$eval_ms" = "null" ]; then
         echo "❌ ERROR: Failed to extract .timings.predicted_ms from API response" >&2
         printf "error=Failed_to_extract_predicted_ms\n"
         return 1
     fi
 
-    local predicted_tps=$(jq -r '.timings.predicted_per_second' <<< "$final_usage_chunk" 2>/dev/null)
+    local predicted_tps; predicted_tps=$(jq -r '.timings.predicted_per_second' <<< "$final_usage_chunk" 2>/dev/null)
     if [ -z "$predicted_tps" ] || [ "$predicted_tps" = "null" ]; then
         echo "❌ ERROR: Failed to extract .timings.predicted_per_second from API response" >&2
         printf "error=Failed_to_extract_predicted_tps\n"
@@ -358,8 +362,8 @@ llamacpp_run() {
     fi
 
     # Calculate the TPS
-    local eval_s=$(from_ms "$eval_ms")
-    local eval_rate=$(float_div "$eval_count" "$eval_s" 6)
+    local eval_s; eval_s=$(from_ms "$eval_ms")
+    local eval_rate; eval_rate=$(float_div "$eval_count" "$eval_s" 6)
       
     local has_tools=0
 
@@ -368,11 +372,11 @@ llamacpp_run() {
     # | .choices[0].delta.tool_calls[0].function.arguments  --> peek the first choice and extract the arguments
     # // empty                                              --> return nothing if the pick return nothing
     #local tool_chunks=$(echo "$json_stream" | jq -j 'select(.choices[0] != null) | .choices[0].delta.tool_calls[0].function.arguments // empty' 2>/dev/null)
-    local tool_chunks=$(echo "$json_stream" | jq -j '.choices[0].delta.tool_calls[0].function.arguments // empty' 2>/dev/null)
+    local tool_chunks; tool_chunks=$(echo "$json_stream" | jq -j '.choices[0].delta.tool_calls[0].function.arguments // empty' 2>/dev/null)
     if [ -n "$tool_chunks" ]; then
         has_tools=1
 
-        local tool_code=$(jq -r '.code // empty' <<< "$tool_chunks" 2>/dev/null) # set to empty means NOT set it
+        local tool_code; tool_code=$(jq -r '.code // empty' <<< "$tool_chunks" 2>/dev/null) # set to empty means NOT set it
 
         if [[ -z "$tool_code" ]]; then
             echo "❌ ERROR: Failed to extract .code from API response" >&2
@@ -386,12 +390,13 @@ llamacpp_run() {
     if [ -n "$tool_chunks" ]; then
         response="${text_response}${text_response:+$'\n\n'}[EXECUTING TOOL: run_code]\n${tool_chunks}"
     else
+        # shellcheck disable=SC2034  # kept for the debug output below
         response="$text_response"
     fi
     #print_value "Response" "$response"
 
     # collect data of memory usage (memory used/free)
-    local vram_usage=$(get_readable_VRAM_usage)
+    local vram_usage; vram_usage=$(get_readable_VRAM_usage)
     return_value "vram_usage" "$vram_usage"
 
     return_value "total_duration_s" "$total_duration_s"
@@ -403,8 +408,8 @@ llamacpp_run() {
     #data: {"choices":[],"created":1780561441,"id":"chatcmpl-tQCE8GXcHvGYWTBwLbPqLpyuCYh7rEU0","model":"unsloth_GLM-4.7-Flash-REAP-23B-A3B-UD-Q4_K_XL.gguf","system_fingerprint":"b9371-f12cc6d0f","object":"chat.completion.chunk","usage":{"completion_tokens":2048,"prompt_tokens":666,"total_tokens":2714,"prompt_tokens_details":{"cached_tokens":0}},"timings":{"cache_n":0,"prompt_n":666,"prompt_ms":4471.659,"prompt_per_token_ms":6.7142027027027025,"prompt_per_second":148.93801159703816,"predicted_n":2048,"predicted_ms":59833.466,"predicted_per_token_ms":29.2155595703125,  "predicted_per_second":34.22833636279737,"draft_n":176,"draft_n_accepted":92}}
     #data: {"choices":[],"created":1780562537,"id":"chatcmpl-AfHMaYacIwtKpzgubMMZ5MbURozImBIV","model":"unsloth_GLM-4.7-Flash-REAP-23B-A3B-UD-Q4_K_XL.gguf","system_fingerprint":"b9371-f12cc6d0f","object":"chat.completion.chunk","usage":{"completion_tokens":971 ,"prompt_tokens":666,"total_tokens":1637,"prompt_tokens_details":{"cached_tokens":0}},"timings":{"cache_n":0,"prompt_n":666,"prompt_ms":3928.869,"prompt_per_token_ms":5.899202702702703, "prompt_per_second":169.51443277950983,"predicted_n":971, "predicted_ms":27352.182,"predicted_per_token_ms":28.169085478887745,"predicted_per_second":35.49991002545976}}
 
-    local draft_n=$(jq -r '.timings.draft_n' <<< "$final_usage_chunk" 2>/dev/null)
-    local draft_n_accepted=$(jq -r '.timings.draft_n_accepted' <<< "$final_usage_chunk" 2>/dev/null)
+    local draft_n; draft_n=$(jq -r '.timings.draft_n' <<< "$final_usage_chunk" 2>/dev/null)
+    local draft_n_accepted; draft_n_accepted=$(jq -r '.timings.draft_n_accepted' <<< "$final_usage_chunk" 2>/dev/null)
 
     if [[ "$draft_n" != "null" && "$draft_n_accepted" != "null" ]]; then
     #if [[ "${draft_n:null}" != "null" && "${draft_n_accepted:null}" != "null" ]]; then
@@ -421,7 +426,7 @@ llamacpp_run() {
             return 1
         fi
 
-        local accepted_pct=$(awk -v a="$draft_n_accepted" -v n="$draft_n" 'BEGIN {
+        local accepted_pct; accepted_pct=$(awk -v a="$draft_n_accepted" -v n="$draft_n" 'BEGIN {
             if (n > 0) printf "%.1f\n", (a / n) * 100
             else printf "0.0\n"
         }')

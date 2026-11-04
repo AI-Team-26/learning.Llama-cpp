@@ -39,6 +39,7 @@ QWEN_REASONING_EFFORT_MEDIUM=1
 is_server_started() {
     local PROCESS_NAME="llama-server"   # Define the exact name of the executable to look for
     # -a is required to treat it as text
+    # shellcheck disable=SC2009  # keep the ps pipeline: pgrep -f would also match unrelated command lines
     if ps -ef | grep -av grep | grep -a "$PROCESS_NAME" > /dev/null; then
         return 0
     else
@@ -48,7 +49,9 @@ is_server_started() {
 
 
 server_info() {
-    local command; command=$(ps -ef | grep -a llama-server | sed 's/ -/\n-/g' | sed 's/^.*\llama-b/"llama-b/')
+    local command
+    # shellcheck disable=SC2009  # same ps pipeline as is_server_started()
+    command=$(ps -ef | grep -a llama-server | sed 's/ -/\n-/g' | sed 's/^.*\llama-b/"llama-b/')
     echo "$command"
 }
 
@@ -164,7 +167,7 @@ start_server() {
         --port "$SERVER_PORT" \
         --seed "1" \
         --model "$model_path" \
-        #--alias 'unsloth/Qwen3.6-27B-MTP-GGUF' \
+        #--alias 'unsloth/Qwen3.6-27B-MTP-GGUF'
         --ctx-size "$context" \
         --parallel "$PARALLEL" \
         --prio 3 \
@@ -262,6 +265,7 @@ start_server() {
     # Logging settings
     args+=(--log-verbosity 4) # default is 3, we need this level to print out the GPU layers
 
+    # shellcheck disable=SC2034  # kept as the documented default for the "pred_type" output key
     local pred_type="none" # default value
 
     # Disable RAM "cache" if no MoE or GPU offloading
@@ -420,7 +424,7 @@ start_server() {
 
         if [[ $i -eq 60 ]] ; then
             echo " not ready after 180 seconds" >&2
-            local err_msg=$(check_load_model_fail "$SERVER_LOG")
+            local err_msg; err_msg=$(check_load_model_fail "$SERVER_LOG")
             if [[ -n "$err_msg" ]]; then
                 echo -e "❌ Can't start the server. Error: ${err_msg}" >&2
                 printf 'error=%s\n' "$err_msg"
@@ -441,7 +445,7 @@ start_server() {
 fail_on_arg_error() {
     local log="$1"
     local model_id="${2:-unknown}"
-    local err_msg=$(check_arg_error "$log")
+    local err_msg; err_msg=$(check_arg_error "$log")
     if [[ -n "$err_msg" ]]; then
         echo "" >&2
         printf '❌ ERROR: %s%s%s\n' "${gray_light}" "$err_msg" "${reset}" >&2
@@ -487,6 +491,7 @@ set_cache_for_model() {
     
     # Check each pattern
     for pattern in "${Q4_QUANTIZATION_MODELS[@]}"; do
+        # shellcheck disable=SC2053  # array entries are glob patterns (e.g. "Qwen3.6-27B*")
         if [[ "$model" == $pattern ]]; then
             echo "q4_0"
             return 0
@@ -508,7 +513,7 @@ check_arg_error() {
     local log="$1"
     [[ -f "$log" ]] || return 0
 
-    local err_line=$(grep -a 'error while handling argument' "$log" | head -n 1)
+    local err_line; err_line=$(grep -a 'error while handling argument' "$log" | head -n 1)
     if [[ -n "$err_line" ]]; then
         printf '%s\n' "$(echo "$err_line" | sed -E 's/^[[:space:]]*([0-9]+(\.[0-9]+)+[[:space:]]+[A-Z][[:space:]]+)?//')"
     fi
@@ -525,7 +530,7 @@ check_load_model_fail() {
     [[ -f "$log" ]] || return 0
 
     # 1) Exact MTP warning message
-    local mtp_msg=$(grep -a 'llama_init_from_model: context type MTP requested but model doesn\''t contain MTP layers' "$log" | tail -n 1)
+    local mtp_msg; mtp_msg=$(grep -a 'llama_init_from_model: context type MTP requested but model doesn'\''t contain MTP layers' "$log" | tail -n 1)
     if [[ -n "$mtp_msg" ]]; then
         printf '%s\n' "$(echo "$mtp_msg" | sed -E 's/^ *[0-9.]+ *W llama_init_from_model: //')"
         return 0
@@ -558,7 +563,7 @@ extract_info_from_server_log() {
 
     # Extracts the number after "n_ctx_train"
     local ctx_train; ctx_train=$(grep "n_ctx_train" "$log" | head -1 | awk -F'=' '{print $2}' | xargs)
-    if [ $ctx -gt $ctx_train ]; then
+    if [ "$ctx" -gt "$ctx_train" ]; then
         echo "WARNING: Context (${ctx}) is greater than training context (${ctx_train})." >&2
     fi
 
@@ -570,7 +575,9 @@ extract_info_from_server_log() {
 
 
     # Extracts graphic card info
-    local gpu_info; gpu_info=$(grep -E "CUDA0.*:" "$log" | sed -E 's/.*:\s+(.*)\s+\(.*/\1/' | head -1)
+    local gpu_info
+    # shellcheck disable=SC2034  # parsed for later GPU reporting
+    gpu_info=$(grep -E "CUDA0.*:" "$log" | sed -E 's/.*:\s+(.*)\s+\(.*/\1/' | head -1)
     
     # MOE 9 GPU 40
     # 0.03.187.029 I load_tensors: offloading 39 repeating layers to GPU
@@ -609,6 +616,7 @@ extract_info_from_server_log() {
             gpu_pct="0"
         fi
     else
+        # shellcheck disable=SC2034  # "?" marks an unknown offload ratio
         gpu_pct="?"
     fi
 
@@ -666,8 +674,7 @@ get_spec_acceptance_rate() {
     [[ -z "$stats_line" ]] && return 0
 
     local gen acc
-    read -r gen acc <<< \
-        $(echo "$stats_line" | sed -E 's/.*#gen drafts *= *([0-9]+), *#acc drafts *= *([0-9]+).*/\1 \2/')
+    read -r gen acc < <(echo "$stats_line" | sed -E 's/.*#gen drafts *= *([0-9]+), *#acc drafts *= *([0-9]+).*/\1 \2/')
     (( gen > 0 )) || return 0
 
     awk -v g="$gen" -v a="$acc" 'BEGIN{printf "%.0f", (a/g)*100}'
@@ -685,15 +692,14 @@ get_prediction_info() {
     #0.12.004.484 I common_speculative_impl_draft_dflash: - n_max=4, n_min=1, p_min=0.20
     #0.12.004.486 I common_speculative_impl_draft_dflash: - block_size=8, mask_token_id=128756, n_extract=5, sample_from_anchor=true
     
-    local draft_dflash=$(grep -E "I common_speculative_impl_draft_dflash: adding speculative implementation 'draft-dflash'" "$log" | tail -n 1)
+    local draft_dflash; draft_dflash=$(grep -E "I common_speculative_impl_draft_dflash: adding speculative implementation 'draft-dflash'" "$log" | tail -n 1)
     
     if [[ -n "$draft_dflash" ]]; then
         #0.12.004.484 I common_speculative_impl_draft_dflash: - n_max=4, n_min=1, p_min=0.20
         local spec_line; spec_line=$(grep -E 'common_speculative_impl_draft_dflash:.*n_max=.*n_min=.*p_min=.*' "$log" | tail -n 1)
         if [[ -n "$spec_line" ]]; then
             # p_min (min acceptance probability) is intentionally not extracted: compact cell shows only <n_min>/<n_max>
-            read -r n_max n_min <<< \
-                $(echo "$spec_line" | awk '
+            read -r n_max n_min < <(echo "$spec_line" | awk '
                     /.*/ {
                         split($0, a, /,|n_max=|n_min=|p_min=/)
                         print a[2], a[4]
@@ -724,8 +730,7 @@ get_prediction_info() {
 
         if [[ -n $spec_line ]]; then
             # p_min (min acceptance probability) is intentionally not extracted: compact cell shows only <n_min>/<n_max>
-            read -r n_max n_min <<< \
-                $(echo "$spec_line" | awk '
+            read -r n_max n_min < <(echo "$spec_line" | awk '
                     /.*/ {
                         split($0, a, /,|n_max=|n_min=|p_min=/)
                         print a[2], a[4]
@@ -752,8 +757,7 @@ get_prediction_info() {
         # I spec common_specu: - size_n=12, size_m=24, min_hits=1
         local spec_line; spec_line=$(grep -E 'common_specu:.*size_n=.*size_m=.*min_hits=.*' "$log" | tail -n 1)
         if [[ -n $spec_line ]]; then
-            read -r size_n size_m min_hits <<< \
-                $(echo "$spec_line" | awk '
+            read -r size_n size_m min_hits < <(echo "$spec_line" | awk '
                     /size_n=/ {
                         split($0, a, /size_n=|,|size_m=|,|min_hits=/)
                         print a[2], a[4], a[6]
