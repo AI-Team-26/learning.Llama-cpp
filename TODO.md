@@ -20,12 +20,14 @@
    to show complete usage, run with -h
   ```
 
-- Bug 14 | UpdateLlamaCpp.py
-  - avoid use GITHUB_TOKEN
-  - USE a const for CUDA version WITHOUT minor version (set to "12", nt "12.4").
-
 - Feature 6 [feat/06_sharpyaml] | Llama Server UI: Replace YamlDotNet with SharpYaml (PropertyNamingPolicy=SnakeCaseLower); drop [YamlMember] aliases except [JsonPropertyName("ubatch")] on UBatch — TODO notes already in ModelsConfigLoader.cs/ModelConfig.cs
 - Feature 8 | Unify the llama-server call of test and prod calls
+
+- Epic 25 | UpdateLlamaCpp.py
+  - Feature 25.1 | UpdateLlamaCpp.py implement the extraction
+  - Feature 25.2 | UpdateLlamaCpp.py implement the copy of DLL into llama.cpp folder
+  - Feature 25.3 | UpdateLlamaCpp.py implement the copy to destination folder
+  - Feature 25.4 | UpdateLlamaCpp.py implement the replace of ENV
 
 ### Scripts robustness
 
@@ -85,6 +87,8 @@
   Tool support is detected but constrained decoding is untested; needed for reliable tool calls and JSON answers.
 
 ## Done
+
+- [fix/34_bug14_upd_llamacpp_scrape_fallback] Bug 14 — UpdateLlamaCpp.py: drop GITHUB_TOKEN, CUDA_VERSION="12" const, no-API fallback scrapes real asset names
 
 - [feat/13_shellcheck] Feature 13 — Add bash syntax check (shellcheck) in CI workflow for shell scripts
 - **[feat/12_shell_title_change]** Feature 12 — change the shell title when a local model is launched
