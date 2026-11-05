@@ -415,7 +415,7 @@ start_server() {
         #if [ -n "$load_failure" ]; then
         if grep -q "failed to load model" "$SERVER_LOG"; then
             echo "❌ ERROR: Failed to load model" >&2
-            printf "error=Failed to load the model"
+            printf 'error=Failed to load the model\n'
             return 1
         fi
 
