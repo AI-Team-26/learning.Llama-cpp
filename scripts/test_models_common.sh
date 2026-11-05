@@ -324,7 +324,7 @@ llamacpp_run() {
 
     if [[ -z "$final_usage_chunk" ]]; then
          echo "❌ ERROR: Failed to extract .usage.completion_tokens from json_stream" >&2
-         printf 'error=Failed to extract .usage.completion_tokens n'
+         printf 'error=Failed to extract .usage.completion_tokens\n'
          return 1
     fi
 
