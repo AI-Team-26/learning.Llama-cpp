@@ -55,6 +55,11 @@
   The Bug 1 fix detects one log pattern; port already in use, missing DLL, CUDA init failure or a bad draft model still wait 180 s.
   Detect the process death (PID file / tasklist) instead of pattern-matching the log.
 
+- Feature 25 | Different temperature
+  This is the suggested values for Qwen3.8 Unsloth models
+  Thinking Mode: temperature=1.0, top_p=0.95, top_k=20, min_p=0.0, presence_penalty=0.0, repetition_penalty=1.0
+  Instruct (or non-thinking) mode: temperature=0.7, top_p=0.80, top_k=20, min_p=0.0, presence_penalty=1.5, repetition_penalty=1.0
+
 ### CI
 
 - Feature 16 | CI job for the shell scripts (extends Feature 13)
@@ -85,6 +90,7 @@
 
 - Feature 24 | Test structured output (GBNF grammar / json_schema)
   Tool support is detected but constrained decoding is untested; needed for reliable tool calls and JSON answers.
+  
 
 ## Done
 
