@@ -31,11 +31,6 @@
 
 ### Scripts robustness
 
-- Bug 15 | printf format-string bugs in the scripts
-  `printf "error=$arg_err\n"` (scripts/server_common.sh, scripts/test_models_common.sh) uses log text as the format string, so any `%` corrupts the message (`100% foo` -> `1000 foo`).
-  scripts/test_models_common.sh:319 also drops the value: `printf 'error=Failed to extract .usage.completion_tokens n'` (no `%s`, literal `n` instead of `\n`).
-  Use `printf 'error=%s\n' "$value"` everywhere.
-
 - Bug 16 | SERVER_LOG is a relative path (scripts/common.sh:13)
   `logs/llama_server.log` only works when the script is launched from the repo root; check_arg_error / check_load_model_fail then read the wrong file.
   Resolve it once against the script directory, so scripts work from any CWD.
@@ -93,6 +88,8 @@
   
 
 ## Done
+
+- [fix/36_bug15_printf_format] Bug 15 — printf format-string bugs: missing `\n`, dropped value in test_models_common.sh, %-unsafe debug.sh print
 
 - [fix/34_bug14_upd_llamacpp_scrape_fallback] Bug 14 — UpdateLlamaCpp.py: drop GITHUB_TOKEN, CUDA_VERSION="12" const, no-API fallback scrapes real asset names
 

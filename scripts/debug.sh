@@ -7,9 +7,7 @@ debug_reset=$'\033[0m'
 
 debug() {
     if [ "$DEBUG" -eq "1" ]; then
-        # shellcheck disable=SC2059 
-        # shellcheck disable=SC1087
-        printf " $debug[$1]$debug_reset \n" >&2
+        printf ' %s[%s]%s \n' "$debug" "$1" "$debug_reset" >&2
     fi 
 }
 
