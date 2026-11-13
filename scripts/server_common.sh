@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 source common.sh
 
+#set -euo pipefail
+
 ## This is called by specific models, look at their specific .md file.
 
 # Functions
@@ -82,6 +84,7 @@ get_current_model() {
 #   batch: batch and ubatch size
 start_server() {
     debug_function "start_server"
+
     local model_file="$1"
     local ctx_k="$2"
     local gpu_layers="$3"
@@ -420,7 +423,7 @@ start_server() {
         fi
 
         # fail fast if llama-server exited due to an invalid argument
-        fail_on_arg_error "$SERVER_LOG" "$model_id" || return 1
+        fail_on_arg_error "$SERVER_LOG" "$model_file" || return 1
 
         if [[ $i -eq 60 ]] ; then
             echo " not ready after 180 seconds" >&2

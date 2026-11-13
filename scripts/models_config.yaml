@@ -56,8 +56,7 @@ models:
 
   Qwen3.8_27B_UD-IQ4_XS_[Unsloth]_Q8_Q4_[52k]:
     note: "🥇"
-    _file: Qwen3.8-27B-UD-IQ4_XS_unsloth.gguf
-    file: Qwen3.8-27B-UD-IQ4_XS_v31_unsloth.gguf
+    file: Qwen3.8-27B-UD-IQ4_XS_unsloth.gguf
     ctx_k: 52
     gpu_layers: 99
     cpu_moe: 0
@@ -71,8 +70,7 @@ models:
 
   Qwen3.8_27B_UD-IQ4_XS_[Unsloth]_Q8_Q4_[48k]_ngram:
     note: "🥇"
-    _file: Qwen3.8-27B-UD-IQ4_XS_unsloth.gguf
-    file: Qwen3.8-27B-UD-IQ4_XS_v31_unsloth.gguf
+    file: Qwen3.8-27B-UD-IQ4_XS_unsloth.gguf
     ctx_k: 48
     gpu_layers: 99
     cpu_moe: 0
@@ -89,8 +87,7 @@ models:
 
   Qwen3.8_27B_UD-IQ4_XS_[Unsloth]_Q8_Q8_[52k]:
     note: "🥇"
-    _file: Qwen3.8-27B-UD-IQ4_XS_unsloth.gguf
-    file: Qwen3.8-27B-UD-IQ4_XS_v31_unsloth.gguf
+    file: Qwen3.8-27B-UD-IQ4_XS_unsloth.gguf
     ctx_k: 52
     gpu_layers: 99
     cpu_moe: 0
@@ -104,8 +101,7 @@ models:
 
   Qwen3.8_27B_UD-IQ4_XS_[Unsloth]_Q8_Q8_[48k]_ngram:
     note: "🥇"
-    _file: Qwen3.8-27B-UD-IQ4_XS_unsloth.gguf
-    file: Qwen3.8-27B-UD-IQ4_XS_v31_unsloth.gguf
+    file: Qwen3.8-27B-UD-IQ4_XS_unsloth.gguf
     ctx_k: 48
     gpu_layers: 99
     cpu_moe: 0
@@ -122,8 +118,7 @@ models:
 
   Qwen3.8_27B_UD-IQ4_XS_[Unsloth]_Q8_Q8_[52]_ngram:
     note: "🥇"
-    _file: Qwen3.8-27B-UD-IQ4_XS_unsloth.gguf
-    file: Qwen3.8-27B-UD-IQ4_XS_v31_unsloth.gguf
+    file: Qwen3.8-27B-UD-IQ4_XS_unsloth.gguf
     ctx_k: 48
     gpu_layers: 99
     cpu_moe: 0
@@ -140,8 +135,7 @@ models:
 
   Qwen3.8_27B_UD-IQ4_XS_[Unsloth]_Q4_Q4_[64k]_ngram:
     note: "🥇"
-    _file: Qwen3.8-27B-UD-IQ4_XS_unsloth.gguf
-    file: Qwen3.8-27B-UD-IQ4_XS_v31_unsloth.gguf
+    file: Qwen3.8-27B-UD-IQ4_XS_unsloth.gguf
     ctx_k: 64
     gpu_layers: 99
     cpu_moe: 0

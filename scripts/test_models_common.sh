@@ -4,6 +4,8 @@ source server_common.sh
 
 test_code_file="test_code.fs"
 
+set -euo pipefail
+
 # call the model with a pompt that check if the model supports OpenAI tools calling
 test_call() {
     debug_function "test_call"

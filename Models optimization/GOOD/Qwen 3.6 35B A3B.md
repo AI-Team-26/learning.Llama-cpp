@@ -17,8 +17,6 @@
 ## https://huggingface.co/avlp12/Qwen3.5-35B-A3B-Alis-Ultra-GGUF
 
 
-##
-Tiel-Coder-35B-A3B-UD-IQ4_XS_peculiar.gguf     16.5 GB
 
 ## ⚠️ Uncensored Genesis V3 APEX (by luffythefox)
 Qwen3.6-35B-A3B-Un-Genesis-V3-APEX_luffythefox.gguf            16.1 GB  
@@ -63,6 +61,10 @@ Speed on Pi
 Not relevant differences noted between these 3 configurations using Pi agent.
 
 
+## ❌ Tiel-Coder-35B-A3B-UD-IQ4_XS_peculiar
+Tiel-Coder-35B-A3B-UD-IQ4_XS_peculiar.gguf                            16.5 GB
+Slow.
+
 ## ⚠️ MOE384-pruned-Q4_K_M (by tipe)
 Qwen3.6-35B-A3B-MOE384-pruned-Q4_K_M_tipe.gguf                         16.5 GB
 MOE: Yes (best value: 5)
@@ -96,6 +98,12 @@ Qwen3.6-35B-A3B-UD-Q4_K_M_unsloth.gguf                                 20.6 GB
 https://huggingface.co/unsloth/Qwen3.6-35B-A3B-GGUF
 
 ❌ Too big, too slow.
+
+## ❌ Edge0-35B-A3B-preview-lossless
+Edge0-35B-A3B-preview-lossless_evoawaken.gguf                19 GB
+0.01.042.928 E llama_model_load: error loading model: unknown model architecture: 'edge0'
+
+
 
 ## Run results [OLD]
 
@@ -187,6 +195,7 @@ quant=q4_0
 spec=none
 draft_model=none
 predict_token=1/2
+ngam_values=16/16
 jinja=0
 batch=1024
 ubatch=512
@@ -456,21 +465,5 @@ batch=1024
 ubatch=256
 
 
-_test_model() {
-source server_common.sh && \
-start_server \
-    $model \
-    $ctx_k \
-    $gpu_layers \
-    $cpu_moe \
-    $spec \
-    $draft_model \
-    $predict_token \
-    $jinja \
-    $batch \
-    $ubatch
-    
-source test_models_common.sh && print_test_call
-}
 ```
 
