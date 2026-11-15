@@ -168,7 +168,7 @@ start_server() {
     local args=(
         --host 127.0.0.1 \
         --port "$SERVER_PORT" \
-        --cors-origins "http://host.docker.internal" \
+        --cors-origins "http://host.docker.internal:8001" \
         --seed "1" \
         --model "$model_path" \
         #--alias 'unsloth/Qwen3.6-27B-MTP-GGUF'
