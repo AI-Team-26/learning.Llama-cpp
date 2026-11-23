@@ -43,8 +43,8 @@ args=(
     # EXPERIMENTAL for 80k of Qwen3.8 27B
     #--ctx-checkpoints 4 --checkpoint-min-step 16384 \
     #--ctx-checkpoints 2 --checkpoint-min-step 8192 \
-    #--ctx-checkpoints 8 --checkpoint-min-step 2048 \
-    --ctx-checkpoints 2 --checkpoint-min-step 2048 \
+    --ctx-checkpoints 8 --checkpoint-min-step 2048 \
+    #--ctx-checkpoints 2 --checkpoint-min-step 2048 \   # for Qwen Q4 and simila, trick to prevent memory accumulation and OOM crashes.
 
     #--hip-fa-force-vec on \
 
@@ -301,14 +301,12 @@ start_server() {
 
     [[ "$spec_type" != "none" ]] && args+=(--spec-type "$spec_type")
 
-    # Disable RAM "cache" if no MoE or GPU offloading
-    #if [[ "$cpu_moe" != "0" || "$gpu_layers" != "99" ]]; then
-    #    args+=(--cache-ram 4096) 
-    #else
-    #    args+=(--cache-ram 0) 
-    #fi
-    #--cache-ram 2048   # it use RAM that can be used for bigger context
-    #args+=(--cache-ram 2048) 
+    # Reduce RAM "cache" if no MoE or GPU offloading
+    if [[ "$cpu_moe" != "0" || "$gpu_layers" != "99" ]]; then
+        args+=(--cache-ram 4096) 
+    else
+        args+=(--cache-ram 2048) 
+    fi
 
     local spec_draft_n_min; local spec_draft_n_max
     if [[ "$spec_type" == *draft-simple* ]]; then
@@ -392,14 +390,10 @@ start_server() {
     # Wait for the server to come alive (up to 30 seconds)
     echo -n "Waiting for llama-server to load model..." >&2
     for i in {1..60}; do
-        if curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${SERVER_PORT}/health" | grep -q "200"; then
+        #if curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${SERVER_PORT}/health" | grep -q "200"; then
+        if curl -s -f -m 2 "http://127.0.0.1:${SERVER_PORT}/health" > /dev/null; then
             echo " Ready! 🚀" >&2
-
             set_title "🦙 🟢 ready $model_id"
-
-            #local vram_usage=$(get_readable_VRAM_usage)
-            #echo "VRAM used/total: $vram_usage" >&2
-
             break
         fi
 

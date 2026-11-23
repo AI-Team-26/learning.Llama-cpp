@@ -198,8 +198,8 @@ start_server() {
         #--ctx-checkpoints 4 --checkpoint-min-step 16384
         #--ctx-checkpoints 2 --checkpoint-min-step 8192 \
         #--ctx-checkpoints 16 --checkpoint-min-step 256 \
-        #--ctx-checkpoints 8 --checkpoint-min-step 2048 \
-        --ctx-checkpoints 2 --checkpoint-min-step 2048 \
+        --ctx-checkpoints 8 --checkpoint-min-step 2048 \
+        #--ctx-checkpoints 2 --checkpoint-min-step 2048 \   # for Qwen Q4 and simila, trick to prevent memory accumulation and OOM crashes.
 
         #--hip-fa-force-vec on \
 
@@ -209,7 +209,7 @@ start_server() {
         #--spec-draft-adaptive \
 
         # --cache-ram 16384    # it use RAM that can be used for bigger context
-        --cache-ram 2048 \
+        #--cache-ram 2048 \    # set lower
 
         #--metrics \
         #--perf \
@@ -272,11 +272,11 @@ start_server() {
     # shellcheck disable=SC2034  # kept as the documented default for the "pred_type" output key
     local pred_type="none" # default value
 
-    # Disable RAM "cache" if no MoE or GPU offloading
+    # Reduce RAM "cache" if no MoE or GPU offloading
     if [[ "$cpu_moe" != "0" || "$gpu_layers" != "99" ]]; then
         args+=(--cache-ram 4096) 
     else
-        args+=(--cache-ram 0) 
+        args+=(--cache-ram 2048) 
     fi
 
     [[ "$spec" != "none" ]] && args+=(--spec-type "$spec")
@@ -405,12 +405,9 @@ start_server() {
     # Wait for the server to come alive (up to 30 seconds)
     echo -n "Waiting for llama-server to load model..." >&2
     for i in {1..60}; do
-        if curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${SERVER_PORT}/health" | grep -q "200"; then
+        #if curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${SERVER_PORT}/health" | grep -q "200"; then
+        if curl -s -f -m 2 "http://127.0.0.1:${SERVER_PORT}/health" > /dev/null; then
             echo "🚀 Ready!" >&2
-
-            #local vram_usage=$(get_readable_VRAM_usage)
-            #echo "VRAM used/total: $vram_usage" >&2
-
             break
         fi
 
@@ -464,7 +461,8 @@ fail_on_arg_error() {
 stop_server() {
     debug_function "stop_server"
     local PID
-    PID=$(tasklist | grep "llama-server" | awk '{print $2}' | head -n 1)
+    #PID=$(tasklist | grep "llama-server" | awk '{print $2}' | head -n 1)  # return 1 when grep find nothing
+    PID=$(tasklist | awk '/llama-server/ { print $2; exit }')
 
     if [[ -n "$PID" ]]; then
 

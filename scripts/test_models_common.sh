@@ -13,7 +13,8 @@ test_call() {
     #local use_prediction="$1"
 
     for i in {1..60}; do
-        if curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${SERVER_PORT}/health" | grep -q "200"; then
+        #if curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${SERVER_PORT}/health" | grep -q "200"; then
+        if curl -s -f -m 2 "http://127.0.0.1:${SERVER_PORT}/health" > /dev/null; then
             break
         fi
 

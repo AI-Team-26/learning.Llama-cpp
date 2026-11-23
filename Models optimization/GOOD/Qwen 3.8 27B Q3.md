@@ -205,18 +205,24 @@ _test_model
 
 
 model=Swift-1.5-Qwen3.8-27B-GSQ-RCO-IQ3_S-mtp_ukisai.gguf
-ctx_k=64
+ctx_k=68
 gpu_layers=99
 cpu_moe=0
-quant=q8_0/q4_0
+quant=q8_0/q8_0
 spec=draft-mtp,ngram-simple
 draft_model=none
-predict_token=1/4
+predict_token=1/6
 ngram_values=24/24
-jinja=1
+jinja=0
 batch=1024
 ubatch=512
 _test_model
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                       | Batch/Ub. | Note              |
+| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | -------------------------------------------- | --------- |------------------ |
+|  50 t/s |  72 k |   0 | 66/66 | 15.6 | 10.9/0.1  | q8_0 (q8_0) |    555 |  12s | 86% = MTP 1/5 (97%) N-gram 24/24/1 (---)     |  1024/512 |                   |
+|  51 t/s |  64 k |   0 | 66/66 | 15.2 | 10.9/0.1  | q8_0 (q4_0) |    555 |  10s | 86% = MTP 1/5 (97%) N-gram 24/24/1 (---)     |  1024/512 |                   |
+|  48 t/s |  64 k |   0 | 66/66 | 15.0 | 10.9/0.1  | q8_0 (q4_0) |    555 |  11s | 91% = MTP 1/4 (97%) N-gram 24/24/1 (---)     |  1024/512 |                   |
 
 | Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                       | Batch/Ub. | Note              |
 | ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | -------------------------------------------- | --------- |------------------ |

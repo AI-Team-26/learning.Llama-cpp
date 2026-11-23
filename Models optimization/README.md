@@ -77,29 +77,36 @@ Not working models:
 
 Script for test models:  
 ```bash
-
 # need to set a default
+
 ngram_values=none
 
-# function:
+source test_models_common.sh 
+
 _test_model() {
-source server_common.sh && \
-start_server \
-    $model \
-    $ctx_k \
-    $gpu_layers \
-    $cpu_moe \
-    $quant \
-    $spec \
-    $draft_model \
-    $predict_token \
-    $ngram_values \
-    $jinja \
-    $batch \
-    $ubatch
-    
-source test_models_common.sh && print_test_call
+
+    start_server \
+        "$model" \
+        "$ctx_k" \
+        "$gpu_layers" \
+        "$cpu_moe" \
+        "$quant" \
+        "$spec" \
+        "$draft_model" \
+        "$predict_token" \
+        "$ngram_values" \
+        "$jinja" \
+        "$batch" \
+        "$ubatch"
+
+    if (( $? != 0 )); then
+        echo "⛔ start_server failed (rc=$rc) — skipping the test call" >&2
+        return 0
+    fi
+
+    print_test_call
 }
+
 
 # call example:
 model=GPT-OSS-20b-UD-Q8_K_XL_unsloth.gguf
