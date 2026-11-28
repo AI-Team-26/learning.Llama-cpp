@@ -90,6 +90,27 @@ It changed the CHANGELOG for the test PR
 
 
 ```bash
+model=Qwen3.8-27B-UD-Q3_K_XL_unsloth.gguf
+ctx_k=64
+gpu_layers=99
+cpu_moe=0
+quant=q8_0/q4_0
+#spec=draft-mtp,ngram-simple
+spec=draft-mtp
+draft_model=none
+predict_token=1/5
+ngram_values=24/24
+jinja=0
+batch=1024
+ubatch=512
+_test_model
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                       | Batch/Ub. | Note              |
+| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | -------------------------------------------- | --------- |------------------ |
+|  39 t/s |  64 k |   0 | 66/66 | 15.7 | 11.7/0.1  | q8_0 (q4_0) |    535 |  14s | 90% = MTP 1/5 (97%)                          |  1024/512 | R: medium         |
+|  29 t/s |  72 k |   0 | 66/66 | 15.7 | 11.7/0.1  | q8_0 (q4_0) |    535 |  19s | 91% = MTP 1/4 (97%) N-gram 24/24/1 (---)     |  1024/512 | R: medium         |
+|  10 t/s |  72 k |   0 | 66/66 | 15.7 | 11.7/0.1  | q8_0 (q4_0) |    535 |  52s | 90% = MTP 1/5 (97%)                          |  1024/512 | R: medium         |
+|  11 t/s |  80 k |   0 | 66/66 | 15.7 | 11.7/0.1  | q8_0 (q4_0) |    535 |  50s | 91% = MTP 1/4 (97%) N-gram 24/24/1 (---)     |  1024/512 | R: medium         |
 
 model=Qwen3.8-27B-GSQ-RCO-IQ3_S-mtp_ista.gguf
 ctx_k=68

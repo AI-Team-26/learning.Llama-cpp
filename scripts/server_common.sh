@@ -276,7 +276,8 @@ start_server() {
     if [[ "$cpu_moe" != "0" || "$gpu_layers" != "99" ]]; then
         args+=(--cache-ram 4096) 
     else
-        args+=(--cache-ram 2048) 
+        #args+=(--cache-ram 0)
+        args+=(--cache-ram 2048)
     fi
 
     [[ "$spec" != "none" ]] && args+=(--spec-type "$spec")

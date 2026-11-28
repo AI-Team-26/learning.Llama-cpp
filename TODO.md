@@ -2,7 +2,6 @@
 
 ## Backlog
 
-
 - Feature 11: error while handling argument "--spec-type": unknown speculative type: ngram-simle while calling a-start (llam_erver_prod.sh)
   UI still shows "Waiting for llama-server to load model" in loop .
   It has to stop and show the error.
@@ -59,6 +58,9 @@
   This is the suggested values for Qwen3.8 Unsloth models
   Thinking Mode: temperature=1.0, top_p=0.95, top_k=20, min_p=0.0, presence_penalty=0.0, repetition_penalty=1.0
   Instruct (or non-thinking) mode: temperature=0.7, top_p=0.80, top_k=20, min_p=0.0, presence_penalty=1.5, repetition_penalty=1.0
+
+- Bug 26 | manage error for unknown architecture
+  llama-server error in log: 0.03.226.185 E llama_model_load: error loading model: unknown model architecture: 'gigachat4'
 
 ### CI
 

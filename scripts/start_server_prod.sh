@@ -44,7 +44,8 @@ args=(
     #--ctx-checkpoints 4 --checkpoint-min-step 16384 \
     #--ctx-checkpoints 2 --checkpoint-min-step 8192 \
     --ctx-checkpoints 8 --checkpoint-min-step 2048 \
-    #--ctx-checkpoints 2 --checkpoint-min-step 2048 \   # for Qwen Q4 and simila, trick to prevent memory accumulation and OOM crashes.
+    # for Qwen Q4 and simila, trick to prevent memory accumulation and OOM crashes.
+    #--ctx-checkpoints 2 --checkpoint-min-step 2048 \
 
     #--hip-fa-force-vec on \
 
@@ -148,17 +149,6 @@ start_server() {
             echo "Error: No models found in $models_config_file"
             exit 1
         fi
-
-        # Create a dictionary indicating if file exists
-        #local -A file_exists
-        #files=$(yq '.models[].file' "$win_path")
-        #for file in $files ; do
-        #    if [[ -f "$file" ]]; then
-        #        file_exists["$file"]=1
-        #    else
-        #        file_exists["$file"]=0
-        #    fi
-        #done
 
         # Create an array for the select loop
         local -a choices
@@ -305,7 +295,8 @@ start_server() {
     if [[ "$cpu_moe" != "0" || "$gpu_layers" != "99" ]]; then
         args+=(--cache-ram 4096) 
     else
-        args+=(--cache-ram 2048) 
+        #args+=(--cache-ram 0) 
+        args+=(--cache-ram 2048)
     fi
 
     local spec_draft_n_min; local spec_draft_n_max
